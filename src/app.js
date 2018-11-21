@@ -1,5 +1,7 @@
 import _ from 'lodash';
+import 'bootstrap';
 
+import './styles/main.scss';
 import exampleAction from './actions';
 import exampleComponent from './components';
 import exampleContainer from './containers';

@@ -1,4 +1,6 @@
 const path = require('path');
+const precss = require('precss');
+const autoprefixer = require('autoprefixer');
 
 
 module.exports = {
@@ -19,11 +21,38 @@ module.exports = {
             //     exclude: path.join(__dirname, '/node_modules'),
             //     options: { presets: ['env'] },
             // },
+            // ESLINT
             {
                 loader: 'eslint-loader',
                 enforce: 'pre',
                 test: /\.jsx?$/,
                 exclude: path.join(__dirname, '/node_modules'),
+            },
+            // SCSS
+            {
+                test: /\.(scss)$/,
+                use: [{
+                    // inject CSS to page
+                    loader: 'style-loader',
+                },
+                {
+                    // translate CSS into CommonJS modules
+                    loader: 'css-loader',
+                },
+                {
+                    // Run post css actions
+                    loader: 'postcss-loader',
+                    options: {
+                        // post css plugins, can be exported to postcss.config.js
+                        plugins() {
+                            return [precss, autoprefixer];
+                        },
+                    },
+                },
+                {
+                    // compile Sass to CSS
+                    loader: 'sass-loader',
+                }],
             },
         ],
     },
