@@ -1,0 +1,19 @@
+{
+  "name": "media-archive",
+  "version": "0.0.0",
+  "description": "Web app for storing and indexing digitized documents, photos, audio, and video.",
+  "main": "srv/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jtschoonhoven/media-archive.git"
+  },
+  "author": "Jonathan Schoonhoven",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jtschoonhoven/media-archive/issues"
+  },
+  "homepage": "https://github.com/jtschoonhoven/media-archive#readme"
+}
