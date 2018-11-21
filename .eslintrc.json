@@ -1,0 +1,23 @@
+{
+    "extends": [
+        "airbnb-base"
+    ],
+    "env": {
+        "browser": true
+    },
+    "rules": {
+        "brace-style": ["error", "stroustrup"],
+        "class-methods-use-this": [0],
+        "default-case": [0],
+        "indent": ["error", 4, {"SwitchCase": 1, "ignoredNodes": ["* > TemplateLiteral > *"]}],
+        "no-console": [0],
+        "no-debugger": [1],
+        "no-new": [0],
+        "no-undef": [1],
+        "no-underscore-dangle": [0],
+        "no-unused-vars": [1],
+        "prefer-arrow-callback": [0],
+        "prefer-destructuring": ["error", {"array": false, "object": false}],
+        "quote-props": ["error", "consistent"]
+    }
+}
