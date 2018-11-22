@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import 'bootstrap';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 import './styles/main.scss';
 import exampleAction from './actions';
@@ -15,10 +16,12 @@ exampleContainer();
 exampleReducer();
 
 
-function component() {
-    const element = document.createElement('div');
-    element.innerHTML = _.join(['Hello', 'world'], ' ');
-    return element;
-}
+const element = document.createElement('div');
+element.id = 'root';
+document.body.appendChild(element);
 
-document.body.appendChild(component());
+
+ReactDOM.render(
+    <p>&copy; Jonathan Schoonhoven 2018</p>,
+    document.getElementById('root'),
+);
