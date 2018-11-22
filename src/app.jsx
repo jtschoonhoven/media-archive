@@ -1,17 +1,33 @@
-import React from 'react';
+import { history as backboneHistory, Router as BackboneRouter } from 'backbone';
+import React from 'react'; // eslint-disable-line no-unused-vars
 import ReactDOM from 'react-dom';
 
 import './styles/main.scss';
-import { ArchiveLogin, ArchiveNavbar } from './components';
+import { ArchiveLogin, ArchiveNavbar, ArchiveNotFound } from './components'; // eslint-disable-line no-unused-vars
 
 
-ReactDOM.render(
-    <ArchiveNavbar />,
-    document.getElementById('archive-navbar'),
-);
+const contentRoot = document.getElementById('archive-content');
+const navbarRoot = document.getElementById('archive-navbar');
 
+ReactDOM.render(<ArchiveNavbar />, navbarRoot);
 
-ReactDOM.render(
-    <ArchiveLogin />,
-    document.getElementById('archive-content'),
-);
+class ArchiveRouter extends BackboneRouter {
+    routes() {
+        return {
+            '': 'login',
+            'login': 'login',
+            '*notFound': 'notFound',
+        };
+    }
+
+    login() {
+        ReactDOM.render(<ArchiveLogin />, contentRoot);
+    }
+
+    notFound() {
+        ReactDOM.render(<ArchiveNotFound />, contentRoot);
+    }
+}
+
+new ArchiveRouter(); // eslint-disable-line no-unused-vars
+backboneHistory.start({ pushState: true });
