@@ -1,6 +1,5 @@
-function example() {
-    console.log('component!');
-}
+import ArchiveLogin from './login/login.jsx';
+import ArchiveNavbar from './navbar/navbar.jsx';
 
 
-export default example;
+export { ArchiveLogin, ArchiveNavbar };

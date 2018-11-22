@@ -2,12 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import './styles/main.scss';
-import ArchiveLogin from './components/login/index.jsx';
+import { ArchiveLogin, ArchiveNavbar } from './components';
 
 
-const element = document.createElement('div');
-element.id = 'root';
-document.body.appendChild(element);
+ReactDOM.render(
+    <ArchiveNavbar />,
+    document.getElementById('archive-navbar'),
+);
 
 
 ReactDOM.render(
