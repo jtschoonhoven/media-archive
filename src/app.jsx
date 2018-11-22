@@ -1,33 +1,49 @@
 import { history as backboneHistory, Router as BackboneRouter } from 'backbone';
 import React from 'react'; // eslint-disable-line no-unused-vars
-import ReactDOM from 'react-dom';
+import { render } from 'react-dom';
 
 import './styles/main.scss';
-import { ArchiveLogin, ArchiveNavbar, ArchiveNotFound } from './components'; // eslint-disable-line no-unused-vars
+import { ArchiveLogin, ArchiveNavbar, ArchiveNotFound, ArchiveSearch } from './components'; // eslint-disable-line no-unused-vars
 
 
-const contentRoot = document.getElementById('archive-content');
-const navbarRoot = document.getElementById('archive-navbar');
+// get root elements from DOM
+const CONTENT_ROOT = document.getElementById('archive-content');
+const NAVBAR_ROOT = document.getElementById('archive-navbar');
 
-ReactDOM.render(<ArchiveNavbar />, navbarRoot);
 
+// render navbar
+render(<ArchiveNavbar />, NAVBAR_ROOT);
+
+
+// define routes
 class ArchiveRouter extends BackboneRouter {
     routes() {
         return {
-            '': 'login',
+            '': 'search',
+            'search': 'search',
             'login': 'login',
+            'logout': 'login',
             '*notFound': 'notFound',
         };
     }
 
     login() {
-        ReactDOM.render(<ArchiveLogin />, contentRoot);
+        render(<ArchiveLogin />, CONTENT_ROOT);
+    }
+
+    search() {
+        render(<ArchiveSearch />, CONTENT_ROOT);
     }
 
     notFound() {
-        ReactDOM.render(<ArchiveNotFound />, contentRoot);
+        render(<ArchiveNotFound />, CONTENT_ROOT);
     }
 }
 
+
+// initialize router
 new ArchiveRouter(); // eslint-disable-line no-unused-vars
+
+
+// start browser history
 backboneHistory.start({ pushState: true });
