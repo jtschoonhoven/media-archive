@@ -1,8 +1,9 @@
-import { history as backboneHistory, Router as BackboneRouter } from 'backbone';
+import './styles/main.scss';
+
 import React from 'react'; // eslint-disable-line no-unused-vars
+import { history as backboneHistory, Router as BackboneRouter } from 'backbone';
 import { render } from 'react-dom';
 
-import './styles/main.scss';
 import { ArchiveLogin, ArchiveNavbar, ArchiveNotFound, ArchiveSearch } from './components'; // eslint-disable-line no-unused-vars
 
 

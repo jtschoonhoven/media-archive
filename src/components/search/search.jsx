@@ -1,18 +1,63 @@
 import React from 'react';
 
+import SearchResult from './result.jsx';
+
+
+const EXAMPLE_DATA = [
+    {
+        id: 'aaabbbccc',
+        title: 'A Search Result',
+        description: 'Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet.',
+        thumbnail_url: 'https://i.imgur.com/gn2JN3f.jpg',
+    },
+    {
+        id: 'eeefffggg',
+        title: 'Another Search Result',
+        description: 'Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet.',
+        thumbnail_url: 'https://i.imgur.com/1kLBouR.png',
+    },
+];
+
 
 class ArchiveSearch extends React.Component {
     render() {
+        const results = EXAMPLE_DATA.map(result => <SearchResult {...result} key={result.id} />);
         return (
-            <form className="form-row">
-                <div className="form-group col-10">
-                    <label className="sr-only" htmlFor="archive-home-search">Search</label>
-                    <input id="archive-home-search" type="text" className="form-control form-control-lg" placeholder="Search" />
+            <div id="archive-search">
+                {/* searchbar */}
+                <form className="form-row">
+                    <div className="form-group col-10">
+                        <label className="sr-only" htmlFor="archive-search-input">Search</label>
+                        <input id="archive-search-input" type="text" className="form-control form-control-lg" placeholder="Search" />
+                    </div>
+                    <div className="col-2">
+                        <button type="submit" className="btn btn-primary btn-lg">Search</button>
+                    </div>
+                </form>
+                {/* filters */}
+                <div className="form-check form-check-inline">
+                    <label className="form-check-label"><strong>Include:</strong></label>
                 </div>
-                <div className="col-2">
-                    <button type="submit" className="btn btn-primary btn-lg">Search</button>
+                {/* documents */}
+                <div className="form-check form-check-inline">
+                    <input id="archive-search-filter-documents" className="form-check-input" type="checkbox" value="documents" defaultChecked />
+                    <label className="form-check-label" htmlFor="archive-search-filter-documents">documents</label>
                 </div>
-            </form>
+                {/* images */}
+                <div className="form-check form-check-inline">
+                    <input id="archive-search-filter-images" className="form-check-input" type="checkbox" value="images" defaultChecked />
+                    <label className="form-check-label" htmlFor="archive-search-filter-images">images</label>
+                </div>
+                {/* videos */}
+                <div className="form-check form-check-inline">
+                    <input id="archive-search-filter-videos" className="form-check-input" type="checkbox" value="videos" defaultChecked />
+                    <label className="form-check-label" htmlFor="archive-search-filter-videos">videos</label>
+                </div>
+                {/* results */}
+                <div id="archive-search-results">
+                    {results}
+                </div>
+            </div>
         );
     }
 }
