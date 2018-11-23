@@ -6,7 +6,7 @@ import { history as backboneHistory } from 'backbone';
 class ArchiveLogin extends React.Component {
     render() {
         return (
-            <div className="jumbotron">
+            <div id="archive-login" className="jumbotron">
                 <h1 className="display-4">Please log in</h1>
                 <hr className="my-4" />
                 <Formik
@@ -24,12 +24,14 @@ class ArchiveLogin extends React.Component {
 
     renderLoginForm({ isSubmitting }) {
         return (
-            <Form>
+            <Form id="archive-login-form">
+                {/* email */}
                 <div className="form-group">
                     <label htmlFor="archive-login-email">Email address</label>
                     <Field id="archive-login-email" type="email" name="email" className="form-control" placeholder="Your email" autoComplete="email" />
                     <ErrorMessage name="email" component="div" />
                 </div>
+                {/* password */}
                 <div className="form-group">
                     <label htmlFor="archive-login-password">Password</label>
                     <Field id="archive-login-password" type="password" name="password" className="form-control" autoComplete="current-password" />

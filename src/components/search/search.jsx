@@ -1,6 +1,6 @@
 import React from 'react';
 
-import SearchResult from './result.jsx';
+import SearchResult from './result.jsx'; // eslint-disable-line no-unused-vars
 
 
 const EXAMPLE_DATA = [
@@ -31,7 +31,7 @@ class ArchiveSearch extends React.Component {
                         <input id="archive-search-input" type="text" className="form-control form-control-lg" placeholder="Search" />
                     </div>
                     <div className="col-2">
-                        <button type="submit" className="btn btn-primary btn-lg">Search</button>
+                        <button type="submit" className="btn btn-primary btn-lg" onClick={this.handleClick}>Search</button>
                     </div>
                 </form>
                 {/* filters */}
@@ -59,6 +59,11 @@ class ArchiveSearch extends React.Component {
                 </div>
             </div>
         );
+    }
+
+    handleClick(e) {
+        e.preventDefault();
+        console.log('SEARCH');
     }
 }
 

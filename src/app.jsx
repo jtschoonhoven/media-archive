@@ -4,7 +4,14 @@ import React from 'react'; // eslint-disable-line no-unused-vars
 import { history as backboneHistory, Router as BackboneRouter } from 'backbone';
 import { render } from 'react-dom';
 
-import { ArchiveLogin, ArchiveNavbar, ArchiveNotFound, ArchiveSearch } from './components'; // eslint-disable-line no-unused-vars
+import {
+    ArchiveDetail, // eslint-disable-line no-unused-vars
+    ArchiveLogin, // eslint-disable-line no-unused-vars
+    ArchiveNavbar, // eslint-disable-line no-unused-vars
+    ArchiveNotFound, // eslint-disable-line no-unused-vars
+    ArchiveSearch, // eslint-disable-line no-unused-vars
+    ArchiveUpload, // eslint-disable-line no-unused-vars
+} from './components';
 
 
 // get root elements from DOM
@@ -22,18 +29,28 @@ class ArchiveRouter extends BackboneRouter {
         return {
             '': 'search',
             'search': 'search',
+            'detail/:id': 'detail',
+            'upload': 'upload',
             'login': 'login',
             'logout': 'login',
             '*notFound': 'notFound',
         };
     }
 
-    login() {
-        render(<ArchiveLogin />, CONTENT_ROOT);
-    }
-
     search() {
         render(<ArchiveSearch />, CONTENT_ROOT);
+    }
+
+    detail() {
+        render(<ArchiveDetail />, CONTENT_ROOT);
+    }
+
+    upload() {
+        render(<ArchiveUpload />, CONTENT_ROOT);
+    }
+
+    login() {
+        render(<ArchiveLogin />, CONTENT_ROOT);
     }
 
     notFound() {
@@ -43,7 +60,7 @@ class ArchiveRouter extends BackboneRouter {
 
 
 // initialize router
-new ArchiveRouter(); // eslint-disable-line no-unused-vars
+new ArchiveRouter();
 
 
 // start browser history
