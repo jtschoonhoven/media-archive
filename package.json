@@ -1,6 +1,6 @@
 {
     "name": "media-archive",
-    "version": "0.0.0",
+    "version": "0.0.0a",
     "description": "Web app for storing and indexing digitized documents, photos, audio, and video.",
     "private": true,
     "author": "Jonathan Schoonhoven",
@@ -11,10 +11,13 @@
         "url": "git+https://github.com/jtschoonhoven/media-archive.git"
     },
     "scripts": {
+        "init": "rm -rf ./node_modules && npm install",
         "clean": "find ./dist/* ! -name 'index.html' | xargs rm",
-        "watch": "npm run clean & webpack --watch --config ./webpack.config.js",
-        "build": "npm run clean & webpack --config ./webpack.config.js",
-        "serve": "node_modules/nodemon/bin/nodemon.js server/server.js"
+        "watch": "npm run clean && webpack --watch --config ./webpack.config.js",
+        "build": "npm run clean && webpack --config ./webpack.config.js",
+        "serve": "node_modules/nodemon/bin/nodemon.js server/server.js",
+        "start": "node server/server.js",
+        "archive": "npm run build && zip -r dist/archive.zip ./dist ./server"
     },
     "dependencies": {
         "backbone": "^1.3.3",
