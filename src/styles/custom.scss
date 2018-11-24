@@ -1,5 +1,17 @@
+/* CONTENT */
 #archive-content {
     margin-top: 2rem;
+}
+
+/* SEARCH */
+#archive-search-form {
+    flex-flow: row;
+}
+
+#archive-search-form {
+    input, button {
+        width: 100%;
+    }
 }
 
 #archive-search-results {
@@ -10,19 +22,12 @@
     margin-top: 1rem;
 }
 
+/* UPLOAD */
 #archive-upload-files {
     margin-top: 2rem;
 }
 
-.archive-thumbnail {
-    width: 20rem;
-}
-
+/* UTILITY */
 .archive-btn-nav {
     margin-left: 1rem;
-}
-
-/* reset row width to 100% in navbar */
-nav > .row {
-    flex-grow: 1;
 }

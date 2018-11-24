@@ -8,13 +8,13 @@ const EXAMPLE_DATA = [
         id: 'aaabbbccc',
         title: 'A Search Result',
         description: 'Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet.',
-        thumbnail_url: 'https://i.imgur.com/gn2JN3f.jpg',
+        thumbnailUrl: 'https://i.imgur.com/gn2JN3f.jpg',
     },
     {
         id: 'eeefffggg',
         title: 'Another Search Result',
         description: 'Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet.',
-        thumbnail_url: 'https://i.imgur.com/1kLBouR.png',
+        thumbnailUrl: 'https://i.imgur.com/1kLBouR.png',
     },
 ];
 
@@ -25,12 +25,12 @@ class ArchiveSearch extends React.Component {
         return (
             <div id="archive-search">
                 {/* searchbar */}
-                <form className="form-row">
-                    <div className="form-group col-10">
+                <form id="archive-search-form" className="form-inline form-row">
+                    <div className="form-group col-7 col-sm-9 col-lg-10">
                         <label className="sr-only" htmlFor="archive-search-input">Search</label>
                         <input id="archive-search-input" type="text" className="form-control form-control-lg" placeholder="Search" />
                     </div>
-                    <div className="col-2">
+                    <div className="form-group col-5 col-sm-3 col-lg-2">
                         <button type="submit" className="btn btn-primary btn-lg" onClick={this.handleClick}>Search</button>
                     </div>
                 </form>

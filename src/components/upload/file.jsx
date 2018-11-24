@@ -62,7 +62,7 @@ class FileUpload extends React.Component {
                     </div>
                     {/* status */}
                     <div className="col-sm-2 col-md-2">
-                        <p>{ status }</p>
+                        <span>{ status }</span>
                     </div>
                     {/* button */}
                     <div className="col-sm-2 col-md-1">
