@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 
 
-const PORT = 5000;
+const PORT = 8081; // nginx default
 const STATIC_PATH = path.resolve(__dirname, '../dist');
 const HTML_PATH = path.resolve(__dirname, '../dist/index.html');
 const HTML_OPTS = {};
