@@ -5,9 +5,9 @@ const autoprefixer = require('autoprefixer');
 
 module.exports = {
     mode: 'development',
-    entry: path.join(__dirname, 'src/app.jsx'),
+    entry: path.join(__dirname, 'client/main.jsx'),
     output: {
-        path: path.join(__dirname, 'www'),
+        path: path.join(__dirname, 'dist'),
         filename: 'bundle.js',
     },
     externals: [{ window: 'window' }],

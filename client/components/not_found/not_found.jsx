@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from '../common'; // eslint-disable-line no-unused-vars
 
 
 class ArchiveNotFound extends React.Component {
@@ -13,7 +14,7 @@ class ArchiveNotFound extends React.Component {
                 <p>
                     Click this button to go back to safety.
                 </p>
-                <a className="btn btn-primary btn-lg" href="#" role="button">Go home</a>
+                <Link className="btn btn-primary btn-lg" href="#" role="button">Go home</Link>
             </div>
         );
     }
