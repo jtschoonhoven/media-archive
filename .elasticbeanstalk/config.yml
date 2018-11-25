@@ -1,0 +1,33 @@
+EnvironmentConfigurationMetadata:
+  Description: '2018-11-24'
+  DateCreated: '1543116568000'
+  DateModified: '1543116568000'
+Platform:
+  PlatformArn: arn:aws:elasticbeanstalk:us-west-2::platform/Node.js running on 64bit Amazon Linux/4.7.0
+OptionSettings:
+  aws:elasticbeanstalk:container:nodejs:
+    NodeCommand: npm start
+  AWSEBAutoScalingGroup.aws:autoscaling:asg:
+    MaxSize: '1'
+  aws:elasticbeanstalk:environment:
+    ServiceRole: aws-elasticbeanstalk-service-role
+    LoadBalancerType: application
+  aws:ec2:vpc:
+    Subnets: subnet-011566861d1385777,subnet-0aa3c7ea55a3a0cd4
+    ELBSubnets: subnet-05a910ef3933c1213,subnet-00f6597668a4bf243
+  aws:elasticbeanstalk:healthreporting:system:
+    SystemType: enhanced
+  AWSEBLoadBalancerSecurityGroup.aws:ec2:vpc:
+    VPCId: vpc-0d03da78bc40b760a
+  AWSEBV2LoadBalancerTargetGroup.aws:elasticbeanstalk:environment:process:default:
+    MatcherHTTPCode: '200'
+    HealthCheckPath: /healthcheck
+  aws:autoscaling:launchconfiguration:
+    SecurityGroups: sg-0b412f4dd61a927c7
+    IamInstanceProfile: aws-elasticbeanstalk-ec2-role
+  AWSEBAutoScalingLaunchConfiguration.aws:autoscaling:launchconfiguration:
+    EC2KeyName: jtschoonhoven
+EnvironmentTier:
+  Type: Standard
+  Name: WebServer
+AWSConfigurationTemplateVersion: 1.1.0.0
