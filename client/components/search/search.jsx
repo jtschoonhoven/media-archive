@@ -5,16 +5,16 @@ import SearchResult from './result.jsx'; // eslint-disable-line no-unused-vars
 
 const EXAMPLE_DATA = [
     {
-        id: 'aaabbbccc',
-        title: 'A Search Result',
+        id: '1',
+        title: 'Scientists Baffled by Tiny Monkey',
         description: 'Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet.',
-        thumbnailUrl: 'https://i.imgur.com/gn2JN3f.jpg',
+        thumbnailUrl: 'https://i.imgur.com/ynpG7gW.png',
     },
     {
-        id: 'eeefffggg',
-        title: 'Another Search Result',
+        id: '2',
+        title: 'Shocking New Research on Tiny Monkey',
         description: 'Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet.',
-        thumbnailUrl: 'https://i.imgur.com/1kLBouR.png',
+        thumbnailUrl: 'https://i.imgur.com/sDiIEYU.jpg',
     },
 ];
 
