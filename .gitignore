@@ -5,3 +5,8 @@ node_modules/
 dist/*
 !dist/index.html
 !dist/favicon.ico
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
