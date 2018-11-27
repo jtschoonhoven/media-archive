@@ -10,3 +10,7 @@ dist/*
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+config/*
+!config/development.json
+!config/production.json

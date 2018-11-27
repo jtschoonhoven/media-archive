@@ -56,7 +56,6 @@ class ArchiveRouter extends BackboneRouter {
     }
 
     privacy() {
-        console.log('!!');
         render(<ArchivePrivacyPolicy />, CONTENT_ROOT);
     }
 
