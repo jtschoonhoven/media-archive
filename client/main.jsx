@@ -9,6 +9,7 @@ import {
     ArchiveLogin, // eslint-disable-line no-unused-vars
     ArchiveNavbar, // eslint-disable-line no-unused-vars
     ArchiveNotFound, // eslint-disable-line no-unused-vars
+    ArchivePrivacyPolicy, // eslint-disable-line no-unused-vars
     ArchiveSearch, // eslint-disable-line no-unused-vars
     ArchiveUpload, // eslint-disable-line no-unused-vars
 } from './components';
@@ -33,6 +34,7 @@ class ArchiveRouter extends BackboneRouter {
             'upload': 'upload',
             'login': 'login',
             'logout': 'login',
+            'privacy': 'privacy',
             '*notFound': 'notFound',
         };
     }
@@ -51,6 +53,11 @@ class ArchiveRouter extends BackboneRouter {
 
     login() {
         render(<ArchiveLogin />, CONTENT_ROOT);
+    }
+
+    privacy() {
+        console.log('!!');
+        render(<ArchivePrivacyPolicy />, CONTENT_ROOT);
     }
 
     notFound() {
