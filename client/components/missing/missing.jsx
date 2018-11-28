@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from '../common'; // eslint-disable-line no-unused-vars
 
 
-class ArchiveNotFound extends React.Component {
+class ArchiveMissing extends React.Component {
     render() {
         return (
             <div className="jumbotron">
@@ -21,4 +21,4 @@ class ArchiveNotFound extends React.Component {
 }
 
 
-export default ArchiveNotFound;
+export default ArchiveMissing;

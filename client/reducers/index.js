@@ -1,6 +1,11 @@
-function example() {
-    console.log('reducer!');
-}
+import { combineReducers } from 'redux';
+
+import userReducer from './user';
 
 
-export default example;
+const combinedReducers = combineReducers({
+    user: userReducer,
+});
+
+
+export default combinedReducers;

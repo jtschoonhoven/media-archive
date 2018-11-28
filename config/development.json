@@ -1,4 +1,5 @@
 {
+    "NODE_ENV": "development",
     "SESSION_SECRET": "notsecure",
     "OAUTH2_CALLBACK": "http://localhost:8081/auth/google/callback"
 }

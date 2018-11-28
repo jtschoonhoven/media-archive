@@ -4,15 +4,14 @@ import React from 'react'; // eslint-disable-line no-unused-vars
 import { history as backboneHistory, Router as BackboneRouter } from 'backbone';
 import { render } from 'react-dom';
 
+import store from './store'; // eslint-disable-line no-unused-vars
 import {
-    ArchiveDetail, // eslint-disable-line no-unused-vars
-    ArchiveLogin, // eslint-disable-line no-unused-vars
-    ArchiveNavbar, // eslint-disable-line no-unused-vars
-    ArchiveNotFound, // eslint-disable-line no-unused-vars
-    ArchivePrivacyPolicy, // eslint-disable-line no-unused-vars
-    ArchiveSearch, // eslint-disable-line no-unused-vars
-    ArchiveUpload, // eslint-disable-line no-unused-vars
-} from './components';
+    ArchiveDetailContainer, // eslint-disable-line no-unused-vars
+    ArchiveNavbarContainer, // eslint-disable-line no-unused-vars
+    ArchiveMissingContainer, // eslint-disable-line no-unused-vars
+    ArchiveSearchContainer, // eslint-disable-line no-unused-vars
+    ArchiveUploadContainer, // eslint-disable-line no-unused-vars
+} from './containers';
 
 
 // get root elements from DOM
@@ -21,7 +20,7 @@ const NAVBAR_ROOT = document.getElementById('archive-navbar');
 
 
 // render navbar
-render(<ArchiveNavbar />, NAVBAR_ROOT);
+render(<ArchiveNavbarContainer store={store} />, NAVBAR_ROOT);
 
 
 // define routes
@@ -32,35 +31,27 @@ class ArchiveRouter extends BackboneRouter {
             'search': 'search',
             'detail/:id': 'detail',
             'upload': 'upload',
-            'login': 'login',
-            'logout': 'login',
-            'privacy': 'privacy',
+            'login': undefined, // server handles these routes
+            'logout': undefined,
+            'privacy': undefined,
             '*notFound': 'notFound',
         };
     }
 
     search() {
-        render(<ArchiveSearch />, CONTENT_ROOT);
+        render(<ArchiveSearchContainer store={store} />, CONTENT_ROOT);
     }
 
     detail() {
-        render(<ArchiveDetail />, CONTENT_ROOT);
+        render(<ArchiveDetailContainer store={store} />, CONTENT_ROOT);
     }
 
     upload() {
-        render(<ArchiveUpload />, CONTENT_ROOT);
-    }
-
-    login() {
-        render(<ArchiveLogin />, CONTENT_ROOT);
-    }
-
-    privacy() {
-        render(<ArchivePrivacyPolicy />, CONTENT_ROOT);
+        render(<ArchiveUploadContainer store={store} />, CONTENT_ROOT);
     }
 
     notFound() {
-        render(<ArchiveNotFound />, CONTENT_ROOT);
+        render(<ArchiveNotFoundContainer store={store} />, CONTENT_ROOT);
     }
 }
 

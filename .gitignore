@@ -4,6 +4,8 @@ node_modules/
 # build artifacts
 dist/*
 !dist/index.html
+!dist/login.html
+!dist/privacy.html
 !dist/favicon.ico
 
 # Elastic Beanstalk Files
