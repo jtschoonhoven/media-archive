@@ -1,15 +1,9 @@
-<!doctype html>
-<html class="no-js" lang="en_US">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <meta name="description" content="Media Archive">
-        <title>Media Archive</title>
-    </head>
-    <body>
-        <div id="archive-navbar"></div>
-        <div id="archive-content" class="container">
+import React from 'react';
+
+
+class ArchiveLogin extends React.Component {
+    render() {
+        return (
             <div id="archive-login" className="jumbotron">
                 <h1 className="display-4">Please log in</h1>
                 <p className="lead">
@@ -22,7 +16,9 @@
                     </a>
                 </div>
             </div>
-        </div>
-        <script src="/bundle.js"></script>
-    </body>
-</html>
+        );
+    }
+}
+
+
+export default ArchiveLogin;
