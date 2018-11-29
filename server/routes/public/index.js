@@ -1,6 +1,14 @@
-const path = require('path');
 const express = require('express');
-const requireLogin = require('../../services/auth').requireLogin;
+const path = require('path');
+// const ReactDOMServer = require('react-dom/server');
+
+const authService = require('../../services/auth');
+// const app = require('../../../dist/bundle.js');
+
+// testing
+// const result = ReactDOMServer.renderToString(app.ArchiveDetailContainer);
+// console.log(result);
+
 
 // constants
 const STATIC_PATH = path.resolve(__dirname, '../../../dist');
@@ -27,7 +35,7 @@ publicRouter.get('/privacy', (req, res) => {
     res.sendFile(path.resolve(STATIC_PATH, 'privacy.html'));
 });
 
-publicRouter.get('*', requireLogin, (req, res) => {
+publicRouter.get('*', (req, res) => {
     res.render('index', { INITIAL_STATE: { user: req.user || {} } });
 });
 

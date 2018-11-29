@@ -1,7 +1,9 @@
+import './browser-shim';
 import './styles/main.scss';
 
 import React from 'react'; // eslint-disable-line no-unused-vars
-import { history as backboneHistory, Router as BackboneRouter } from 'backbone';
+import { BrowserRouter, Route, Switch } from 'react-router-dom'; // eslint-disable-line no-unused-vars
+import { Provider } from 'react-redux'; // eslint-disable-line no-unused-vars
 import { render } from 'react-dom';
 
 import store from './store'; // eslint-disable-line no-unused-vars
@@ -20,45 +22,30 @@ const NAVBAR_ROOT = document.getElementById('archive-navbar');
 
 
 // render navbar
-render(<ArchiveNavbarContainer store={store} />, NAVBAR_ROOT);
+render(
+    (
+        <BrowserRouter>
+            <ArchiveNavbarContainer store={store} />
+        </BrowserRouter>
+    ),
+    NAVBAR_ROOT,
+);
 
-
-// define routes
-class ArchiveRouter extends BackboneRouter {
-    routes() {
-        return {
-            '': 'search',
-            'search': 'search',
-            'detail/:id': 'detail',
-            'upload': 'upload',
-            'login': undefined, // server handles these routes
-            'logout': undefined,
-            'privacy': undefined,
-            '*notFound': 'notFound',
-        };
-    }
-
-    search() {
-        render(<ArchiveSearchContainer store={store} />, CONTENT_ROOT);
-    }
-
-    detail() {
-        render(<ArchiveDetailContainer store={store} />, CONTENT_ROOT);
-    }
-
-    upload() {
-        render(<ArchiveUploadContainer store={store} />, CONTENT_ROOT);
-    }
-
-    notFound() {
-        render(<ArchiveNotFoundContainer store={store} />, CONTENT_ROOT);
+class ArchiveRouter extends React.Component { // eslint-disable-line no-unused-vars
+    render() {
+        return (
+            <Provider store={store}>
+                <BrowserRouter>
+                    <Switch>
+                        <Route path="/" exact component={ArchiveSearchContainer} />
+                        <Route path="/detail/:id" component={ArchiveDetailContainer} />
+                        <Route path="/upload" component={ArchiveUploadContainer} />
+                        <Route component={ArchiveMissingContainer} />
+                    </Switch>
+                </BrowserRouter>
+            </Provider>
+        );
     }
 }
 
-
-// initialize router
-new ArchiveRouter();
-
-
-// start browser history
-backboneHistory.start({ pushState: true });
+render(<ArchiveRouter />, CONTENT_ROOT);

@@ -1,8 +1,7 @@
-import 'bootstrap/js/dist/util';
 import React from 'react';
+import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
 import FileUpload from './file.jsx'; // eslint-disable-line no-unused-vars
-import { Link } from '../common'; // eslint-disable-line no-unused-vars
 import { UPLOAD_STATUS } from '../../constants';
 
 

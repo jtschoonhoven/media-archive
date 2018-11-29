@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-
-import { Link } from '../common'; // eslint-disable-line no-unused-vars
+import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
 
 class SearchResult extends React.Component {
@@ -16,7 +15,7 @@ class SearchResult extends React.Component {
                 {/* img */}
                 <div className="row">
                     <div className="col-5 col-sm-4 col-md-3 col-lg-2">
-                        <Link href={ `detail/${id}` }>
+                        <Link to={ `detail/${id}` }>
                             <img
                                 src={ thumbnailUrl }
                                 alt={ title }
@@ -27,7 +26,7 @@ class SearchResult extends React.Component {
                     {/* info */}
                     <div className="col-7 col-sm-8 col-md-9 col-lg-10">
                         <h3>
-                            <Link href={ `detail/${this.props.id}` }>
+                            <Link to={ `detail/${this.props.id}` }>
                                 { this.props.title }
                             </Link>
                         </h3>

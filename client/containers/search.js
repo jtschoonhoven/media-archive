@@ -4,11 +4,7 @@ import { ArchiveSearch } from '../components';
 
 
 function mapStateToProps(state) {
-    return {
-        search: {
-            results: state.search.results || [],
-        },
-    };
+    return state.search || {};
 }
 
 

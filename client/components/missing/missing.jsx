@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '../common'; // eslint-disable-line no-unused-vars
+import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
 
 class ArchiveMissing extends React.Component {
@@ -14,7 +14,7 @@ class ArchiveMissing extends React.Component {
                 <p>
                     Click this button to go back to safety.
                 </p>
-                <Link className="btn btn-primary btn-lg" href="#" role="button">Go home</Link>
+                <Link className="btn btn-primary btn-lg" to="#" role="button">Go home</Link>
             </div>
         );
     }

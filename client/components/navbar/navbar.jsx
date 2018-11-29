@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '../common'; // eslint-disable-line no-unused-vars
+import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
 
 class ArchiveNavbar extends React.Component {
@@ -8,7 +8,7 @@ class ArchiveNavbar extends React.Component {
             <nav className="navbar navbar-light bg-light">
                 <div className="col">
                     {/* logo */}
-                    <Link href="/" className="navbar-brand d-none d-sm-inline">Media Archive</Link>
+                    <Link to="/" className="navbar-brand d-none d-sm-inline">Media Archive</Link>
                     {/* login */}
                     <div className="btn-group float-right archive-btn-nav">
                         <a href="/login" className="btn btn-outline-dark">Login</a>
@@ -19,7 +19,7 @@ class ArchiveNavbar extends React.Component {
                     </div>
                     {/* upload */}
                     <div className="btn-group float-right archive-btn-nav d-none d-sm-block">
-                        <Link href="/upload" className="btn btn-outline-dark">Upload</Link>
+                        <Link to="/upload" className="btn btn-outline-dark">Upload</Link>
                     </div>
                 </div>
             </nav>

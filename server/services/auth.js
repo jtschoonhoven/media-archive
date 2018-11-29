@@ -4,7 +4,6 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 // middleware to redirect to login page if user is not authorized
 module.exports.requireLogin = (req, res, next) => {
-    console.log('REQUIRE AUTH');
     if (!req.user) {
         req.session.oauth2return = req.originalUrl;
         return res.redirect('/login');

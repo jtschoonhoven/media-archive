@@ -4,11 +4,7 @@ import { ArchiveUpload } from '../components';
 
 
 function mapStateToProps(state) {
-    return {
-        upload: {
-            files: state.upload.files || [],
-        },
-    };
+    return state.files || {};
 }
 
 
