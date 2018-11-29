@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
+import './style.scss';
 import FileUpload from './file.jsx'; // eslint-disable-line no-unused-vars
 import { UPLOAD_STATUS } from '../../constants';
 

@@ -1,11 +1,10 @@
-import './browser-shim';
-import './styles/main.scss';
-
 import React from 'react'; // eslint-disable-line no-unused-vars
 import { BrowserRouter, Route, Switch } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 import { Provider } from 'react-redux'; // eslint-disable-line no-unused-vars
 import { render } from 'react-dom';
 
+import 'bootstrap/scss/bootstrap.scss';
+import './components/style.scss';
 import store from './store'; // eslint-disable-line no-unused-vars
 import {
     ArchiveDetailContainer, // eslint-disable-line no-unused-vars
@@ -16,10 +15,6 @@ import {
     ArchiveSearchContainer, // eslint-disable-line no-unused-vars
     ArchiveUploadContainer, // eslint-disable-line no-unused-vars
 } from './containers';
-
-
-// get root elements from DOM
-const CONTENT_ROOT = document.getElementById('archive-main');
 
 
 class ArchiveRouter extends React.Component { // eslint-disable-line no-unused-vars
@@ -46,4 +41,8 @@ class ArchiveRouter extends React.Component { // eslint-disable-line no-unused-v
     }
 }
 
-render(<ArchiveRouter />, CONTENT_ROOT);
+
+if (typeof window !== 'undefined') {
+    const CONTENT_ROOT = document.getElementById('archive-main');
+    render(<ArchiveRouter />, CONTENT_ROOT);
+}

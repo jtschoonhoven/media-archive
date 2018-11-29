@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
+import './style.scss';
+
 
 class ArchiveNavbar extends React.Component {
     render() {
@@ -12,7 +14,7 @@ class ArchiveNavbar extends React.Component {
                         <Link to="/" className="navbar-brand d-none d-sm-inline">Media Archive</Link>
                         {/* login */}
                         <div className="btn-group float-right archive-btn-nav">
-                            <a href="/login" className="btn btn-outline-dark">Login</a>
+                            <Link to="/login" className="btn btn-outline-dark">Login</Link>
                         </div>
                         {/* logout */}
                         <div className="btn-group float-right archive-btn-nav">

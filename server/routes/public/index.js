@@ -1,13 +1,13 @@
 const express = require('express');
 const path = require('path');
-// const ReactDOMServer = require('react-dom/server');
+const ReactDOMServer = require('react-dom/server');
 
 // const authService = require('../../services/auth');
-// const app = require('../../../dist/bundle.js');
+const app = require('../../../dist/bundle.js');
 
 // testing
-// const result = ReactDOMServer.renderToString(app.ArchiveDetailContainer);
-// console.log(result);
+const result = ReactDOMServer.renderToString(app.ArchiveDetailContainer);
+console.log(result);
 
 
 // constants
