@@ -5,6 +5,7 @@ import { Provider } from 'react-redux'; // eslint-disable-line no-unused-vars
 import { Route, Switch } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
 import reducer from './reducers';
+import RestrictedRoute from './components/common'; // eslint-disable-line no-unused-vars
 import {
     ArchiveDetailContainer, // eslint-disable-line no-unused-vars
     ArchiveLoginContainer, // eslint-disable-line no-unused-vars
@@ -29,9 +30,9 @@ class ArchiveApp extends React.Component {
                     <ArchiveNavbarContainer />
                     <div id="archive-content" className="container">
                         <Switch>
-                            <Route path="/" exact component={ArchiveSearchContainer} />
-                            <Route path="/detail/:id" component={ArchiveDetailContainer} />
-                            <Route path="/upload" component={ArchiveUploadContainer} />
+                            <RestrictedRoute path="/" exact component={ArchiveSearchContainer} store={this.store} />
+                            <RestrictedRoute path="/detail/:id" component={ArchiveDetailContainer} store={this.store} />
+                            <RestrictedRoute path="/upload" component={ArchiveUploadContainer} store={this.store} />
                             <Route path="/login" component={ArchiveLoginContainer} />
                             <Route path="/privacy" component={ArchivePrivacyContainer} />
                             <Route component={ArchiveMissingContainer} />

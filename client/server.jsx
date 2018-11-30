@@ -10,6 +10,7 @@ class ArchiveServerApp extends React.Component {
         const location = this.props.location;
         const context = this.props.context;
         const initialState = this.props.initialState;
+
         return (
             <StaticRouter location={location} context={context}>
                 <ArchiveApp initialState={initialState} />
@@ -21,7 +22,7 @@ class ArchiveServerApp extends React.Component {
 ArchiveServerApp.propTypes = {
     context: PropTypes.objectOf(PropTypes.string).isRequired,
     location: PropTypes.string.isRequired,
-    store: PropTypes.object.isRequired,
+    initialState: PropTypes.object.isRequired,
 };
 
 

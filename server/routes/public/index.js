@@ -25,7 +25,7 @@ publicRouter.get('*', (req, res) => {
     // https://reacttraining.com/react-router/web/guides/server-rendering
     const context = {};
     const html = ReactDOMServer.renderToString(
-        React.createElement(app.default, { location: req.url, store: initialState, context }),
+        React.createElement(app.default, { location: req.url, initialState, context }),
     );
     if (context.url) {
         return res.redirect(301, context.url);
