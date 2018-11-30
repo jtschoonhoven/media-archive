@@ -1,11 +1,10 @@
-import React from 'react'; // eslint-disable-line no-unused-vars
-import { BrowserRouter, Route, Switch } from 'react-router-dom'; // eslint-disable-line no-unused-vars
+import PropTypes from 'prop-types';
+import React from 'react';
+import { createStore } from 'redux';
 import { Provider } from 'react-redux'; // eslint-disable-line no-unused-vars
-import { render } from 'react-dom';
+import { Route, Switch } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
-import 'bootstrap/scss/bootstrap.scss';
-import './components/style.scss';
-import store from './store'; // eslint-disable-line no-unused-vars
+import reducer from './reducers';
 import {
     ArchiveDetailContainer, // eslint-disable-line no-unused-vars
     ArchiveLoginContainer, // eslint-disable-line no-unused-vars
@@ -17,32 +16,36 @@ import {
 } from './containers';
 
 
-class ArchiveRouter extends React.Component { // eslint-disable-line no-unused-vars
+class ArchiveApp extends React.Component {
+    constructor(props) {
+        super(props);
+        this.store = createStore(reducer, props.initialState);
+    }
+
     render() {
         return (
-            <Provider store={store}>
-                <BrowserRouter>
-                    <div>
-                        <ArchiveNavbarContainer store={store} />
-                        <div id="archive-content" className="container">
-                            <Switch>
-                                <Route path="/" exact component={ArchiveSearchContainer} />
-                                <Route path="/detail/:id" component={ArchiveDetailContainer} />
-                                <Route path="/upload" component={ArchiveUploadContainer} />
-                                <Route path="/login" component={ArchiveLoginContainer} />
-                                <Route path="/privacy" component={ArchivePrivacyContainer} />
-                                <Route component={ArchiveMissingContainer} />
-                            </Switch>
-                        </div>
+            <Provider store={this.store}>
+                <div>
+                    <ArchiveNavbarContainer />
+                    <div id="archive-content" className="container">
+                        <Switch>
+                            <Route path="/" exact component={ArchiveSearchContainer} />
+                            <Route path="/detail/:id" component={ArchiveDetailContainer} />
+                            <Route path="/upload" component={ArchiveUploadContainer} />
+                            <Route path="/login" component={ArchiveLoginContainer} />
+                            <Route path="/privacy" component={ArchivePrivacyContainer} />
+                            <Route component={ArchiveMissingContainer} />
+                        </Switch>
                     </div>
-                </BrowserRouter>
+                </div>
             </Provider>
         );
     }
 }
 
+ArchiveApp.propTypes = {
+    initialState: PropTypes.object.isRequired,
+};
 
-if (typeof window !== 'undefined') {
-    const CONTENT_ROOT = document.getElementById('archive-main');
-    render(<ArchiveRouter />, CONTENT_ROOT);
-}
+
+export default ArchiveApp;

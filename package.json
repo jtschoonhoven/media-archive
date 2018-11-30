@@ -11,10 +11,10 @@
         "url": "git+https://github.com/jtschoonhoven/media-archive.git"
     },
     "scripts": {
-        "clean": "find ./dist/* ! -name 'index.html' ! -name 'favicon.ico' ! -name 'login.html' ! -name 'privacy.html' | xargs rm",
+        "clean": "find ./dist/* ! -name 'favicon.ico' | xargs rm",
         "watch": "npm run clean && webpack --watch --config ./webpack.config.js",
         "build": "npm run clean && webpack --config ./webpack.config.js",
-        "serve": "node_modules/nodemon/bin/nodemon.js server/server.js",
+        "serve": "node_modules/nodemon/bin/nodemon.js --inspect server/server.js",
         "start": "node server/server.js",
         "zip": "npm run build && zip -r dist/archive.zip ./dist ./server ./config package.json",
         "deploy": "npm run zip && eb deploy --verbose"
@@ -56,6 +56,7 @@
         "eslint-plugin-import": "^2.14.0",
         "eslint-plugin-react": "^7.11.1",
         "exports-loader": "^0.7.0",
+        "ignore-loader": "^0.1.2",
         "isomorphic-style-loader": "^4.0.0",
         "mini-css-extract-plugin": "^0.4.5",
         "node-sass": "^4.10.0",

@@ -14,7 +14,7 @@ class ArchiveMissing extends React.Component {
                 <p>
                     Click this button to go back to safety.
                 </p>
-                <Link className="btn btn-primary btn-lg" to="#" role="button">Go home</Link>
+                <Link to="/" className="btn btn-primary btn-lg" role="button">Go home</Link>
             </div>
         );
     }

@@ -12,13 +12,11 @@ module.exports.requireLogin = (req, res, next) => {
 };
 
 module.exports.deserializeUser = (userStr, done) => {
-    console.log(`DESERIALIZE ${userStr}`);
     const user = JSON.parse(userStr);
     done(null, user); // restored to req.user
 };
 
 module.exports.serializeUser = (user, done) => {
-    console.log(`SERIALIZE ${JSON.stringify(user)}`);
     done(null, JSON.stringify(user)); // saved to session token
 };
 
