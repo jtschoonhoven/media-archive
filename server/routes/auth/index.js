@@ -17,6 +17,11 @@ authRouter.get(
     passport.authenticate('google', { scope: ['email', 'profile'] }),
 );
 
+authRouter.get('/auth/logout', (req, res) => {
+    req.logout();
+    res.redirect('/login');
+});
+
 authRouter.get(
     '/auth/google/callback',
     passport.authenticate('google'),
