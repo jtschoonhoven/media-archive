@@ -11,9 +11,12 @@ class ArchiveNavbar extends React.Component {
 
     render() {
         let NavButtons = ( // eslint-disable-line no-unused-vars
-            <div className="btn-group float-right archive-btn-nav">
-                <a href="/auth/login" className="btn btn-outline-dark">Login</a>
-            </div>
+            <span>
+                {/* login */}
+                <div className="btn-group float-right archive-btn-nav">
+                    <a href="/auth/login" className="btn btn-outline-dark">Login</a>
+                </div>
+            </span>
         );
 
         if (this.isLoggedIn()) {

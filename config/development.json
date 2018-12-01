@@ -1,5 +1,10 @@
 {
     "NODE_ENV": "development",
     "SESSION_SECRET": "notsecure",
-    "OAUTH2_CALLBACK": "http://localhost:8081/auth/google/callback"
+    "OAUTH2_CALLBACK": "http://localhost:8081/auth/google/callback",
+    "RDS_HOSTNAME": "",
+    "RDS_PORT": "",
+    "RDS_DB_NAME": "",
+    "RDS_USERNAME": "",
+    "RDS_PASSWORD": ""
 }
