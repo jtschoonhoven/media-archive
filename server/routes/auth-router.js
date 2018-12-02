@@ -6,7 +6,7 @@ const passport = require('passport');
 const authRouter = express.Router();
 
 authRouter.get(
-    '/auth/login',
+    '/login',
     (req, res, next) => {
         if (req.query.return) {
             // Save the url of the user's current page so the app can redirect
@@ -17,13 +17,13 @@ authRouter.get(
     passport.authenticate('google', { scope: ['email', 'profile'] }),
 );
 
-authRouter.get('/auth/logout', (req, res) => {
+authRouter.get('/logout', (req, res) => {
     req.logout();
     res.redirect('/login');
 });
 
 authRouter.get(
-    '/auth/google/callback',
+    '/google/callback',
     passport.authenticate('google'),
     (req, res) => {
         const redirect = req.session.oauth2return || '/';

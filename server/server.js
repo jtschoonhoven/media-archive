@@ -5,11 +5,12 @@ const passport = require('passport');
 const path = require('path');
 const sessions = require('client-sessions');
 
-const apiRouter = require('./routes/api');
-const authRouter = require('./routes/auth');
+const apiRouter = require('./routes/api-router');
+const appRouter = require('./routes/app-router');
+const authRouter = require('./routes/auth-router');
 const authService = require('./services/auth');
 const logger = require('./services/logger');
-const publicRouter = require('./routes/public');
+const publicRouter = require('./routes/public-router');
 const routeLogger = require('./routes/route-logger');
 
 // constants
@@ -24,10 +25,7 @@ const SESSION_CONFIG = {
 
 // testing
 const db = require('./services/database');
-db.migrate()
-    .then(() => db.all('SELECT * FROM media'))
-    .then(console.log)
-    .catch(console.log);
+db.migrate(true).catch(logger.error);
 
 // init app
 const app = express();
@@ -43,13 +41,14 @@ passport.use(authService.googleStrategy);
 passport.serializeUser(authService.serializeUser);
 passport.deserializeUser(authService.deserializeUser);
 app.use(passport.initialize());
-app.use(passport.session());
 
 // attach routers
 app.use(routeLogger);
-app.use(authRouter);
-app.use(apiRouter);
-app.use(publicRouter); // must be last: contains a '*' route
+app.use(publicRouter);
+app.use('/auth', authRouter);
+app.use(passport.session()); // set session cookie only for api and appRouter
+app.use('/api', apiRouter);
+app.use(appRouter);
 
 // start server
 app.listen(PORT, () => logger.info(`node server listening on http://localhost:${PORT}`));

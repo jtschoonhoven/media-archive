@@ -14,11 +14,13 @@ const OAUTH2_CONFIG = {
  * Simple middleware to redirect to login page is user is not authorized.
  */
 module.exports.requireLogin = (req, res, next) => {
-    if (!req.user) {
-        req.session.oauth2return = req.originalUrl;
-        return res.redirect('/login');
+    // continue if authorized
+    if (req.user) {
+        return next();
     }
-    return next();
+    // redirect to login page for all other routes
+    req.session.oauth2return = req.originalUrl;
+    return res.redirect('/login');
 };
 
 /*
