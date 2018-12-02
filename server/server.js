@@ -24,14 +24,10 @@ const SESSION_CONFIG = {
 
 // testing
 const db = require('./services/database');
-try {
-    db.migrate().then(() => {
-        db.all('SELECT * FROM Category').then(console.log);
-    });
-}
-catch (err) {
-    console.log(err);
-}
+db.migrate()
+    .then(() => db.all('SELECT * FROM media'))
+    .then(console.log)
+    .catch(console.log);
 
 // init app
 const app = express();

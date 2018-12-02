@@ -10,7 +10,9 @@ const OAUTH2_CONFIG = {
     accessType: 'offline',
 };
 
-// middleware to redirect to login page if user is not authorized
+/*
+ * Simple middleware to redirect to login page is user is not authorized.
+ */
 module.exports.requireLogin = (req, res, next) => {
     if (!req.user) {
         req.session.oauth2return = req.originalUrl;
@@ -20,7 +22,7 @@ module.exports.requireLogin = (req, res, next) => {
 };
 
 /*
- * Parse the user
+ * Parse the serialized user object and restore to req.user.
  */
 module.exports.deserializeUser = (userStr, done) => {
     try {
