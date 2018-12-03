@@ -1,9 +1,11 @@
 const bodyParser = require('body-parser');
 const config = require('config');
 const express = require('express');
+const helmet = require('helmet');
 const passport = require('passport');
 const path = require('path');
-const sessions = require('client-sessions');
+const session = require('cookie-session');
+const { createTerminus } = require('@godaddy/terminus');
 
 const apiRouter = require('./routes/api-router');
 const appRouter = require('./routes/app-router');
@@ -11,19 +13,19 @@ const authRouter = require('./routes/auth-router');
 const authService = require('./services/auth');
 const db = require('./services/database');
 const logger = require('./services/logger');
-const publicRouter = require('./routes/public-router');
 const routeLogger = require('./routes/route-logger');
 const settings = require('./settings');
 
 
 // constants
 const PORT = 8081; // nginx default
+const STATIC_PATH = path.resolve(__dirname, '../../dist');
+const STATIC_OPTS = { maxAge: '5s' };
 const SESSION_CONFIG = {
-    secret: config.get('SESSION_SECRET'),
-    cookieName: 'session', // key name on req object
-    duration: 1000 * 60 * 60 * 24, // 24h in ms
-    activeDuration: 1000 * 60 * 60 * 24, // automatically extend session on login
-    secure: true,
+    name: 'session',
+    keys: [config.get('SESSION_SECRET')],
+    maxAge: 1000 * 60 * 60 * 24, // 24h in ms
+    sameSite: 'lax',
 };
 
 // bootstrap database in dev
@@ -31,13 +33,14 @@ if (settings.NODE_ENV === 'development') {
     db.migrate(true).catch(logger.error);
 }
 
-// init app
+// init server
 const app = express();
 
 // config app
+app.use(helmet()); // sets HTTP headers to avoid common exploits
 app.set('views', path.resolve(__dirname, 'templates'));
 app.set('view engine', 'ejs');
-app.use(sessions(SESSION_CONFIG));
+app.use(session(SESSION_CONFIG));
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // config passport
@@ -48,11 +51,27 @@ app.use(passport.initialize());
 
 // attach routers
 app.use(routeLogger);
-app.use(publicRouter);
+app.use(express.static(STATIC_PATH, STATIC_OPTS));
 app.use('/auth', authRouter);
 app.use(passport.session()); // set session cookie only for api and appRouter
 app.use('/api/v1', apiRouter);
 app.use(appRouter);
 
 // start server
-app.listen(PORT, () => logger.info(`node server listening on http://localhost:${PORT}`));
+const server = app.listen(PORT, () => {
+    logger.info(`node server listening on http://localhost:${PORT}`);
+});
+
+// configure graceful shutdown and healthchecks
+createTerminus(
+    server,
+    {
+        signal: 'SIGINT',
+        healthChecks: { '/healthcheck': () => Promise.resolve() },
+        onShutdown: () => {
+            logger.info('node app gracefully shutting down');
+            db.close();
+        },
+        logger: logger.error,
+    },
+);

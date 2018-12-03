@@ -7,13 +7,6 @@ const searchService = require('../services/search');
 // this router handles private API routes to serve data in JSON format
 const apiRouter = express.Router();
 
-// for testing
-function promiseTimeout(time) {
-    return new Promise((resolve) => {
-        setTimeout(() => resolve(time), time);
-    });
-}
-
 /*
  * Middleware to require auth for all API routes.
  */
@@ -42,7 +35,6 @@ apiRouter.get('/user', (req, res) => {
 apiRouter.get('/search', async (req, res) => {
     const { s, ...filters } = req.query;
     const result = await searchService.query(s, filters);
-    await promiseTimeout(1000);
     if (result.error) {
         return res.status(500).json(result);
     }

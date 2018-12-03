@@ -9,7 +9,7 @@ const logger = require('../services/logger');
  */
 module.exports.query = async (searchString, filters) => {
     const query = sql`
-        SELECT id, media_name, media_description, media_tags, media_url, media_url_thumbnail
+        SELECT *
         FROM media
         WHERE LOWER(media_name) LIKE '%' || LOWER(${searchString}) || '%'
     ;`;

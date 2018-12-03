@@ -6,6 +6,7 @@ import { Link, Redirect, Route } from 'react-router-dom'; // eslint-disable-line
 class RestrictedRoute extends React.Component {
     isLoggedIn(props) {
         const state = props.store.getState();
+        console.log(`STATE: ${JSON.stringify(state)}`);
         return state.user && state.user.isLoggedIn;
     }
 
