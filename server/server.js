@@ -30,7 +30,7 @@ const SESSION_CONFIG = {
 
 // bootstrap database in dev
 if (settings.NODE_ENV === 'development') {
-    db.migrate(true).catch(logger.error);
+    db.rebuild().catch(logger.error);
 }
 
 // init server
