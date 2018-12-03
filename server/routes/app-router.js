@@ -15,7 +15,6 @@ const appRouter = express.Router();
  */
 appRouter.get('*', (req, res) => {
     const initialState = { user: req.user || {} };
-    // https://reacttraining.com/react-router/web/guides/server-rendering
     const context = {};
     const html = ReactDOMServer.renderToString(
         React.createElement(app, { location: req.url, initialState, context }),

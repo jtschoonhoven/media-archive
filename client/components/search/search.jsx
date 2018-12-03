@@ -2,12 +2,16 @@ import './style.scss';
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik'; // eslint-disable-line no-unused-vars
 
 import SearchResult from './result.jsx'; // eslint-disable-line no-unused-vars
 
 
 class ArchiveSearch extends React.Component {
+    constructor(props) {
+        super(props);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
     render() {
         const results = this.props.results || [];
         const Results = results.map(
@@ -16,20 +20,15 @@ class ArchiveSearch extends React.Component {
         return (
             <div id="archive-search">
                 {/* searchbar */}
-                <Formik initialValues={{ search: '' }} onSubmit={values => this.props.onSearchSubmit(values.search)}>
-                    {({ values }) => (
-                        <Form id="archive-search-form" className="form-inline form-row">
-                            <div className="form-group col-7 col-sm-9 col-lg-10">
-                                <label className="sr-only" htmlFor="archive-search-input">Search</label>
-                                <Field type="text" name="search" value={values.search} className="form-control form-control-lg" placeholder="Search" />
-                                <ErrorMessage name="search" component="div" />
-                            </div>
-                            <div className="form-group col-5 col-sm-3 col-lg-2">
-                                <button type="submit" className="btn btn-primary btn-lg" disabled={this.props.isFetching}>Search</button>
-                            </div>
-                        </Form>
-                    )}
-                </Formik>
+                <form id="archive-search-form" className="form-inline form-row" onSubmit={this.handleSubmit}>
+                    <div className="form-group col-7 col-sm-9 col-lg-10">
+                        <label className="sr-only" htmlFor="archive-search-input">Search</label>
+                        <input id="archive-search-form-input" type="text" name="search" className="form-control form-control-lg" placeholder="Search" />
+                    </div>
+                    <div className="form-group col-5 col-sm-3 col-lg-2">
+                        <button type="submit" className="btn btn-primary btn-lg" disabled={this.props.isFetching}>Search</button>
+                    </div>
+                </form>
                 {/* filters */}
                 <div className="form-check form-check-inline">
                     <label className="form-check-label"><strong>Include:</strong></label>
@@ -55,6 +54,12 @@ class ArchiveSearch extends React.Component {
                 </div>
             </div>
         );
+    }
+
+    handleSubmit(e) {
+        e.preventDefault();
+        const searchTerm = document.getElementById('archive-search-form-input').value;
+        this.props.onSearchSubmit(searchTerm);
     }
 }
 
