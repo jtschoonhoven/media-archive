@@ -6,9 +6,9 @@ import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 class SearchResult extends React.Component {
     render() {
         const id = this.props.id;
-        const title = this.props.title;
-        const description = this.props.description;
-        const thumbnailUrl = this.props.thumbnailUrl;
+        const title = this.props.media_name;
+        const description = this.props.media_description;
+        const thumbnailUrl = this.props.media_url_thumbnail;
 
         return (
             <div id="archive-search-result">
@@ -26,8 +26,8 @@ class SearchResult extends React.Component {
                     {/* info */}
                     <div className="col-7 col-sm-8 col-md-9 col-lg-10">
                         <h3>
-                            <Link to={ `detail/${this.props.id}` }>
-                                { this.props.title }
+                            <Link to={ `detail/${id}` }>
+                                { title }
                             </Link>
                         </h3>
                         <p>{ description }</p>
@@ -40,10 +40,10 @@ class SearchResult extends React.Component {
 }
 
 SearchResult.propTypes = {
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    thumbnailUrl: PropTypes.string.isRequired,
+    id: PropTypes.number.isRequired,
+    media_name: PropTypes.string.isRequired,
+    media_description: PropTypes.string.isRequired,
+    media_url_thumbnail: PropTypes.string.isRequired,
 };
 
 

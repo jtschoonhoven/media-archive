@@ -69,8 +69,9 @@ CREATE TABLE media (
     deleted_at TIMESTAMP
 );
 
-INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, workflow_batch_date, workflow_error, workflow_log, workflow_status, upload_started_at, upload_success_at, upload_failure_at, processing_started_at, processing_success_at, processing_failure_at, created_at, updated_at, deleted_at)
+INSERT INTO media (id, box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, workflow_batch_date, workflow_error, workflow_log, workflow_status, upload_started_at, upload_success_at, upload_failure_at, processing_started_at, processing_success_at, processing_failure_at, created_at, updated_at, deleted_at)
 VALUES (
+    1, -- id
     1, -- box_id
     '2017', -- box_name
     'B', -- box_or_cabinet
@@ -119,8 +120,9 @@ VALUES (
     null  -- deleted_at
 );
 
-INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, workflow_batch_date, workflow_error, workflow_log, workflow_status, upload_started_at, upload_success_at, upload_failure_at, processing_started_at, processing_success_at, processing_failure_at, created_at, updated_at, deleted_at)
+INSERT INTO media (id, box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, workflow_batch_date, workflow_error, workflow_log, workflow_status, upload_started_at, upload_success_at, upload_failure_at, processing_started_at, processing_success_at, processing_failure_at, created_at, updated_at, deleted_at)
 VALUES (
+    2, -- id
     2, -- box_id
     '2017', -- box_name
     'B', -- box_or_cabinet
