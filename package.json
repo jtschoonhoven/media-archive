@@ -1,6 +1,6 @@
 {
     "name": "media-archive",
-    "version": "0.0.7a",
+    "version": "0.0.8a",
     "description": "Web app for storing and indexing digitized documents, photos, audio, and video.",
     "private": true,
     "author": "Jonathan Schoonhoven",
@@ -12,12 +12,13 @@
     },
     "scripts": {
         "clean": "find ./dist/* ! -name 'favicon.ico' | xargs rm",
-        "watch": "npm run clean && node_modules/webpack/webpack.js --watch --config ./webpack.config.js",
-        "build": "npm run clean && node_modules/webpack/webpack.js --config ./webpack.config.js",
+        "watch": "npm run clean && ./node_modules/.bin/webpack --watch --config ./webpack.config.js",
+        "build": "npm run clean && ./node_modules/.bin/webpack --config ./webpack.config.js",
         "serve": "node_modules/nodemon/bin/nodemon.js --inspect server/server.js",
         "start": "node server/server.js",
         "zip": "npm run build && zip -r dist/archive.zip ./dist ./server ./config package.json",
-        "deploy": "npm run zip && eb deploy --verbose"
+        "deploy": "npm run zip && eb deploy --verbose",
+        "db": "pg_ctl -D ./.pgdb start"
     },
     "dependencies": {
         "@godaddy/terminus": "^4.1.0",
@@ -68,8 +69,7 @@
         "precss": "^3.1.2",
         "sass-loader": "^7.1.0",
         "serve": "^10.1.1",
-        "sqlite": "^3.0.0",
-        "webpack": "^4.26.0",
+        "webpack": "^4.26.1",
         "webpack-cli": "^3.1.2"
     }
 }

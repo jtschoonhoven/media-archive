@@ -7,10 +7,6 @@ EnvironmentTier:
   Name: WebServer
   Type: Standard
 OptionSettings:
-  AWSEBAutoScalingGroup.aws:autoscaling:asg:
-    MaxSize: '1'
-  AWSEBAutoScalingLaunchConfiguration.aws:autoscaling:launchconfiguration:
-    EC2KeyName: jtschoonhoven
   AWSEBAutoScalingLaunchConfiguration.aws:ec2:vpc:
     AssociatePublicIpAddress: true
   AWSEBLoadBalancerSecurityGroup.aws:ec2:vpc:

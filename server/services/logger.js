@@ -1,8 +1,27 @@
 const winston = require('winston');
+const expressWinston = require('express-winston');
+
+const TRANSPORTS = [new winston.transports.Console()];
 
 
-// configure logger for route access
-module.exports = winston.createLogger({
+// configure app-level logging
+const logger = winston.createLogger({
     format: winston.format.printf(info => `${info.level.toUpperCase()} ${info.message}`),
-    transports: [new winston.transports.Console()],
+    transports: TRANSPORTS,
 });
+
+// configure route-level logging
+const routeLogger = expressWinston.logger({
+    format: winston.format.printf((info) => {
+        const status = info.meta.res.statusCode;
+        const method = info.meta.req.method;
+        const timeMs = info.meta.responseTime;
+        const url = info.meta.req.url;
+        return `HTTP ${status} ${method} ${timeMs}ms ${url}`;
+    }),
+    transports: TRANSPORTS,
+});
+
+
+module.exports = logger;
+module.exports.routeLogger = routeLogger;

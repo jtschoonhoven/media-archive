@@ -13,13 +13,11 @@ const authRouter = require('./routes/auth-router');
 const authService = require('./services/auth');
 const db = require('./services/database');
 const logger = require('./services/logger');
-const routeLogger = require('./routes/route-logger');
 const settings = require('./settings');
-
 
 // constants
 const PORT = 8081; // nginx default
-const STATIC_PATH = path.resolve(__dirname, '../../dist');
+const STATIC_PATH = path.resolve(__dirname, '../dist');
 const STATIC_OPTS = { maxAge: '5s' };
 const SESSION_CONFIG = {
     name: 'session',
@@ -28,10 +26,10 @@ const SESSION_CONFIG = {
     sameSite: 'lax',
 };
 
-// bootstrap database in dev
-if (settings.NODE_ENV === 'development') {
-    db.rebuild().catch(logger.error);
-}
+
+// bootstrap database with test data for development
+// FIXME: remove when ready
+db.rebuild(true).catch(logger.error);
 
 // init server
 const app = express();
@@ -50,7 +48,7 @@ passport.deserializeUser(authService.deserializeUser);
 app.use(passport.initialize());
 
 // attach routers
-app.use(routeLogger);
+app.use(logger.routeLogger);
 app.use(express.static(STATIC_PATH, STATIC_OPTS));
 app.use('/auth', authRouter);
 app.use(passport.session()); // set session cookie only for api and appRouter
@@ -59,7 +57,7 @@ app.use(appRouter);
 
 // start server
 const server = app.listen(PORT, () => {
-    logger.info(`node server listening on http://localhost:${PORT}`);
+    logger.info(`${settings.NODE_ENV} node server listening on http://localhost:${PORT}`);
 });
 
 // configure graceful shutdown and healthchecks
