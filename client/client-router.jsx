@@ -21,7 +21,7 @@ class ClientRouter extends React.Component {
 
 // attach event listeners to server-rendered HTML
 const CONTENT_ROOT = document.getElementById('archive-main');
-ReactDom.hydrate(<ClientApp />, CONTENT_ROOT);
+ReactDom.hydrate(<ClientRouter />, CONTENT_ROOT);
 
 
 export default ClientRouter;

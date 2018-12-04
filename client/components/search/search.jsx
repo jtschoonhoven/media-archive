@@ -2,14 +2,29 @@ import './style.scss';
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import queryString from 'query-string';
+import { withRouter } from 'react-router';
 
 import SearchResult from './result.jsx'; // eslint-disable-line no-unused-vars
+
+const SEARCH_INPUT_ID = 'archive-search-form-input';
 
 
 class ArchiveSearch extends React.Component {
     constructor(props) {
         super(props);
+        const query = queryString.parse(this.props.location.search);
+        const searchTerm = query.s || '';
+        this.state = { searchTerm };
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    componentDidMount() {
+        const searchTerm = this.state.searchTerm;
+        if (searchTerm) {
+            this.props.onSearchSubmit(searchTerm);
+        }
     }
 
     render() {
@@ -23,7 +38,7 @@ class ArchiveSearch extends React.Component {
                 <form id="archive-search-form" className="form-inline form-row" onSubmit={this.handleSubmit}>
                     <div className="form-group col-7 col-sm-9 col-lg-10">
                         <label className="sr-only" htmlFor="archive-search-input">Search</label>
-                        <input id="archive-search-form-input" type="text" name="search" className="form-control form-control-lg" placeholder="Search" />
+                        <input id={SEARCH_INPUT_ID} type="text" name="search" className="form-control form-control-lg" placeholder="Search" value={this.state.searchTerm} onChange={this.handleChange} />
                     </div>
                     <div className="form-group col-5 col-sm-3 col-lg-2">
                         <button type="submit" className="btn btn-primary btn-lg" disabled={this.props.isFetching}>Search</button>
@@ -56,9 +71,17 @@ class ArchiveSearch extends React.Component {
         );
     }
 
-    handleSubmit(e) {
-        e.preventDefault();
-        const searchTerm = document.getElementById('archive-search-form-input').value;
+    handleChange(event) {
+        event.preventDefault();
+        const searchTerm = event.target.value;
+        this.setState({ searchTerm });
+    }
+
+    handleSubmit(event) {
+        event.preventDefault();
+        const searchTerm = this.state.searchTerm;
+        const query = queryString.stringify({ s: searchTerm });
+        this.props.history.push({ search: `?${query}` });
         this.props.onSearchSubmit(searchTerm);
     }
 }
@@ -68,4 +91,4 @@ ArchiveSearch.propTypes = {
 };
 
 
-export default ArchiveSearch;
+export default withRouter(ArchiveSearch);
