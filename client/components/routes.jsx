@@ -4,8 +4,8 @@ import { createStore } from 'redux';
 import { Provider } from 'react-redux'; // eslint-disable-line no-unused-vars
 import { Route, Switch } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
-import reducer from './reducers';
-import RestrictedRoute from './components/common'; // eslint-disable-line no-unused-vars
+import reducer from '../reducers';
+import RestrictedRoute from './common'; // eslint-disable-line no-unused-vars
 import {
     ArchiveDetailContainer, // eslint-disable-line no-unused-vars
     ArchiveLoginContainer, // eslint-disable-line no-unused-vars
@@ -14,7 +14,7 @@ import {
     ArchivePrivacyContainer, // eslint-disable-line no-unused-vars
     ArchiveSearchContainer, // eslint-disable-line no-unused-vars
     ArchiveUploadContainer, // eslint-disable-line no-unused-vars
-} from './containers';
+} from '../containers';
 
 
 class ArchiveApp extends React.Component {

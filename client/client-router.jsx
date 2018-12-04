@@ -5,10 +5,10 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import { BrowserRouter } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
-import ArchiveApp from './main.jsx'; // eslint-disable-line no-unused-vars
+import ArchiveApp from './components/routes.jsx'; // eslint-disable-line no-unused-vars
 
 
-class ClientApp extends React.Component {
+class ClientRouter extends React.Component {
     render() {
         return (
             <BrowserRouter>
@@ -24,4 +24,4 @@ const CONTENT_ROOT = document.getElementById('archive-main');
 ReactDom.hydrate(<ClientApp />, CONTENT_ROOT);
 
 
-export default ClientApp;
+export default ClientRouter;

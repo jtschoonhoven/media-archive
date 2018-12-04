@@ -2,10 +2,13 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
-import ArchiveApp from './main.jsx'; // eslint-disable-line no-unused-vars
+import ArchiveApp from './components/routes.jsx'; // eslint-disable-line no-unused-vars
 
 
-class ArchiveServerApp extends React.Component {
+/*
+ * This is the main entrypoint for the *server-rendered* React frontend.
+ */
+class ServerRouter extends React.Component {
     render() {
         const location = this.props.location;
         const context = this.props.context;
@@ -19,11 +22,11 @@ class ArchiveServerApp extends React.Component {
     }
 }
 
-ArchiveServerApp.propTypes = {
+ServerRouter.propTypes = {
     context: PropTypes.objectOf(PropTypes.string).isRequired,
     location: PropTypes.string.isRequired,
     initialState: PropTypes.object.isRequired,
 };
 
 
-export default ArchiveServerApp;
+export default ServerRouter;
