@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -20,7 +19,7 @@ class FileUpload extends React.Component {
         let actionName = 'cancel';
 
         // progress bars are not animated on success, no "retry" or "cancel" option
-        if (_.includes(SUCCESS_STATES, status)) {
+        if (SUCCESS_STATES.includes(status)) {
             isAnimated = false;
             isStriped = false;
             styleName = 'success';
@@ -28,7 +27,7 @@ class FileUpload extends React.Component {
         }
 
         // progress bars are not animated on failure, show "retry" option
-        else if (_.includes(FAILURE_STATES, status)) {
+        else if (FAILURE_STATES.includes(status)) {
             isAnimated = false;
             styleName = 'danger';
             actionName = 'retry';
