@@ -29,7 +29,8 @@ const SESSION_CONFIG = {
 
 // bootstrap database with test data for development
 // FIXME: remove when ready
-db.rebuild(true).catch(logger.error);
+db.rebuild(true)
+    .catch(logger.error);
 
 // init server
 const app = express();

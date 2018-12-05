@@ -1,6 +1,3 @@
-import 'bootstrap/scss/bootstrap.scss';
-import './components/style.scss';
-
 import React from 'react';
 import ReactDom from 'react-dom';
 import { BrowserRouter } from 'react-router-dom'; // eslint-disable-line no-unused-vars

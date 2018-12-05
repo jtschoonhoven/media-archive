@@ -36,14 +36,19 @@ class Database {
      */
     async all(sql) {
         const client = await this.pool.connect();
-        return client.query(sql).then(res => res.rows);
+        try {
+            return await client.query(sql).then(res => res.rows);
+        }
+        finally {
+            client.release();
+        }
     }
 
     /*
      * Execute a single query and return the database object (chainable).
      */
     async run(sql) {
-        return this.all(sql).then(() => this.pool);
+        return this.all(sql).then(() => this);
     }
 
     /*

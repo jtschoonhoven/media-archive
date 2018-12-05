@@ -14,7 +14,7 @@ exports.up = async (db) => {
             series_index_id INTEGER, -- the order an item should appear in a series
 
             -- media info
-            media_name TEXT, -- ("Title") name of media (MUST be unique)
+            media_name TEXT UNIQUE, -- ("Title") name of media
             media_description TEXT, -- describes content of media
             media_authors TEXT, -- comma-separated list of authors, photographers, creators, etc
             media_notes TEXT, -- (AKA "Add. Notes" or "Notes (word by word, on back, post it notes, attached to paperwork)")
@@ -70,6 +70,87 @@ exports.up = async (db) => {
             deleted_at TIMESTAMP
         );
     `);
+
+    await db.run(`
+        CREATE FUNCTION ts_vectorize_v0(
+            media_name TEXT,
+            media_tags TEXT,
+            media_description TEXT,
+            media_authors TEXT,
+            audio_lecturers TEXT,
+            image_photographer TEXT,
+            media_notes TEXT,
+            media_transcript TEXT,
+            box_name TEXT,
+            folder_name TEXT,
+            series_name TEXT,
+            series_description TEXT,
+            media_type TEXT,
+            media_file_extension TEXT,
+            media_file_name TEXT,
+            media_file_path TEXT,
+            origin_location TEXT,
+            origin_medium TEXT,
+            origin_medium_notes TEXT
+        )
+            RETURNS tsvector
+        AS
+        $BODY$
+            SELECT
+                   SETWEIGHT(TO_TSVECTOR('english', COALESCE($1,  '')), 'A')
+                || SETWEIGHT(TO_TSVECTOR('simple',  COALESCE($2,  '')), 'A')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($3,  '')), 'B')
+                || SETWEIGHT(TO_TSVECTOR('simple',  COALESCE($4,  '')), 'B')
+                || SETWEIGHT(TO_TSVECTOR('simple',  COALESCE($5,  '')), 'B')
+                || SETWEIGHT(TO_TSVECTOR('simple',  COALESCE($6,  '')), 'B')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($7,  '')), 'C')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($8,  '')), 'C')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($9,  '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($10, '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($11, '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($12, '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($13, '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($14, '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($15, '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($16, '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($17, '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($18, '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($19, '')), 'D');
+        $BODY$
+        LANGUAGE sql
+        IMMUTABLE;
+    `);
+
+    await db.run(`
+        CREATE INDEX idx_tsvector ON media
+        USING GIN(
+            TS_VECTORIZE_V0(
+                media_name,
+                media_tags,
+                media_description,
+                media_authors,
+                audio_lecturers,
+                image_photographer,
+                media_notes,
+                media_transcript,
+                box_name,
+                folder_name,
+                series_name,
+                series_description,
+                media_type,
+                media_file_extension,
+                media_file_name,
+                media_file_path,
+                origin_location,
+                origin_medium,
+                origin_medium_notes
+            )
+        );
+    `);
 };
 
-exports.down = async db => db.run('DROP TABLE IF EXISTS media;');
+exports.down = async (db) => {
+    await db.run('DROP INDEX IF EXISTS idx_tsvector;');
+    await db.run('DROP FUNCTION IF EXISTS ts_vectorize_v0');
+    await db.run('DROP TABLE IF EXISTS media;');
+};

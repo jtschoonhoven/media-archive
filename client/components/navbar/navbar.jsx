@@ -1,7 +1,7 @@
+import './style.scss';
+
 import React from 'react';
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
-
-import './style.scss';
 
 
 class ArchiveNavbar extends React.Component {
@@ -36,7 +36,7 @@ class ArchiveNavbar extends React.Component {
 
         return (
             <div id="archive-navbar">
-                <nav className="navbar navbar-light bg-light">
+                <nav className="navbar">
                     <div className="col">
                         {/* logo */}
                         <Link to="/" className="navbar-brand d-none d-sm-inline">Media Archive</Link>

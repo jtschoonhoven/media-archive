@@ -1,3 +1,5 @@
+import './style.scss';
+
 import PropTypes from 'prop-types';
 import React from 'react';
 import { createStore } from 'redux';

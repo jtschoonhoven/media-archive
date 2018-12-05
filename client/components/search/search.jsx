@@ -41,7 +41,7 @@ class ArchiveSearch extends React.Component {
                         <input id={SEARCH_INPUT_ID} type="text" name="search" className="form-control form-control-lg" placeholder="Search" value={this.state.searchTerm} onChange={this.handleChange} />
                     </div>
                     <div className="form-group col-5 col-sm-3 col-lg-2">
-                        <button type="submit" className="btn btn-primary btn-lg" disabled={this.props.isFetching}>Search</button>
+                        <button type="submit" className="btn btn-primary btn-lg" disabled={!this.state.searchTerm || this.props.isFetching}>Search</button>
                     </div>
                 </form>
                 {/* filters */}
