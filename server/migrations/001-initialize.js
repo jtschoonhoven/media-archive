@@ -72,7 +72,7 @@ exports.up = async (db) => {
     `);
 
     await db.run(`
-        CREATE FUNCTION ts_vectorize_v0(
+        CREATE FUNCTION ts_vectorize_v0 (
             media_name TEXT,
             media_tags TEXT,
             media_description TEXT,
@@ -122,6 +122,24 @@ exports.up = async (db) => {
     `);
 
     await db.run(`
+        CREATE FUNCTION ts_relevance_v0 (
+            tsvector TSVECTOR,
+            query_lex TSQUERY,
+            query_pre TSQUERY
+        )
+            RETURNS integer
+        AS
+        $BODY$
+            SELECT (
+                ( TS_RANK(tsvector, query_lex) * 3
+                + TS_RANK(tsvector, query_pre)) * 100 / 4
+            )::integer
+        $BODY$
+        LANGUAGE sql
+        IMMUTABLE;
+    `);
+
+    await db.run(`
         CREATE INDEX idx_tsvector ON media
         USING GIN(
             TS_VECTORIZE_V0(
@@ -151,6 +169,7 @@ exports.up = async (db) => {
 
 exports.down = async (db) => {
     await db.run('DROP INDEX IF EXISTS idx_tsvector;');
+    await db.run('DROP FUNCTION IF EXISTS ts_relevance_v0');
     await db.run('DROP FUNCTION IF EXISTS ts_vectorize_v0');
     await db.run('DROP TABLE IF EXISTS media;');
 };

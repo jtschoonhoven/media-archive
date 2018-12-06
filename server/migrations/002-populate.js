@@ -1,4 +1,58 @@
 exports.up = async (db) => {
+    for (let i = 0; i < 100; i += 1) { // eslint-disable-next-line no-await-in-loop
+        await db.run(`
+            INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, workflow_batch_date, workflow_error, workflow_log, workflow_status, upload_started_at, upload_success_at, upload_failure_at, processing_started_at, processing_success_at, processing_failure_at, created_at, updated_at, deleted_at)
+            VALUES (
+                ${i}, -- box_id
+                '2018', -- box_name
+                'B', -- box_or_cabinet
+                ${i}, -- folder_id
+                'magazine clippings', -- folder_name
+                null, -- series_name
+                null, -- series_description
+                null, -- series_index_id
+                'Minutes from meeting ${i}', -- media_name
+                'Read on for more great info from meeting ${i}', -- media_description
+                '${i} authors', -- media_authors
+                null, -- media_notes
+                null, -- media_transcript
+                null, -- media_date
+                'tag-${i}', -- media_tags
+                'document', -- media_type
+                'PDF', -- media_file_extension
+                '${i}.pdf', -- media_file_name
+                'uploads/${i}.pdf', -- media_file_path
+                ${i}, -- media_file_size_bytes
+                'https://i.imgur.com/fqRBCko.jpg', -- media_url
+                'https://i.imgur.com/fqRBCko.jpg', -- media_url_thumbnail
+                null, -- origin_location
+                null, -- origin_medium
+                null, -- origin_medium_notes
+                null, -- audio_lecturers
+                null, -- audio_video_length_seconds
+                'imgur', -- image_photographer
+                'C', -- image_color
+                'Person unknown', -- image_location_or_people_unknown
+                null, -- image_professional_or_personal
+                null, -- legal_is_confidential
+                FALSE, -- legal_can_license
+                null, -- workflow_batch_date
+                null, -- workflow_error
+                null, -- workflow_log
+                null, -- workflow_status
+                null, -- upload_started_at
+                null, -- upload_success_at
+                null, -- upload_failure_at
+                null, -- processing_started_at
+                null, -- processing_success_at
+                null, -- processing_failure_at
+                current_timestamp, -- created_at
+                null, -- updated_at
+                null  -- deleted_at
+            );
+        `);
+    }
+
     await db.run(`
         INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, workflow_batch_date, workflow_error, workflow_log, workflow_status, upload_started_at, upload_success_at, upload_failure_at, processing_started_at, processing_success_at, processing_failure_at, created_at, updated_at, deleted_at)
         VALUES (

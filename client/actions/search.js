@@ -1,3 +1,5 @@
+import queryString from 'query-string';
+
 export const SEARCH = 'SEARCH';
 export const SEARCH_COMPLETE = 'SEARCH_COMPLETE';
 
@@ -8,7 +10,7 @@ export const SEARCH_COMPLETE = 'SEARCH_COMPLETE';
  */
 export function searchComplete(searchResults) {
     const isError = !!searchResults.error;
-    const payload = isError ? new Error(searchResults.error) : searchResults;
+    const payload = isError ? new Error(searchResults.error.toString()) : searchResults;
     return {
         type: SEARCH_COMPLETE,
         payload,
@@ -21,10 +23,11 @@ export function searchComplete(searchResults) {
  * Automatically send searchComplete action on success/failure.
  */
 export function search(searchString, filters, dispatch) {
-    fetch(`/api/v1/search?s=${searchString}`)
+    const query = queryString.stringify({ s: searchString, ...filters });
+    fetch(`/api/v1/search?${query}`)
         .then(response => response.json())
         .then(data => dispatch(searchComplete(data)))
-        .catch(err => dispatch(searchComplete({ error: err.message })));
+        .catch(err => dispatch(searchComplete({ error: err.toString() })));
     return {
         type: SEARCH,
         payload: { searchString, filters },

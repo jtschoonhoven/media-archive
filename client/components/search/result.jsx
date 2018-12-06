@@ -9,6 +9,7 @@ class SearchResult extends React.Component {
         const title = this.props.media_name;
         const description = this.props.media_description;
         const thumbnailUrl = this.props.media_url_thumbnail;
+        const relevance = this.props.relevance;
 
         return (
             <div id="archive-search-result">
@@ -31,6 +32,7 @@ class SearchResult extends React.Component {
                             </Link>
                         </h3>
                         <p>{ description }</p>
+                        <p className="small">{ relevance }</p>
                     </div>
                 </div>
                 <hr />

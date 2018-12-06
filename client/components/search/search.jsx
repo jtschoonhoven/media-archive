@@ -3,6 +3,7 @@ import './style.scss';
 import PropTypes from 'prop-types';
 import React from 'react';
 import queryString from 'query-string';
+import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 import { withRouter } from 'react-router';
 
 import SearchResult from './result.jsx'; // eslint-disable-line no-unused-vars
@@ -14,24 +15,28 @@ class ArchiveSearch extends React.Component {
     constructor(props) {
         super(props);
         const query = queryString.parse(this.props.location.search);
-        const searchTerm = query.s || '';
-        this.state = { searchTerm };
+        const { s, ...filters } = query;
+        const searchTerm = s || '';
+        this.state = { searchTerm, filters };
+
+        // bind event handlers
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.handleNextPage = this.handleNextPage.bind(this);
+        this.handlePrevPage = this.handlePrevPage.bind(this);
     }
 
     componentDidMount() {
         const searchTerm = this.state.searchTerm;
+        const filters = this.state.filters;
         if (searchTerm) {
-            this.props.onSearchSubmit(searchTerm);
+            this.props.onSearchSubmit(searchTerm, filters);
         }
     }
 
     render() {
         const results = this.props.results || [];
-        const Results = results.map(
-            result => <SearchResult {...result} key={result.id} />,
-        );
+        const Results = results.map(result => <SearchResult {...result} key={result.id} />);
         return (
             <div id="archive-search">
                 {/* searchbar */}
@@ -41,7 +46,7 @@ class ArchiveSearch extends React.Component {
                         <input id={SEARCH_INPUT_ID} type="text" name="search" className="form-control form-control-lg" placeholder="Search" value={this.state.searchTerm} onChange={this.handleChange} />
                     </div>
                     <div className="form-group col-5 col-sm-3 col-lg-2">
-                        <button type="submit" className="btn btn-primary btn-lg" disabled={!this.state.searchTerm || this.props.isFetching}>Search</button>
+                        <button type="submit" className="btn btn-primary btn-lg" disabled={!this.state.searchTerm.trim() || this.props.isFetching}>Search</button>
                     </div>
                 </form>
                 {/* filters */}
@@ -67,8 +72,53 @@ class ArchiveSearch extends React.Component {
                 <div id="archive-search-results">
                     {Results}
                 </div>
+                {/* errors */}
+                <div id="archive-search-errors" className="alert alert-danger" role="alert" style={{ display: this.props.error ? 'block' : 'none' }}>
+                    {this.props.error && this.props.error.toString()}
+                </div>
+                {/* no results */}
+                {/* TODO
+                <div className="alert alert-secondary text-center" role="alert">
+                    <span className="text-muted">No results.</span>
+                </div>
+                */}
+                {/* pagination */}
+                <nav aria-label="pagination">
+                    <ul className="pagination justify-content-center">
+                        <li className="page-item">
+                            <button className="page-link btn btn-link btn-lg" onClick={this.handlePrevPage} disabled={!this.props.prevKey}>
+                                Previous
+                            </button>
+                        </li>
+                        <li className="page-item">
+                            <button className="page-link btn btn-link btn-lg" onClick={this.handleNextPage} disabled={!this.props.nextKey}>
+                                Next
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         );
+    }
+
+    search({ nextKey, prevKey }) {
+        const searchTerm = this.state.searchTerm;
+        const filters = Object.assign({}, this.state.filters || {});
+
+        delete filters.nextKey;
+        delete filters.prevKey;
+
+        if (nextKey) {
+            filters.nextKey = nextKey;
+        }
+        else if (prevKey) {
+            filters.prevKey = prevKey;
+        }
+        this.setState({ filters });
+
+        const query = queryString.stringify({ s: searchTerm, ...filters });
+        this.props.history.push({ search: `?${query}` });
+        this.props.onSearchSubmit(searchTerm, filters);
     }
 
     handleChange(event) {
@@ -79,10 +129,19 @@ class ArchiveSearch extends React.Component {
 
     handleSubmit(event) {
         event.preventDefault();
-        const searchTerm = this.state.searchTerm;
-        const query = queryString.stringify({ s: searchTerm });
-        this.props.history.push({ search: `?${query}` });
-        this.props.onSearchSubmit(searchTerm);
+        this.search({});
+    }
+
+    handleNextPage(event) {
+        event.preventDefault();
+        const nextKey = this.props.nextKey;
+        this.search({ nextKey });
+    }
+
+    handlePrevPage(event) {
+        event.preventDefault();
+        const prevKey = this.props.prevKey;
+        this.search({ prevKey });
     }
 }
 

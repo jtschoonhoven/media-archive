@@ -34,8 +34,16 @@ apiRouter.get('/user', (req, res) => {
  */
 apiRouter.get('/search', async (req, res) => {
     const { s, ...filters } = req.query;
-    const result = await searchService.query(s, filters);
+    let result;
+    try {
+        result = await searchService.query(s, filters);
+    }
+    catch (err) {
+        logger.error(err.stack);
+        result = { error: 'Server error.' };
+    }
     if (result.error) {
+        logger.error(`error on search API: ${result.error}`);
         return res.status(500).json(result);
     }
     return res.json(result);
