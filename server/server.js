@@ -29,10 +29,10 @@ const SESSION_CONFIG = {
 
 // bootstrap database with test data for development
 // FIXME: remove when ready
-// db.rebuild(true)
-//     .then(() => db.get('SELECT COUNT(1) FROM media'))
-//     .then(res => logger.info(`loaded ${res.count} records`))
-//     .catch(logger.error);
+db.rebuild({ force: true })
+    .then(() => db.get('SELECT COUNT(1) FROM media'))
+    .then(res => logger.info(`loaded ${res.count} records`))
+    .catch(logger.error);
 
 // init server
 const app = express();

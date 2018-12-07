@@ -71,7 +71,7 @@ class Database {
      * Apply a migration file by calling its "up" method.
      */
     async up(filename, { force }) {
-        logger.warn(`applying migration ${filename}`);
+        logger.warn(`applying migration ${settings.NODE_ENV !== 'development' && !force}`);
         if (settings.NODE_ENV !== 'development' && !force) {
             throw new Error('applying migrations forbidden outside development');
         }
@@ -80,7 +80,9 @@ class Database {
             logger.info(`applied migration ${filename} successfully`);
         }
         catch (err) {
-            logger.error(`failed to apply migration ${filename}: ${err.message}`);
+            logger.error(`\
+                failed to apply migration ${filename}: "${err.toString()}"\n${err.trace}\
+            `);
             throw err;
         }
     }
@@ -98,7 +100,9 @@ class Database {
             logger.info(`reverted migration ${filename} successfully`);
         }
         catch (err) {
-            logger.error(`failed to revert migration ${filename}: ${err.message}`);
+            logger.error(`\
+                failed to revert migration ${filename}: "${err.toString()}"\n${err.trace}\
+            `);
             throw err;
         }
     }
@@ -114,13 +118,13 @@ class Database {
         filenames.sort().reverse();
         for (const filename of filenames) { // eslint-disable-line no-restricted-syntax
             await this.down(filename, { force }) // eslint-disable-line no-await-in-loop
-                .catch(() => 'no-op');
+                .catch(logger.error);
         }
         // re-apply migrations in order
         filenames.reverse();
         for (const filename of filenames) { // eslint-disable-line no-restricted-syntax
             await this.up(filename, { force }) // eslint-disable-line no-await-in-loop
-                .catch(() => 'no-op');
+                .catch(logger.error);
         }
         logger.info('migrations complete');
     }
