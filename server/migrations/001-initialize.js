@@ -14,7 +14,7 @@ exports.up = async (db) => {
             series_index_id INTEGER, -- the order an item should appear in a series
 
             -- media info
-            media_name TEXT UNIQUE, -- ("Title") name of media
+            media_name TEXT, -- ("Title") name of media
             media_description TEXT, -- describes content of media
             media_authors TEXT, -- comma-separated list of authors, photographers, creators, etc
             media_notes TEXT, -- (AKA "Add. Notes" or "Notes (word by word, on back, post it notes, attached to paperwork)")
@@ -24,9 +24,10 @@ exports.up = async (db) => {
             media_type TEXT, -- normalized media types ('audio', 'video', 'image', 'document')
 
             -- media file info
-            media_file_extension TEXT, -- upper-case file extension, e.g. MP4, PDF, etc
             media_file_name TEXT, -- original name of uploaded file
-            media_file_path TEXT, -- e.g. "/board/meetings/november.txt" path to the uploaded media at time of upload
+            media_file_path TEXT UNIQUE, -- e.g. "/board/meetings/november.txt" path to the uploaded media at time of upload
+            media_file_path_array TEXT ARRAY, -- same as media_file_path but split on path delimeters
+            media_file_extension TEXT, -- upper-case file extension, e.g. MP4, PDF, etc
             media_file_size_bytes INTEGER, -- size of object on S3
 
             -- media source info
@@ -89,6 +90,7 @@ exports.up = async (db) => {
             media_file_extension TEXT,
             media_file_name TEXT,
             media_file_path TEXT,
+            media_file_path_array TEXT ARRAY,
             origin_location TEXT,
             origin_medium TEXT,
             origin_medium_notes TEXT
@@ -124,20 +126,22 @@ exports.up = async (db) => {
     await db.run(`
         CREATE FUNCTION ts_relevance_v0 (
             tsvector TSVECTOR,
-            query_lex TSQUERY,
-            query_pre TSQUERY
+            query_lex TSQUERY, -- "lex" matches word roots (more precise)
+            query_pre TSQUERY  -- "pre" mathes word prefixes (less precise)
         )
             RETURNS integer
         AS
         $BODY$
             SELECT (
-                ( TS_RANK(tsvector, query_lex) * 3
+                ( TS_RANK(tsvector, query_lex) * 3 -- multiplier is relative weight of "lex" match
                 + TS_RANK(tsvector, query_pre)) * 100 / 4
             )::integer
         $BODY$
         LANGUAGE sql
         IMMUTABLE;
     `);
+
+    await db.run('CREATE INDEX idx_media_type ON media (media_type);');
 
     await db.run(`
         CREATE INDEX idx_tsvector ON media
@@ -169,6 +173,7 @@ exports.up = async (db) => {
 
 exports.down = async (db) => {
     await db.run('DROP INDEX IF EXISTS idx_tsvector;');
+    await db.run('DROP INDEX IF EXISTS idx_media_type;');
     await db.run('DROP FUNCTION IF EXISTS ts_relevance_v0');
     await db.run('DROP FUNCTION IF EXISTS ts_vectorize_v0');
     await db.run('DROP TABLE IF EXISTS media;');

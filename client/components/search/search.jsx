@@ -156,6 +156,7 @@ class ArchiveSearch extends React.Component {
 
         const query = queryString.stringify({ s: searchTerm, ...filters });
         this.props.history.push({ search: `?${query}` });
+        this.props.onSearchReset();
         this.props.onSearchSubmit(searchTerm, filters);
         this.setState({ isSubmitted: true, isDirty: false, filters });
     }
