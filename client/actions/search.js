@@ -2,11 +2,15 @@ import queryString from 'query-string';
 
 export const SEARCH = 'SEARCH';
 export const SEARCH_COMPLETE = 'SEARCH_COMPLETE';
+export const SEARCH_RESET = 'SEARCH_RESET';
 
+/*
+ * Actions must be "standard flux actions".
+ * Refer to https://github.com/redux-utilities/flux-standard-action
+ */
 
 /*
  * Receive the JSON search results as JSON.
- * https://github.com/redux-utilities/flux-standard-action
  */
 export function searchComplete(searchResults) {
     const isError = !!searchResults.error;
@@ -32,4 +36,8 @@ export function search(searchString, filters, dispatch) {
         type: SEARCH,
         payload: { searchString, filters },
     };
+}
+
+export function searchReset() {
+    return { type: SEARCH_RESET };
 }

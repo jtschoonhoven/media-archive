@@ -1,4 +1,4 @@
-import { SEARCH, SEARCH_COMPLETE } from '../actions/search';
+import { SEARCH, SEARCH_COMPLETE, SEARCH_RESET } from '../actions/search';
 
 
 const INITIAL_STATE = {
@@ -24,6 +24,17 @@ export default function searchReducer(state = INITIAL_STATE, action) {
                 results: data.results || [],
                 nextKey: data.nextKey,
                 prevKey: data.prevKey,
+            };
+            return Object.assign({}, state, update);
+        }
+
+        case SEARCH_RESET: {
+            const update = {
+                results: [],
+                isFetching: false,
+                error: null,
+                nextKey: null,
+                prevKey: null,
             };
             return Object.assign({}, state, update);
         }

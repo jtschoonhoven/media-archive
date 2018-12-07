@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 
 import { ArchiveSearch } from '../components';
-import { search } from '../actions/search';
+import { search, searchReset } from '../actions/search';
 
 
 function mapStateToProps(state) {
@@ -12,6 +12,9 @@ function mapDispatchToProps(dispatch) {
     return {
         onSearchSubmit: (searchString, filters) => {
             dispatch(search(searchString, filters, dispatch));
+        },
+        onSearchReset: () => {
+            dispatch(searchReset());
         },
     };
 }

@@ -94,7 +94,8 @@ function sanitizeSearchString(searchString) {
  * For a good explanation of tsvector see
  * http://rachbelaid.com/postgres-full-text-search-is-good-enough
  */
-async function runQuery(searchString, limit, prevKey, nextKey) {
+async function runQuery(searchString, filters) {
+    const { limit, prevKey, nextKey, document, image, video, audio } = filters;
     const safeSearchString = sanitizeSearchString(searchString);
     const firstWordMatch = toAlphaNum(safeSearchString);
     const isPrecise = QUERY_LOGIC_CHARS.some(char => safeSearchString.includes(char));
@@ -104,6 +105,20 @@ async function runQuery(searchString, limit, prevKey, nextKey) {
     }
     if (nextKey && prevKey) {
         return { error: 'nextKey and prevKey query params are mutually exclusive' };
+    }
+
+    const typeFilters = [];
+    if (document) {
+        typeFilters.push('\'document\'');
+    }
+    if (image) {
+        typeFilters.push('\'image\'');
+    }
+    if (video) {
+        typeFilters.push('\'video\'');
+    }
+    if (audio) {
+        typeFilters.push('\'audio\'');
     }
 
     const query = `
@@ -141,6 +156,10 @@ async function runQuery(searchString, limit, prevKey, nextKey) {
             ` : '-- precise search enabled'
         }
         )
+        ${typeFilters.length ? `
+            AND media.media_type IN (${typeFilters.join(', ')})
+            ` : '-- type filters disabled'
+        }
         ${nextKey ? `
             -- pagination: get next page of results
             AND relevance <= ${nextKey.relevance}
@@ -157,11 +176,11 @@ async function runQuery(searchString, limit, prevKey, nextKey) {
              ORDER BY relevance DESC, media.id DESC
         ` : 'ORDER BY relevance ASC, media.id ASC'
         }
-        LIMIT ${limit + 1} -- fetch one extra row so we know if more rows are available
+        LIMIT ${limit + 1} -- fetch one extra row to detect extra pages
     ;`;
     return db.all(query)
         .catch((err) => {
-            logger.error(err.stack);
+            logger.error(`${err.stack}\n${query}`);
             return {
                 error: `\
                     Something went wrong with your search.
@@ -174,12 +193,12 @@ async function runQuery(searchString, limit, prevKey, nextKey) {
  * Execute search query and return results with pagination data.
  */
 module.exports.query = async (searchString, filters) => {
-    const limit = filters.limit || DEFAULT_LIMIT;
-    const nextKey = deserializePageKey(filters.nextKey);
-    const prevKey = deserializePageKey(filters.prevKey);
+    filters.nextKey = deserializePageKey(filters.nextKey);
+    filters.prevKey = deserializePageKey(filters.prevKey);
+    filters.limit = filters.limit || DEFAULT_LIMIT;
 
     // execute query
-    const rows = await runQuery(searchString, limit, prevKey, nextKey);
+    const rows = await runQuery(searchString, filters);
 
     // check if "user-friendly" error was raised
     if (rows.error) {
@@ -188,6 +207,7 @@ module.exports.query = async (searchString, filters) => {
 
     let newNextKey;
     let newPrevKey;
+    const limit = filters.limit;
 
     // if there are more rows than requested, return a key to access the next page
     if (rows.length > limit) {
@@ -195,12 +215,12 @@ module.exports.query = async (searchString, filters) => {
         newNextKey = serializePageKey(rows[limit - 1].id, rows[limit - 1].relevance);
     }
     // if a page key was used on THIS query, send a key to return to the previous page
-    if (rows.length && (nextKey || prevKey)) {
+    if (rows.length && (filters.nextKey || filters.prevKey)) {
         newPrevKey = serializePageKey(rows[0].id, rows[0].relevance);
     }
 
     // if we were searching backwards, flip values around to maintain forward order
-    if (prevKey) {
+    if (filters.prevKey) {
         const _newNextKey = newNextKey;
         newNextKey = newPrevKey;
         newPrevKey = _newNextKey;
@@ -211,5 +231,6 @@ module.exports.query = async (searchString, filters) => {
         nextKey: newNextKey,
         prevKey: newPrevKey,
         results: rows,
+        success: true,
     };
 };
