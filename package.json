@@ -1,6 +1,6 @@
 {
     "name": "media-archive",
-    "version": "0.0.8a",
+    "version": "0.0.9a",
     "description": "Web app for storing and indexing digitized documents, photos, audio, and video.",
     "private": true,
     "author": "Jonathan Schoonhoven",

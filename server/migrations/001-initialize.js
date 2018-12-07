@@ -147,6 +147,7 @@ exports.up = async (db) => {
             END IF;
             NEW.media_file_path_array = STRING_TO_ARRAY(
                 REPLACE(NEW.media_file_path, '\\', '/'),
+                '/',
                 NEW.media_file_name
             );
             RETURN NEW;
