@@ -1,4 +1,7 @@
 exports.up = async (db) => {
+    /*
+     * MEDIA: the primary directory of all media stored in the archive.
+     */
     await db.run(`
         CREATE TABLE media (
             id SERIAL PRIMARY KEY,
@@ -26,9 +29,9 @@ exports.up = async (db) => {
             -- media file info
             media_file_name TEXT, -- original name of uploaded file
             media_file_path TEXT UNIQUE, -- e.g. "/board/meetings/november.txt" path to the uploaded media at time of upload
-            media_file_path_array TEXT ARRAY, -- same as media_file_path but split on path delimeters
+            media_file_path_array TEXT[], -- same as media_file_path but split on path delimeters
             media_file_extension TEXT, -- upper-case file extension, e.g. MP4, PDF, etc
-            media_file_size_bytes INTEGER, -- size of object on S3
+            media_file_size_bytes INTEGER, -- size of object on S3t s
 
             -- media source info
             media_url TEXT, -- path to file location on S3
@@ -68,61 +71,16 @@ exports.up = async (db) => {
             -- metadata
             created_at TIMESTAMP,
             updated_at TIMESTAMP,
-            deleted_at TIMESTAMP
+            deleted_at TIMESTAMP,
+
+            -- search
+            media_tsvector TSVECTOR
         );
     `);
 
-    await db.run(`
-        CREATE FUNCTION ts_vectorize_v0 (
-            media_name TEXT,
-            media_tags TEXT,
-            media_description TEXT,
-            media_authors TEXT,
-            audio_lecturers TEXT,
-            image_photographer TEXT,
-            media_notes TEXT,
-            media_transcript TEXT,
-            box_name TEXT,
-            folder_name TEXT,
-            series_name TEXT,
-            series_description TEXT,
-            media_type TEXT,
-            media_file_extension TEXT,
-            media_file_name TEXT,
-            media_file_path TEXT,
-            media_file_path_array TEXT ARRAY,
-            origin_location TEXT,
-            origin_medium TEXT,
-            origin_medium_notes TEXT
-        )
-            RETURNS tsvector
-        AS
-        $BODY$
-            SELECT
-                   SETWEIGHT(TO_TSVECTOR('english', COALESCE($1,  '')), 'A')
-                || SETWEIGHT(TO_TSVECTOR('simple',  COALESCE($2,  '')), 'A')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($3,  '')), 'B')
-                || SETWEIGHT(TO_TSVECTOR('simple',  COALESCE($4,  '')), 'B')
-                || SETWEIGHT(TO_TSVECTOR('simple',  COALESCE($5,  '')), 'B')
-                || SETWEIGHT(TO_TSVECTOR('simple',  COALESCE($6,  '')), 'B')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($7,  '')), 'C')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($8,  '')), 'C')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($9,  '')), 'D')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($10, '')), 'D')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($11, '')), 'D')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($12, '')), 'D')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($13, '')), 'D')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($14, '')), 'D')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($15, '')), 'D')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($16, '')), 'D')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($17, '')), 'D')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($18, '')), 'D')
-                || SETWEIGHT(TO_TSVECTOR('english', COALESCE($19, '')), 'D');
-        $BODY$
-        LANGUAGE sql
-        IMMUTABLE;
-    `);
-
+    /*
+     * TS_RELEVANCE: generates relavance scores for media against the given tsqueries.
+     */
     await db.run(`
         CREATE FUNCTION ts_relevance_v0 (
             tsvector TSVECTOR,
@@ -141,40 +99,97 @@ exports.up = async (db) => {
         IMMUTABLE;
     `);
 
+    /*
+     * MEDIA_TO_TSVECTOR: creates a search-optimized tsvector from text columns on the media table.
+     */
+    await db.run(`
+        CREATE FUNCTION media_to_tsvector_v0 ()
+        RETURNS trigger AS $media_tsvector_trigger$
+        BEGIN
+            NEW.media_tsvector = (
+                   SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.media_name,            '')), 'A')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.media_tags,            '')), 'A')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.media_description,     '')), 'B')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.media_authors,         '')), 'B')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.media_file_path,       '')), 'B')
+                || SETWEIGHT(TO_TSVECTOR('english', ARRAY_TO_STRING(NEW.media_file_path_array, ' ', '')), 'B')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.audio_lecturers,       '')), 'B')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.image_photographer,    '')), 'B')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.media_notes,           '')), 'B')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.media_transcript,      '')), 'B')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.box_name,              '')), 'C')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.folder_name,           '')), 'C')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.series_name,           '')), 'C')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.series_description,    '')), 'C')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.media_file_extension,  '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.media_file_name,       '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.origin_location,       '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.origin_medium,         '')), 'D')
+                || SETWEIGHT(TO_TSVECTOR('english', COALESCE(NEW.origin_medium_notes,   '')), 'D')
+            );
+            RETURN NEW;
+        END;
+        $media_tsvector_trigger$ LANGUAGE plpgsql;
+    `);
+
+    /*
+     * MEDIA_FILE_PATH_TO_ARRAY: automatically generates an array from media_file_path.
+     */
+    await db.run(`
+        CREATE FUNCTION media_file_path_to_array_v0 ()
+        RETURNS trigger AS $media_file_path_array_trigger$
+        BEGIN
+            IF NEW.media_file_path IS NULL THEN
+                RAISE EXCEPTION 'media.media_file_path cannot be null';
+            END IF;
+            IF NEW.media_file_name IS NULL THEN
+                RAISE EXCEPTION 'media.media_file_name cannot be null';
+            END IF;
+            NEW.media_file_path_array = STRING_TO_ARRAY(
+                REPLACE(NEW.media_file_path, '\\', '/'),
+                NEW.media_file_name
+            );
+            RETURN NEW;
+        END;
+        $media_file_path_array_trigger$ LANGUAGE plpgsql;
+    `);
+
+    /*
+     * MEDIA_FILE_PATH_TO_ARRAY_TRIGGER: automatically generates an array from media_file_path.
+     */
+    await db.run(`
+        CREATE TRIGGER trigger_01_media_file_path_to_array
+        BEFORE INSERT OR UPDATE ON media
+        FOR EACH ROW EXECUTE PROCEDURE media_file_path_to_array_v0();
+    `);
+
+    /*
+     * MEDIA_TO_TSVECTOR_TRIGGER: automatically create a search-optimized tsvector.
+     */
+    await db.run(`
+        CREATE TRIGGER trigger_02_media_to_tsvector
+        BEFORE INSERT OR UPDATE ON media
+        FOR EACH ROW EXECUTE PROCEDURE media_to_tsvector_v0();
+    `);
+
+    /*
+     * IDX_MEDIA_TYPE: optimize search on media.media_type.
+     */
     await db.run('CREATE INDEX idx_media_type ON media (media_type);');
 
-    await db.run(`
-        CREATE INDEX idx_tsvector ON media
-        USING GIN(
-            TS_VECTORIZE_V0(
-                media_name,
-                media_tags,
-                media_description,
-                media_authors,
-                audio_lecturers,
-                image_photographer,
-                media_notes,
-                media_transcript,
-                box_name,
-                folder_name,
-                series_name,
-                series_description,
-                media_type,
-                media_file_extension,
-                media_file_name,
-                media_file_path,
-                origin_location,
-                origin_medium,
-                origin_medium_notes
-            )
-        );
-    `);
+    /*
+     * IDX_TSVECTOR: optimized search on lexemes.
+     */
+    await db.run('CREATE INDEX idx_tsvector ON media USING GIN(media_tsvector);');
 };
 
 exports.down = async (db) => {
     await db.run('DROP INDEX IF EXISTS idx_tsvector;');
     await db.run('DROP INDEX IF EXISTS idx_media_type;');
+    await db.run('DROP TRIGGER IF EXISTS trigger_01_media_file_path_to_array ON media CASCADE');
+    await db.run('DROP TRIGGER IF EXISTS trigger_02_media_to_tsvector ON media CASCADE');
+    await db.run('DROP FUNCTION IF EXISTS media_file_path_to_array_v0');
+    await db.run('DROP FUNCTION IF EXISTS media_to_tsvector_v0');
     await db.run('DROP FUNCTION IF EXISTS ts_relevance_v0');
-    await db.run('DROP FUNCTION IF EXISTS ts_vectorize_v0');
     await db.run('DROP TABLE IF EXISTS media;');
 };

@@ -71,7 +71,7 @@ class Database {
      * Apply a migration file by calling its "up" method.
      */
     async up(filename, { force }) {
-        logger.warn(`applying migration ${settings.NODE_ENV !== 'development' && !force}`);
+        logger.warn(`applying migration ${filename}`);
         if (settings.NODE_ENV !== 'development' && !force) {
             throw new Error('applying migrations forbidden outside development');
         }

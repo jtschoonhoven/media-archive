@@ -127,32 +127,11 @@ async function runQuery(searchString, filters) {
             media,
             TO_TSQUERY('english', '${safeSearchString}')    AS query_lex,
             TO_TSQUERY('simple',  '${firstWordMatch[0]}:*') AS query_pre,
-            TS_VECTORIZE_V0(
-                media.media_name,
-                media.media_tags,
-                media.media_description,
-                media.media_authors,
-                media.audio_lecturers,
-                media.image_photographer,
-                media.media_notes,
-                media.media_transcript,
-                media.box_name,
-                media.folder_name,
-                media.series_name,
-                media.series_description,
-                media.media_type,
-                media.media_file_extension,
-                media.media_file_name,
-                media.media_file_path,
-                media.origin_location,
-                media.origin_medium,
-                media.origin_medium_notes
-            ) AS tsvector,
-            TS_RELEVANCE_V0(tsvector, query_lex, query_pre) AS relevance
+            TS_RELEVANCE_V0(media_tsvector, query_lex, query_pre) AS relevance
         WHERE (
-                tsvector @@ query_lex -- matches word roots in parsed document
+                media_tsvector @@ query_lex -- matches word roots in parsed document
         ${!isPrecise ? `
-            OR  tsvector @@ query_pre -- matches any prefix in parsed document
+            OR  media_tsvector @@ query_pre -- matches any prefix in parsed document
             ` : '-- precise search enabled'
         }
         )
