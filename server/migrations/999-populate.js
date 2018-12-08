@@ -126,7 +126,7 @@ exports.up = async (db) => {
             'image', -- media_type
             'JPG', -- media_file_extension
             'new_research.png', -- media_file_name
-            'uploads/new_research.png', -- media_file_path
+            'clippings/new_research.png', -- media_file_path
             256, -- media_file_size_bytes
             'https://i.imgur.com/sDiIEYU.jpg', -- media_url
             'https://i.imgur.com/sDiIEYU.jpg', -- media_url_thumbnail
@@ -178,7 +178,7 @@ exports.up = async (db) => {
             'document', -- media_type
             'PDF', -- media_file_extension
             'safety.pdf', -- media_file_name
-            'uploads/safety.pdf', -- media_file_path
+            'clippings/safety.pdf', -- media_file_path
             256, -- media_file_size_bytes
             'https://i.imgur.com/xYbJwhM.jpg', -- media_url
             'https://i.imgur.com/xYbJwhM.jpg', -- media_url_thumbnail
@@ -230,7 +230,7 @@ exports.up = async (db) => {
             'document', -- media_type
             'PDF', -- media_file_extension
             'shame.pdf', -- media_file_name
-            'uploads/shame.pdf', -- media_file_path
+            'clippings/shame.pdf', -- media_file_path
             256, -- media_file_size_bytes
             'https://i.imgur.com/UecRQCU.png', -- media_url
             'https://i.imgur.com/UecRQCU.png', -- media_url_thumbnail
@@ -282,7 +282,7 @@ exports.up = async (db) => {
             'document', -- media_type
             'PDF', -- media_file_extension
             'care.pdf', -- media_file_name
-            'uploads/care.pdf', -- media_file_path
+            'clippings/care.pdf', -- media_file_path
             256, -- media_file_size_bytes
             'https://i.imgur.com/fqRBCko.jpg', -- media_url
             'https://i.imgur.com/fqRBCko.jpg', -- media_url_thumbnail

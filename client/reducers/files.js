@@ -3,8 +3,8 @@ import { FILES_LOAD, FILES_LOAD_COMPLETE } from '../actions/files';
 
 const INITIAL_STATE = {
     isFetching: false,
-    files: [],
-    directories: [],
+    results: [],
+    path: undefined,
     error: null,
 };
 
@@ -22,8 +22,7 @@ export default function filesReducer(state = INITIAL_STATE, action) {
             const update = {
                 isFetching: false,
                 error: action.error ? data.toString() : null,
-                files: data.files || [],
-                directories: data.directories || [],
+                results: data.results || [],
             };
             return Object.assign({}, state, update);
         }

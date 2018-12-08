@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 
 import { ArchiveUpload } from '../components';
 import { load } from '../actions/files';
@@ -17,6 +18,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 
-const ArchiveUploadContainer = connect(mapStateToProps, mapDispatchToProps)(ArchiveUpload);
+const ArchiveUploadContainer = withRouter(
+    connect(mapStateToProps, mapDispatchToProps)(ArchiveUpload),
+);
 
 export default ArchiveUploadContainer;

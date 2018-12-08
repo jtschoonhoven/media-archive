@@ -2,11 +2,11 @@ import './style.scss';
 
 import React from 'react';
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
-import { withRouter } from 'react-router';
 
 import Breadcrumb from './breadcrumb.jsx'; // eslint-disable-line no-unused-vars
-import FileUpload from './file.jsx'; // eslint-disable-line no-unused-vars
-import Result from './result.jsx';
+import FileUpload from './file-old.jsx'; // eslint-disable-line no-unused-vars
+import File from './file.jsx'; // eslint-disable-line no-unused-vars
+import Directory from './directory.jsx'; // eslint-disable-line no-unused-vars
 import { UPLOAD_STATUS } from '../../constants';
 
 
@@ -40,9 +40,17 @@ const EXAMPLE_DATA = [ // eslint-disable-line no-unused-vars
 
 
 class ArchiveUpload extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {};
+    }
+
     componentDidMount() {
-        const path = this.props.location.pathname.replace('/files', '');
-        this.props.onLoad(path);
+        this.loadDir();
+    }
+
+    componentDidUpdate() {
+        this.loadDir();
     }
 
     render() {
@@ -50,10 +58,12 @@ class ArchiveUpload extends React.Component {
         //     (fileInfo, index) => <FileUpload {...fileInfo} key={index} />,
         // );
         const props = this.props;
-        const pathArray = this.props.location.pathname.slice(1).split('/');
+        const currentUrl = props.location.pathname;
+        const pathArray = currentUrl.slice(1).split('/');
         const BreadCrumbs = pathArray.map((dirname, idx) => Breadcrumb(pathArray, dirname, idx));
-        const Files = this.props.files.map((fileObj, idx) => Result(idx, fileObj));
-        const Directories = this.props.directories.map((fileObj, idx) => Result(idx, fileObj));
+        const Files = props.results.map((fileObj) => {
+            return fileObj.type === 'file' ? File(fileObj) : Directory(fileObj, currentUrl);
+        });
         return (
             <div id="archive-upload">
                 {/* breadcrumbs */}
@@ -74,7 +84,6 @@ class ArchiveUpload extends React.Component {
                 {/* browse */}
                 <div id="archive-upload-browse">
                     <hr />
-                    { Directories }
                     { Files }
                 </div>
                 {/* uploads */}
@@ -86,11 +95,19 @@ class ArchiveUpload extends React.Component {
         );
     }
 
+    loadDir() {
+        const currentPath = this.props.location.pathname.replace('/files', '');
+        if (currentPath !== this.state.currentPath) {
+            this.setState({ currentPath });
+            this.props.onLoad(currentPath);
+        }
+    }
+
     handleClick(e) {
         e.preventDefault();
     }
 }
 
 
-export default withRouter(ArchiveUpload);
+export default ArchiveUpload;
 export { UPLOAD_STATUS };

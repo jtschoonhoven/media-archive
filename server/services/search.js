@@ -1,7 +1,7 @@
 const db = require('../services/database');
 const logger = require('../services/logger');
 
-const REGEX_WHITELIST = new RegExp('[^0-9a-zA-Z _(&|!)-]/g');
+const REGEX_WHITELIST = new RegExp('[^0-9a-zA-Z _(&|!)-]', 'g');
 const REGEX_ALPHA_NUM = new RegExp('[0-9a-zA-Z]+');
 
 const QUERY_LOGIC_CHARS = ['!', '&', '|', '(', ')'];

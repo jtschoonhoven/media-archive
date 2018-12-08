@@ -8,9 +8,21 @@ exports.up = async (db) => {
      * IDX_TSVECTOR: optimized search on lexemes.
      */
     await db.run('CREATE INDEX idx_tsvector ON media USING GIN(media_tsvector);');
+
+    /*
+     * IDX_MEDIA_FILE_PATH_ARRAY: to support searching the filesystem.
+     */
+    await db.run('CREATE INDEX idx_media_file_path_array on media USING GIN (media_file_path_array);');
+
+    /*
+     * IDX_MEDIA_FILE_PATH_ARRAY_FIRST: the first non-root dir in the filesystem.
+     */
+    await db.run('CREATE INDEX idx_media_file_path_array_first on media ((media_file_path_array[1]));');
 };
 
 exports.down = async (db) => {
+    await db.run('DROP INDEX IF EXISTS idx_media_file_path_array_first;');
+    await db.run('DROP INDEX IF EXISTS idx_media_file_path_array;');
     await db.run('DROP INDEX IF EXISTS idx_tsvector;');
     await db.run('DROP INDEX IF EXISTS idx_media_type;');
 };

@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 
 import { ArchiveSearch } from '../components';
 import { search, searchReset } from '../actions/search';
@@ -20,6 +21,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 
-const ArchiveSearchContainer = connect(mapStateToProps, mapDispatchToProps)(ArchiveSearch);
+const ArchiveSearchContainer = withRouter(
+    connect(mapStateToProps, mapDispatchToProps)(ArchiveSearch),
+);
 
 export default ArchiveSearchContainer;

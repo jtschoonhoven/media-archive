@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import queryString from 'query-string';
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
-import { withRouter } from 'react-router';
 
 import SearchResult from './result.jsx'; // eslint-disable-line no-unused-vars
 
@@ -213,4 +212,4 @@ ArchiveSearch.propTypes = {
 };
 
 
-export default withRouter(ArchiveSearch);
+export default ArchiveSearch;
