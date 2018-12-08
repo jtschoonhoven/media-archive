@@ -34,7 +34,7 @@ class ArchiveApp extends React.Component {
                         <Switch>
                             <RestrictedRoute path="/" exact component={ArchiveSearchContainer} store={this.store} />
                             <RestrictedRoute path="/detail/:id" component={ArchiveDetailContainer} store={this.store} />
-                            <RestrictedRoute path="/upload" component={ArchiveUploadContainer} store={this.store} />
+                            <RestrictedRoute path="/files" component={ArchiveUploadContainer} store={this.store} />
                             <Route path="/login" component={ArchiveLoginContainer} />
                             <Route path="/privacy" component={ArchivePrivacyContainer} />
                             <Route component={ArchiveMissingContainer} />

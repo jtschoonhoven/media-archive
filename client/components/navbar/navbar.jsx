@@ -28,7 +28,7 @@ class ArchiveNavbar extends React.Component {
                     </div>
                     {/* upload */}
                     <div className="btn-group float-right archive-btn-nav d-none d-sm-block">
-                        <Link to="/upload" className="btn btn-outline-dark">Upload</Link>
+                        <Link to="/files" className="btn btn-outline-dark">Explore</Link>
                     </div>
                 </span>
             );

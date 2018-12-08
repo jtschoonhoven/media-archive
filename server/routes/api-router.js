@@ -1,6 +1,7 @@
 const express = require('express');
 
 const logger = require('../services/logger');
+const filesService = require('../services/files');
 const searchService = require('../services/search');
 
 
@@ -44,6 +45,25 @@ apiRouter.get('/search', async (req, res) => {
     }
     if (result.error) {
         logger.error(`error on search API: ${result.error}`);
+        return res.status(500).json(result);
+    }
+    return res.json(result);
+});
+
+/*
+ * Query the database for a list of files and directories at a given path.
+ */
+apiRouter.get('/files/:path(*)', async (req, res) => {
+    let result;
+    try {
+        result = await filesService.load(req.params.path);
+    }
+    catch (err) {
+        logger.error(err.stack);
+        result = { error: 'Server error.' };
+    }
+    if (result.error) {
+        logger.error(`error on files API: ${result.error}`);
         return res.status(500).json(result);
     }
     return res.json(result);
