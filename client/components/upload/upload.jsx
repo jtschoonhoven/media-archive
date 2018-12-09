@@ -69,7 +69,7 @@ class ArchiveUpload extends React.Component {
                 {/* breadcrumbs */}
                 <nav id="archive-upload-breadcrumbs" aria-label="breadcrumb">
                     <ol className="breadcrumb">
-                        <strong>Path:</strong> &nbsp; / &nbsp; { BreadCrumbs }
+                        <strong>Archive</strong> &nbsp; / &nbsp; { BreadCrumbs }
                     </ol>
                 </nav>
                 {/* errors */}
@@ -78,8 +78,10 @@ class ArchiveUpload extends React.Component {
                 </div>
                 {/* uploader */}
                 <div className="custom-file">
-                    <input type="file" className="custom-file-input" id="archive-upload-input" multiple />
-                    <label className="custom-file-label" htmlFor="archive-upload-input">Add files</label>
+                    <input id="archive-upload-input" type="file" className="custom-file-input" onChange={this.handleUploadSelect} multiple />
+                    <label className="custom-file-label" htmlFor="archive-upload-input">
+                        Upload
+                    </label>
                 </div>
                 {/* browse */}
                 <div id="archive-upload-browse">
@@ -87,10 +89,12 @@ class ArchiveUpload extends React.Component {
                     { Files }
                 </div>
                 {/* uploads */}
+                {/*
                 <div id="archive-upload-files">
-                    { /* <hr /> */ }
-                    { /* fileUploads */ }
+                    <hr />
+                    {fileUploads}
                 </div>
+                */}
             </div>
         );
     }
@@ -103,8 +107,9 @@ class ArchiveUpload extends React.Component {
         }
     }
 
-    handleClick(e) {
-        e.preventDefault();
+    handleUploadSelect(event) {
+        event.preventDefault();
+        console.log(event.target.files);
     }
 }
 

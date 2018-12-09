@@ -43,6 +43,7 @@ app.set('views', path.resolve(__dirname, 'templates'));
 app.set('view engine', 'ejs');
 app.use(session(SESSION_CONFIG));
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(authService.envConfig);
 
 // config passport
 passport.use(authService.googleStrategy);

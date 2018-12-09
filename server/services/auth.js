@@ -1,19 +1,35 @@
 const crypto = require('crypto');
-const config = require('config');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
+const logger = require('./logger');
+const settings = require('../settings');
 
 const OAUTH2_CONFIG = {
-    clientID: config.get('OAUTH2_CLIENT_ID'),
-    clientSecret: config.get('OAUTH2_CLIENT_SECRET'),
-    callbackURL: config.get('OAUTH2_CALLBACK'),
+    clientID: settings.OAUTH2_CLIENT_ID,
+    clientSecret: settings.OAUTH2_CLIENT_SECRET,
+    callbackURL: settings.OAUTH2_CALLBACK,
     accessType: 'offline',
+};
+
+/*
+ * Middleware to conditionally apply settings depending on the environment.
+ */
+module.exports.envConfig = (req, res, next) => {
+    if (settings.NODE_ENV === 'development') {
+        logger.warn('using development user');
+        req.user = { isLoggedIn: true, email: 'fake@leakeyfoundation.org' };
+    }
+    next();
 };
 
 /*
  * Simple middleware to redirect to login page is user is not authorized.
  */
 module.exports.requireLogin = (req, res, next) => {
+    if (settings.NODE_ENV === 'development') {
+        logger.warn('bypassing login in development');
+        return next();
+    }
     // continue if authorized
     if (req.user) {
         return next();
