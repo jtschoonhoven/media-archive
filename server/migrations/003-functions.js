@@ -1,5 +1,31 @@
 exports.up = async (db) => {
     /*
+     * CREATED_AT: sets `created_at` to the current timestamp.
+     */
+    await db.run(`
+        CREATE FUNCTION created_at_v0 ()
+        RETURNS TRIGGER AS $created_at_trigger$
+        BEGIN
+            NEW.created_at = NOW();
+            RETURN NEW;
+        END;
+        $created_at_trigger$ LANGUAGE plpgsql;
+    `);
+
+    /*
+     * UPDATED_AT: sets `created_at` to the current timestamp.
+     */
+    await db.run(`
+        CREATE FUNCTION updated_at_v0 ()
+        RETURNS TRIGGER AS $updated_at_trigger$
+        BEGIN
+            NEW.updated_at = NOW();
+            RETURN NEW;
+        END;
+        $updated_at_trigger$ LANGUAGE plpgsql;
+    `);
+
+    /*
      * TS_RELEVANCE: generates relavance scores for media against the given tsqueries.
      */
     await db.run(`
@@ -8,7 +34,7 @@ exports.up = async (db) => {
             query_lex TSQUERY, -- "lex" matches word roots (more precise)
             query_pre TSQUERY  -- "pre" mathes word prefixes (less precise)
         )
-            RETURNS integer
+        RETURNS integer
         AS
         $BODY$
             SELECT (
@@ -78,4 +104,6 @@ exports.down = async (db) => {
     await db.run('DROP FUNCTION IF EXISTS media_file_path_to_array_v0');
     await db.run('DROP FUNCTION IF EXISTS media_to_tsvector_v0');
     await db.run('DROP FUNCTION IF EXISTS ts_relevance_v0');
+    await db.run('DROP FUNCTION IF EXISTS updated_at_v0');
+    await db.run('DROP FUNCTION IF EXISTS created_at_v0');
 };

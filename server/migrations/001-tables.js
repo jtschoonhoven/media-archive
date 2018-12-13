@@ -54,20 +54,6 @@ exports.up = async (db) => {
             legal_is_confidential BOOLEAN, -- (AKA "Confidential (Board Meetings, Phone Calls, Specified Oral History Interviews)")
             legal_can_license BOOLEAN, -- (AKA "Licensing Rights (Y or N or ?)")
 
-            -- workflow
-            workflow_batch_date TIMESTAMP, -- time group of files was uploaded
-            workflow_error TEXT,
-            workflow_log TEXT,
-            workflow_status TEXT, -- enum of ('upload_pending', 'upload_started', 'upload_success', 'upload_failure', 'worker_pending', 'worker_started', 'worker_success', 'worker_failure')
-
-            -- workflow timers
-            upload_started_at TIMESTAMP,
-            upload_success_at TIMESTAMP,
-            upload_failure_at TIMESTAMP,
-            processing_started_at TIMESTAMP,
-            processing_success_at TIMESTAMP,
-            processing_failure_at TIMESTAMP,
-
             -- metadata
             created_at TIMESTAMP,
             updated_at TIMESTAMP,
@@ -77,8 +63,16 @@ exports.up = async (db) => {
             media_tsvector TSVECTOR
         );
     `);
+
+    /*
+     * MEDIA_UPLOADS_PENDING: clone of MEDIA, stores files with pending uploads that might fail.
+     */
+    await db.run(`
+        CREATE TABLE media_uploads_pending (INHERITS media);
+    `);
 };
 
 exports.down = async (db) => {
+    await db.run('DROP TABLE IF EXISTS media_uploads_pending');
     await db.run('DROP TABLE IF EXISTS media;');
 };

@@ -9,6 +9,14 @@ import File from './file.jsx'; // eslint-disable-line no-unused-vars
 import Directory from './directory.jsx'; // eslint-disable-line no-unused-vars
 import { UPLOAD_STATUS } from '../../constants';
 
+const VALID_EXTENSIONS = [
+    '.PDF',
+    '.DOC',
+    '.DOCX',
+    '.TIFF',
+    '.JPG',
+    '.PNG',
+].join(',');
 
 const EXAMPLE_DATA = [ // eslint-disable-line no-unused-vars
     // {
@@ -43,6 +51,7 @@ class ArchiveUpload extends React.Component {
     constructor(props) {
         super(props);
         this.state = {};
+        this.handleUploadSelect = this.handleUploadSelect.bind(this);
     }
 
     componentDidMount() {
@@ -78,7 +87,7 @@ class ArchiveUpload extends React.Component {
                 </div>
                 {/* uploader */}
                 <div className="custom-file">
-                    <input id="archive-upload-input" type="file" className="custom-file-input" onChange={this.handleUploadSelect} multiple />
+                    <input id="archive-upload-input" type="file" className="custom-file-input" onChange={this.handleUploadSelect} accept={VALID_EXTENSIONS} multiple />
                     <label className="custom-file-label" htmlFor="archive-upload-input">
                         Upload
                     </label>
@@ -100,16 +109,25 @@ class ArchiveUpload extends React.Component {
     }
 
     loadDir() {
-        const currentPath = this.props.location.pathname.replace('/files', '');
+        const currentPath = this.getFilePath();
         if (currentPath !== this.state.currentPath) {
             this.setState({ currentPath });
             this.props.onLoad(currentPath);
         }
     }
 
+    getFilePath() {
+        return this.props.location.pathname.replace('/files', '');
+    }
+
     handleUploadSelect(event) {
         event.preventDefault();
-        console.log(event.target.files);
+        const path = this.getFilePath();
+        const fileListObj = event.target.files || [];
+        const filesList = Object.values(fileListObj).map((file) => {
+            return { name: file.name, sizeInBytes: file.size };
+        });
+        this.props.onUpload(path, filesList);
     }
 }
 

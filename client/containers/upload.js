@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 
 import { ArchiveUpload } from '../components';
-import { load } from '../actions/files';
+import { load, upload } from '../actions/files';
 
 
 function mapStateToProps(state) {
@@ -13,6 +13,9 @@ function mapDispatchToProps(dispatch) {
     return {
         onLoad: (path) => {
             dispatch(load(path, dispatch));
+        },
+        onUpload: (path, filesList) => {
+            dispatch(upload(path, filesList, dispatch));
         },
     };
 }

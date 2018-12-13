@@ -18,9 +18,15 @@ exports.up = async (db) => {
      * IDX_MEDIA_FILE_PATH_ARRAY_FIRST: the first non-root dir in the filesystem.
      */
     await db.run('CREATE INDEX idx_media_file_path_array_first on media ((media_file_path_array[1]));');
+
+    /*
+     * IDX_MEDIA_FILE_PATH_ARRAY_SECOND: the second-level dir (or filename) in the filesystem.
+     */
+    await db.run('CREATE INDEX idx_media_file_path_array_second on media ((media_file_path_array[2]));');
 };
 
 exports.down = async (db) => {
+    await db.run('DROP INDEX IF EXISTS idx_media_file_path_array_second;');
     await db.run('DROP INDEX IF EXISTS idx_media_file_path_array_first;');
     await db.run('DROP INDEX IF EXISTS idx_media_file_path_array;');
     await db.run('DROP INDEX IF EXISTS idx_tsvector;');
