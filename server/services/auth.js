@@ -16,7 +16,6 @@ const OAUTH2_CONFIG = {
  */
 module.exports.envConfig = (req, res, next) => {
     if (settings.NODE_ENV === 'development') {
-        logger.warn('using development user');
         req.user = { isLoggedIn: true, email: 'fake@leakeyfoundation.org' };
     }
     next();

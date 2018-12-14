@@ -129,24 +129,31 @@ const db = new Database();
 class Transaction {
     constructor() {
         this.queries = []; // stores a promise for each active/completed query
-        this.client = db.pool.connect();
-        this._begin();
+        this.clientPromise = Promise.resolve()
+            .then(() => {
+                return db.pool.connect();
+            })
+            .then((client) => {
+                this._begin(client);
+                return client;
+            })
+            .then(client => client);
     }
 
     /*
      * Open a transaction and return the client instance.
      * This is called in the constructor and should not be used elsewhere.
      */
-    async _begin() {
+    async _begin(client) {
         try {
-            await this.client;
-            const query = this.client.query('BEGIN;');
+            const query = client.query('BEGIN;');
             this.queries.push(query);
+            return client;
         }
         catch (err) {
             logger.error(`failed to open transaction: ${err.toString()}`);
-            if (this.client) {
-                this.client.release();
+            if (client) {
+                client.release();
             }
             throw err;
         }
@@ -156,9 +163,9 @@ class Transaction {
      * Run a query within this transaction.
      */
     async add(sql, rollbackOnFailure = true) {
-        await this.client;
         try {
-            const query = this.client.query(sql);
+            const client = await this.clientPromise;
+            const query = client.query(sql);
             this.queries.push(query);
             return this.client;
         }
@@ -176,18 +183,17 @@ class Transaction {
      */
     async rollback() {
         logger.warn(`rolling back transaction with ${this.queries.length} statements`);
-        await this.client;
+        const client = await this.clientPromise;
         try {
-            await this.client.query('ROLLBACK;');
+            return client.query('ROLLBACK;');
         }
         catch (err) {
             logger.error(`Failed to roll back transaction: ${err.toString()}`);
             throw err;
         }
         finally {
-            this.client.release();
+            client.release();
         }
-        return this.client;
     }
 
     /*
@@ -195,12 +201,11 @@ class Transaction {
      * NOTE: the same client *MUST* be used to make queries within the transaction.
      */
     async commit(rollbackOnFailure = true) {
-        await this.client;
+        const client = await this.clientPromise;
         try {
-            const query = this.client.query('COMMIT;');
-            this.queries.push(query);
             await Promise.all(this.queries);
-            this.client.release();
+            await client.query('COMMIT;');
+            client.release();
         }
         catch (err) {
             logger.error(`failed to commit transaction: ${err.toString()}`);

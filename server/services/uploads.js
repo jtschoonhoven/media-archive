@@ -82,7 +82,7 @@ function getMediaType(fileName) {
 
 function getSql(mediaName, mediaType, mediaFile, mediaPath, mediaExtn, mediaSize) {
     return sql`
-        INSERT INTO media (
+        INSERT INTO media_uploads_pending (
             media_name,
             media_type,
             media_file_name,
