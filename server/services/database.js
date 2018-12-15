@@ -136,8 +136,7 @@ class Transaction {
             .then((client) => {
                 this._begin(client);
                 return client;
-            })
-            .then(client => client);
+            });
     }
 
     /*
@@ -198,7 +197,6 @@ class Transaction {
 
     /*
      * Close and commit an open transaction.
-     * NOTE: the same client *MUST* be used to make queries within the transaction.
      */
     async commit(rollbackOnFailure = true) {
         const client = await this.clientPromise;

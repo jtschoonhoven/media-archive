@@ -1,12 +1,9 @@
 const db = require('../services/database');
 const logger = require('../services/logger');
 
-const REGEX_WHITELIST = new RegExp('[^0-9a-zA-Z _(&|!)-]', 'g');
 const REGEX_ALPHA_NUM = new RegExp('[0-9a-zA-Z]+');
-
 const QUERY_LOGIC_CHARS = ['!', '&', '|', '(', ')'];
 const QUERY_GROUP_CHARS = ['&', '|', '(', ')'];
-
 const DEFAULT_LIMIT = 10;
 
 /*
@@ -29,15 +26,10 @@ function serializePageKey(id, relevanceScore) {
  * Deserialize a page key back into its id and relevance score.
  */
 function deserializePageKey(key) {
-    let safeKey = key || '';
-    safeKey = safeKey.replace(REGEX_WHITELIST, '');
-    if (!safeKey) {
-        return null;
-    }
     try {
         return {
-            id: parseInt(safeKey.slice(0, -2), 16),
-            relevance: parseInt(safeKey.slice(-2), 16),
+            id: parseInt(key.slice(0, -2), 16),
+            relevance: parseInt(key.slice(-2), 16),
         };
     }
     catch (err) {
@@ -62,9 +54,7 @@ function toAlphaNum(str) {
  * Enforces use of logical operators.
  */
 function sanitizeSearchString(searchString) {
-    // remove any characters not in whitelist
-    const safeSearchString = searchString.replace(REGEX_WHITELIST, ' ');
-    return safeSearchString.split(' ').reduce((result, word) => {
+    return searchString.split(' ').reduce((result, word) => {
         // skip empty strings
         if (!word) {
             return result;

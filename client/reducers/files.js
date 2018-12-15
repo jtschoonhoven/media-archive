@@ -9,6 +9,7 @@ import {
 const INITIAL_STATE = {
     isFetching: false,
     results: [],
+    uploads: [],
     path: undefined,
     error: null,
 };
@@ -45,7 +46,7 @@ export default function filesReducer(state = INITIAL_STATE, action) {
             const update = {
                 isFetching: false,
                 error: action.error ? data.toString() : null,
-                uploads: data.results || [],
+                uploads: data.uploads || [],
             };
             return Object.assign({}, state, update);
         }

@@ -6,7 +6,7 @@ const logger = require('../services/logger');
 
 const EXTRA_SPACE_REGEX = new RegExp('\\s+', 'g');
 const MEDIA_NAME_BLACKLIST = new RegExp('[^0-9a-zA-Z -]', 'g');
-const FILE_NAME_BLACKLIST = new RegExp('[^0-9a-zA-Z_-]', 'g');
+const FILE_NAME_BLACKLIST = new RegExp('[^0-9a-zA-Z._-]', 'g');
 const FILE_PATH_BLACKLIST = new RegExp('[^0-9a-zA-Z_/-]', 'g');
 const MEDIA_FILE_EXTENSION_BLACKLIST = new RegExp('[^0-9a-zA-Z]', 'g');
 
@@ -24,6 +24,18 @@ const EXTENSION_TYPES = {
     'JPG': IMAGE,
     'WAV': AUDIO,
     'MP4': VIDEO,
+};
+
+const UPLOAD_PENDING = 'pending';
+const UPLOAD_FAILURE = 'failure';
+const UPLOAD_ABORTED = 'aborted';
+const UPLOAD_SUCCESS = 'success';
+
+const UPLOAD_STATUSES = {
+    UPLOAD_PENDING,
+    UPLOAD_FAILURE,
+    UPLOAD_ABORTED,
+    UPLOAD_SUCCESS,
 };
 
 
@@ -45,7 +57,9 @@ function getFileName(rawFileName) {
 }
 
 function getMediaName(fileName) {
+    const extension = path.extname(fileName);
     const mediaName = fileName
+        .slice(0, -extension.length) // remove file extension
         .replace(MEDIA_NAME_BLACKLIST, ' ') // remove illegal characters
         .replace(EXTRA_SPACE_REGEX, ' '); // remove redundant whitespace
     if (!mediaName.length) {
@@ -82,13 +96,15 @@ function getMediaType(fileName) {
 
 function getSql(mediaName, mediaType, mediaFile, mediaPath, mediaExtn, mediaSize) {
     return sql`
-        INSERT INTO media_uploads_pending (
+        INSERT INTO media (
             media_name,
             media_type,
             media_file_name,
             media_file_path,
             media_file_extension,
-            media_file_size_bytes
+            media_file_size_bytes,
+            upload_status,
+            upload_started_at
         )
         VALUES (
             ${mediaName}, -- media_name
@@ -96,12 +112,14 @@ function getSql(mediaName, mediaType, mediaFile, mediaPath, mediaExtn, mediaSize
             ${mediaFile}, -- media_file_name
             ${mediaPath}, -- media_file_path
             ${mediaExtn}, -- media_file_extension
-            ${mediaSize}  -- media_file_size_bytes
+            ${mediaSize}, -- media_file_size_bytes
+            ${UPLOAD_PENDING}, -- upload_status
+            NOW() -- upload_started_at
         );
     `;
 }
 
-async function addToPendingUploads(dirPath, fileList) {
+async function addFilesToDb(dirPath, fileList) {
     const transaction = new db.Transaction();
 
     fileList.forEach((fileInfo) => {
@@ -133,6 +151,7 @@ async function addToPendingUploads(dirPath, fileList) {
         // update fileInfo with sanitized name
         fileInfo.originalName = fileInfo.name;
         fileInfo.name = mediaName;
+        fileInfo.status = UPLOAD_PENDING;
     });
     await transaction.commit();
     return fileList;
@@ -142,6 +161,9 @@ async function addToPendingUploads(dirPath, fileList) {
  * Add pending upload to media_uploads_pending table and return direct upload tokens for S3.
  */
 module.exports.upload = async (dirPath, fileList) => {
-    const fileListResults = await addToPendingUploads(dirPath, fileList);
-    return { results: fileListResults };
+    if (!dirPath.replace('/', '').trim()) {
+        throw new Error('Cannot upload files to the root directory: please choose a folder.');
+    }
+    const fileListResults = await addFilesToDb(dirPath, fileList);
+    return { uploads: fileListResults };
 };

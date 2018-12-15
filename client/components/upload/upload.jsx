@@ -7,6 +7,7 @@ import Breadcrumb from './breadcrumb.jsx'; // eslint-disable-line no-unused-vars
 import FileUpload from './file-old.jsx'; // eslint-disable-line no-unused-vars
 import File from './file.jsx'; // eslint-disable-line no-unused-vars
 import Directory from './directory.jsx'; // eslint-disable-line no-unused-vars
+import Upload from './file-upload.jsx'; // eslint-disable-line no-unused-vars
 import { UPLOAD_STATUS } from '../../constants';
 
 const VALID_EXTENSIONS = [
@@ -50,7 +51,7 @@ const EXAMPLE_DATA = [ // eslint-disable-line no-unused-vars
 class ArchiveUpload extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = { results: [], uploads: [] };
         this.handleUploadSelect = this.handleUploadSelect.bind(this);
     }
 
@@ -71,7 +72,13 @@ class ArchiveUpload extends React.Component {
         const pathArray = currentUrl.slice(1).split('/');
         const BreadCrumbs = pathArray.map((dirname, idx) => Breadcrumb(pathArray, dirname, idx));
         const Files = props.results.map((fileObj) => {
-            return fileObj.type === 'file' ? File(fileObj) : Directory(fileObj, currentUrl);
+            if (fileObj.type === 'upload') {
+                return <Upload fileObj={fileObj} key={fileObj.id} />;
+            }
+            if (fileObj.type === 'file') {
+                return File(fileObj);
+            }
+            return Directory(fileObj, currentUrl);
         });
         return (
             <div id="archive-upload">
@@ -110,8 +117,17 @@ class ArchiveUpload extends React.Component {
 
     loadDir() {
         const currentPath = this.getFilePath();
+        const currentUploads = this.props.uploads;
+
+        // reload when URL changes
         if (currentPath !== this.state.currentPath) {
             this.setState({ currentPath });
+            this.props.onLoad(currentPath);
+        }
+
+        // reload when new uploads are added
+        if (currentUploads !== this.state.currentUploads) {
+            this.setState({ currentUploads });
             this.props.onLoad(currentPath);
         }
     }

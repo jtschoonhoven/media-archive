@@ -11,9 +11,11 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
+        // load directory contents
         onLoad: (path) => {
             dispatch(load(path, dispatch));
         },
+        // upload a list of files
         onUpload: (path, filesList) => {
             dispatch(upload(path, filesList, dispatch));
         },

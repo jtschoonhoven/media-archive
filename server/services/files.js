@@ -11,8 +11,10 @@ const getSQL = (path) => {
     return `
         SELECT
             CASE
+                WHEN upload_status = 'pending'
+                    THEN 'upload'
                 WHEN ARRAY_LENGTH(media_file_path_array, 1) > ${pathArray.length + 1}
-                THEN 'directory'
+                    THEN 'directory'
                 ELSE 'file'
             END AS type,
             media_file_path_array[${pathArray.length + 1}] AS name,

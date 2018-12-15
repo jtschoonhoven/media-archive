@@ -54,6 +54,12 @@ exports.up = async (db) => {
             legal_is_confidential BOOLEAN, -- (AKA "Confidential (Board Meetings, Phone Calls, Specified Oral History Interviews)")
             legal_can_license BOOLEAN, -- (AKA "Licensing Rights (Y or N or ?)")
 
+            -- upload workflow
+            upload_status TEXT,
+            upload_error TEXT,
+            upload_started_at TIMESTAMP,
+            upload_finished_at TIMESTAMP,
+
             -- metadata
             created_at TIMESTAMP,
             updated_at TIMESTAMP,
@@ -67,12 +73,12 @@ exports.up = async (db) => {
     /*
      * MEDIA_UPLOADS_PENDING: clone of MEDIA, stores files with pending uploads that might fail.
      */
-    await db.run(`
-        CREATE TABLE media_uploads_pending (INHERITS media);
-    `);
+    // await db.run(`
+    //     CREATE TABLE media_uploads_pending (INHERITS media);
+    // `);
 };
 
 exports.down = async (db) => {
-    await db.run('DROP TABLE IF EXISTS media_uploads_pending');
+    // await db.run('DROP TABLE IF EXISTS media_uploads_pending');
     await db.run('DROP TABLE IF EXISTS media;');
 };

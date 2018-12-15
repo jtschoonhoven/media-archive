@@ -59,8 +59,8 @@ export function upload(path, fileList, dispatch) {
     const body = JSON.stringify({ files: fileList });
     fetch(`/api/v1/files/${path}`, { method: 'POST', body, headers: POST_HEADERS })
         .then(response => response.json())
-        .then(data => dispatch(loadComplete(data)))
-        .catch(err => dispatch(loadComplete({ error: err.toString() })));
+        .then(data => dispatch(uploadAcknowledged(data)))
+        .catch(err => dispatch(uploadAcknowledged({ error: err.toString() })));
     return {
         type: FILES_UPLOAD,
         payload: { path },
