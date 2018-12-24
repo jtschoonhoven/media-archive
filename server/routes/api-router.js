@@ -1,10 +1,8 @@
 const express = require('express');
 const Joi = require('joi');
 
-const authService = require('../services/auth');
 const filesService = require('../services/files');
 const logger = require('../services/logger');
-const s3Service = require('../services/s3');
 const searchService = require('../services/search');
 const uploadsService = require('../services/uploads');
 
@@ -169,14 +167,6 @@ const DELETE_SCHEMA = Joi.object({
 apiRouter.delete('/files/:fileId', validateReq.bind(null, DELETE_SCHEMA), async (req, res) => {
     const fileId = req.params.fileId;
     return sendResponse(200, req, res, filesService.delete, fileId);
-});
-
-/*
- * S3 API.
- * Endpoint to receive signed S3 policy for direct HTTP upload.
- */
-apiRouter.get('/s3/policy', authService.requireLogin, (req, res) => {
-    return sendResponse(200, req, res, s3Service.getPolicy);
 });
 
 

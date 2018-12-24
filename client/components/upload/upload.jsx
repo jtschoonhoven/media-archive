@@ -47,6 +47,8 @@ class ArchiveUpload extends React.Component {
         const Uploads = [];
         props.results.forEach((fileObj) => {
             if (fileObj.type === 'upload') {
+                console.log(fileObj);
+                window.f = fileObj;
                 Uploads.push(<Upload fileObj={ fileObj } onUploadCancel={ this.props.onUploadCancel } key={ fileObj.id } />); // eslint-disable-line max-len
             }
             if (fileObj.type === 'file') {

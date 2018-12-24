@@ -1,35 +1,55 @@
-const AWS = require('aws-sdk');
 const crypto = require('crypto');
+
+const settings = require('../settings');
 
 /*
  * Adapted from https://leonid.shevtsov.me/post/demystifying-s3-browser-upload/
  */
 
-const BUCKET_NAME = 'media-archive-uploads';
+const S3_BUCKET_NAME = settings.S3_BUCKET_NAME;
+const S3_BUCKET_REGION = settings.S3_BUCKET_REGION;
+const S3_USER_ACCESS_KEY_ID = settings.S3_USER_ACCESS_KEY_ID;
+const S3_USER_SECRET_ACCESS_KEY = settings.S3_USER_SECRET_ACCESS_KEY;
 
-// generate and format an ISO date string as expected by the AWS APIs
-function dateString() {
+/*
+ * Generate a date string, specially-formatted for the AWS API.
+ */
+function getAwsDateString() {
     const date = new Date().toISOString();
     return `${date.substr(0, 4)}${date.substr(5, 2)}${date.substr(8, 2)}`;
 }
 
+/*
+ * Encrypt the given string with the given signing key.
+ */
 function hmac(key, string) {
     const sha = crypto.createHmac('sha256', key);
     sha.end(string);
     return sha.read();
 }
 
-function amzCredential(config) {
-    return [config.accessKey, dateString(), config.region, 's3/aws4_request'].join('/');
+/*
+ * Generate a credential string for the user in the format expected by AWS.
+ */
+function getS3Credentials() {
+    return [
+        S3_USER_ACCESS_KEY_ID,
+        getAwsDateString(),
+        S3_BUCKET_REGION,
+        's3/aws4_request',
+    ].join('/');
 }
 
-// Constructs the policy
-function s3UploadPolicy(config, filepath, credential) {
+/*
+ * Configure rules for file upload.
+ * See See https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-authenticating-requests.html.
+ */
+function getS3UploadPolicy(filepath, credential) {
     return {
         // 5 minutes into the future
         expiration: new Date((new Date()).getTime() + (5 * 60 * 1000)).toISOString(),
         conditions: [
-            { bucket: config.bucket },
+            { bucket: S3_BUCKET_NAME },
             { key: filepath },
             { acl: 'public-read' },
             { success_action_status: '201' },
@@ -38,40 +58,37 @@ function s3UploadPolicy(config, filepath, credential) {
             // ['content-length-range', 0, 1000000],
             { 'x-amz-algorithm': 'AWS4-HMAC-SHA256' },
             { 'x-amz-credential': credential },
-            { 'x-amz-date': `${dateString()}T000000Z` },
+            { 'x-amz-date': `${getAwsDateString()}T000000Z` },
         ],
     };
 }
 
-// Signs the policy with the credential
-function s3UploadSignature(config, policyBase64, credential) {
-    const dateKey = hmac(`AWS4 ${config.secretKey}`, dateString());
-    const dateRegionKey = hmac(dateKey, config.region);
+/*
+ * Sign the policy with the authorized users' secret key to prevent tampering.
+ */
+function getS3UploadPolicySignature(policy) {
+    const policyBase64 = Buffer.from(JSON.stringify(policy)).toString('base64');
+    const dateKey = hmac(`AWS4 ${S3_USER_SECRET_ACCESS_KEY}`, getAwsDateString());
+    const dateRegionKey = hmac(dateKey, S3_BUCKET_REGION);
     const dateRegionServiceKey = hmac(dateRegionKey, 's3');
     const signingKey = hmac(dateRegionServiceKey, 'aws4_request');
     return hmac(signingKey, policyBase64).toString('hex');
 }
 
-function s3Params(config, filepath) {
-    const credential = amzCredential(config);
-    const policy = s3UploadPolicy(config, filepath, credential);
-    const policyBase64 = Buffer.from(JSON.stringify(policy)).toString('base64');
+/*
+ * Get all authorization config needed by the client to POST directly to S3.
+ */
+module.exports.getS3UploadAuth = (filepath) => {
+    const credentials = getS3Credentials();
+    const policy = getS3UploadPolicy(filepath, credentials);
     return {
         'key': filepath,
         'acl': 'public-read',
         'successActionStatus': '201',
         'policy': 'policyBase64',
         'x-amz-algorithm': 'AWS4-HMAC-SHA256',
-        'x-amz-credential': credential,
-        'x-amz-date': `${dateString()}T000000Z`,
-        'x-amz-signature': s3UploadSignature(config, policyBase64, credential),
-    };
-}
-
-// return a policy that may be used to upload a single file
-module.exports.getPolicy = (config, filepath) => {
-    return {
-        endpointUrl: `https://${BUCKET_NAME}.s3.amazonaws.com`,
-        params: s3Params(config, filepath),
+        'x-amz-credential': credentials,
+        'x-amz-date': `${getAwsDateString()}T000000Z`,
+        'x-amz-signature': getS3UploadPolicySignature(policy),
     };
 };

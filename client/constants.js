@@ -1,3 +1,4 @@
+// FIXME: move this to shared config
 const UPLOAD_STATUS = {
     PENDING: 'pending',
     RUNNING: 'running',

@@ -5,6 +5,7 @@ const uuidv4 = require('uuid/v4');
 const db = require('./database');
 const filesService = require('./files');
 const logger = require('./logger');
+const s3Service = require('./s3');
 
 const EXTRA_SPACE_REGEX = new RegExp('\\s+', 'g');
 const MEDIA_NAME_BLACKLIST = new RegExp('[^0-9a-zA-Z -]', 'g');
@@ -215,16 +216,30 @@ async function addFilesToDb(dirPath, fileList, userEmail) {
 }
 
 /*
- * Add pending upload to media_uploads_pending table and return direct upload tokens for S3.
+ * Add pending upload to media_uploads_pending table and return direct upload auth for S3.
  * Returns ALL files in directory (not just uploads).
  */
 module.exports.upload = async (dirPath, fileList, userEmail) => {
+    // throw an error if any uploaded file contains a filename already in the directory
     try {
         await checkDuplicates(dirPath, fileList);
     }
     catch (err) {
         return { error: err.message };
     }
+    // add all files to the DB in "pending" state
     await addFilesToDb(dirPath, fileList, userEmail);
-    return filesService.load(dirPath, userEmail);
+    // load the list of all files in the directory (not just uploads)
+    const directoryList = await filesService.load(dirPath, userEmail);
+    if (directoryList.error) {
+        return directoryList;
+    }
+    // generate S3 upload credentials for pending uploads
+    directoryList.results.forEach((fileObj) => {
+        if (fileObj.type === UPLOAD_TYPE) {
+            fileObj.s3UploadAuth = s3Service.getS3UploadAuth(fileObj.media_file_path);
+        }
+    });
+    // return the list of all files in directory
+    return directoryList;
 };

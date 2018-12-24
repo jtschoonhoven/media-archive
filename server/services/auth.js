@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const Joi = require('joi');
+const path = require('path');
 
 const logger = require('./logger');
 const settings = require('../settings');
@@ -8,7 +9,7 @@ const settings = require('../settings');
 const OAUTH2_CONFIG = {
     clientID: settings.OAUTH2_CLIENT_ID,
     clientSecret: settings.OAUTH2_CLIENT_SECRET,
-    callbackURL: settings.OAUTH2_CALLBACK,
+    callbackURL: path.join(settings.BASE_URL, '/auth/google/callback'),
     accessType: 'offline',
 };
 
