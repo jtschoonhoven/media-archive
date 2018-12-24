@@ -1,4 +1,5 @@
 const autoprefixer = require('autoprefixer');
+const ConfigWebpackPlugin = require('config-webpack');
 const merge = require('webpack-merge');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
@@ -37,7 +38,6 @@ const BASE_CONFIG = {
 const DEVELOPMENT_CONFIG = {
     mode: 'development',
     devtool: 'source-map',
-    externals: [{ window: 'window' }],
 };
 
 /*
@@ -60,6 +60,9 @@ const CLIENT_CONFIG = {
         filename: 'bundle.client.js',
     },
     plugins: [
+        // define a global SETTINGS object from config files
+        new ConfigWebpackPlugin('SETTINGS'),
+        // make CSS available to client
         new MiniCssExtractPlugin({
             path: path.join(__dirname, '../dist'),
             filename: 'bundle.css',

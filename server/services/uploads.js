@@ -5,7 +5,6 @@ const uuidv4 = require('uuid/v4');
 const db = require('./database');
 const filesService = require('./files');
 const logger = require('./logger');
-const s3Service = require('./s3');
 
 const EXTRA_SPACE_REGEX = new RegExp('\\s+', 'g');
 const MEDIA_NAME_BLACKLIST = new RegExp('[^0-9a-zA-Z -]', 'g');
@@ -234,12 +233,6 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
     if (directoryList.error) {
         return directoryList;
     }
-    // generate S3 upload credentials for pending uploads
-    directoryList.results.forEach((fileObj) => {
-        if (fileObj.type === UPLOAD_TYPE) {
-            fileObj.s3UploadAuth = s3Service.getS3UploadAuth(fileObj.media_file_path);
-        }
-    });
     // return the list of all files in directory
     return directoryList;
 };

@@ -1,11 +1,8 @@
 {
-    "extends": [
-        "airbnb-base"
-    ],
-    "env": {
-        "browser": true
-    },
+    "extends": ["airbnb-base"],
+    "env": { "browser": true },
     "parser": "babel-eslint",
+    "globals": { "SETTINGS": false },
     "rules": {
         "arrow-body-style": [0],
         "brace-style": ["error", "stroustrup"],

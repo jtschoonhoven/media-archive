@@ -29,7 +29,7 @@ exports.up = async (db) => {
             media_type TEXT, -- normalized media types ('audio', 'video', 'image', 'document')
 
             -- media file info
-            media_file_name TEXT, -- original name of uploaded file
+            media_file_name TEXT, -- filename with extension, but without directory path
             media_file_path TEXT, -- e.g. "/board/meetings/november.txt" path to the uploaded media at time of upload
             media_file_path_array TEXT[], -- same as media_file_path but split on path delimeters
             media_file_extension TEXT, -- upper-case file extension, e.g. MP4, PDF, etc

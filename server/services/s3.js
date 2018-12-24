@@ -4,6 +4,19 @@ const settings = require('../settings');
 
 /*
  * Adapted from https://leonid.shevtsov.me/post/demystifying-s3-browser-upload/
+ * Requires S3 CORS policy to allow requests from domain. Example policy:
+ *
+ * <?xml version="1.0" encoding="UTF-8"?>
+ * <CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+ *   <CORSRule>
+ *     <AllowedOrigin>https://yourdomain.biz</AllowedOrigin>
+ *     <AllowedMethod>HEAD</AllowedMethod>
+ *     <AllowedMethod>GET</AllowedMethod>
+ *     <AllowedMethod>POST</AllowedMethod>
+ *     <AllowedHeader>*</AllowedHeader>
+ *     <ExposeHeader>ETag</ExposeHeader>
+ *   </CORSRule>
+ * </CORSConfiguration>
  */
 
 const S3_BUCKET_NAME = settings.S3_BUCKET_NAME;
@@ -78,11 +91,11 @@ function getS3UploadPolicySignature(policy) {
 /*
  * Get all authorization config needed by the client to POST directly to S3.
  */
-module.exports.getS3UploadAuth = (filepath) => {
+module.exports.getS3UploadAuth = (s3FilePath) => {
     const credentials = getS3Credentials();
-    const policy = getS3UploadPolicy(filepath, credentials);
+    const policy = getS3UploadPolicy(s3FilePath, credentials);
     return {
-        'key': filepath,
+        'key': s3FilePath,
         'acl': 'public-read',
         'successActionStatus': '201',
         'policy': 'policyBase64',

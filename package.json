@@ -62,6 +62,7 @@
         "autoprefixer": "^9.3.1",
         "babel-eslint": "^10.0.1",
         "babel-loader": "^8.0.4",
+        "config-webpack": "^1.0.4",
         "css-loader": "^1.0.1",
         "eslint": "^5.9.0",
         "eslint-config-airbnb-base": "^13.1.0",
@@ -79,7 +80,7 @@
         "sass-loader": "^7.1.0",
         "serve": "^10.1.1",
         "uglifyjs-webpack-plugin": "^2.0.1",
-        "webpack": "^4.26.1",
+        "webpack": "^4.28.2",
         "webpack-cli": "^3.1.2",
         "webpack-merge": "^4.1.4"
     }

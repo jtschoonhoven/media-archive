@@ -1,6 +1,7 @@
 const sql = require('sql-template-strings');
 
-const db = require('../services/database');
+const db = require('./database');
+const s3Service = require('./s3');
 
 const FILENAME_WHITELIST = new RegExp('[^0-9a-zA-Z_-]+', 'g');
 
@@ -56,6 +57,13 @@ module.exports.load = async (path, userEmail) => {
     }
     const query = getSQL(path, userEmail);
     const rows = await db.all(query);
+
+    // add S3 upload credentials for each pending upload
+    rows.forEach((fileObj) => {
+        if (fileObj.type === 'upload') {
+            fileObj.s3UploadAuth = s3Service.getS3UploadAuth(fileObj.media_file_name);
+        }
+    });
     return { results: rows };
 };
 

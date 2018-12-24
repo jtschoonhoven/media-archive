@@ -4,6 +4,8 @@ export const FILES_UPLOAD = 'FILES_UPLOAD';
 export const FILES_UPLOAD_ACKNOWLEDGED = 'FILES_UPLOAD_ACKNOWLEDGED';
 export const FILES_UPLOAD_CANCEL = 'FILES_UPLOAD_CANCEL';
 export const FILES_UPLOAD_CANCEL_COMPLETE = 'FILES_UPLOAD_CANCEL_COMPLETE';
+export const FILES_UPLOAD_TO_S3 = 'FILES_UPLOAD_TO_S3';
+export const FILES_UPLOAD_TO_S3_COMPLETE = 'FILES_UPLOAD_TO_S3_COMPLETE';
 
 const POST_HEADERS = { 'Content-Type': 'application/json' };
 
@@ -40,6 +42,34 @@ export function load(path, dispatch) {
     };
 }
 
+export function uploadFileToS3Complete(filesResults) {
+    const isError = !!filesResults.error;
+    const payload = isError ? new Error(filesResults.error) : filesResults;
+    return {
+        type: FILES_UPLOAD_TO_S3_COMPLETE,
+        payload,
+        error: isError,
+    };
+}
+
+export function uploadFileToS3(file, uuid, s3AuthConfig, dispatch) {
+    // urlencode S3 auth config
+    const formData = new FormData();
+    Object.keys(s3AuthConfig).forEach((configKey) => {
+        const configValue = s3AuthConfig[configKey];
+        formData.append(configKey, configValue);
+    });
+    formData.append('file', file); // this must be added to formData last
+    fetch(`https://${SETTINGS.S3_BUCKET_NAME}.s3.amazonaws.com`, { method: 'POST', body: formData })
+        .then(response => response.json())
+        .then(data => dispatch(uploadFileToS3Complete(data)))
+        .catch(err => dispatch(uploadFileToS3Complete({ error: err.message })));
+    return {
+        type: FILES_UPLOAD_TO_S3,
+        payload: {},
+    };
+}
+
 /*
  * Server acknowledges upload and returns signed tokens used for direct upload to S3.
  */
@@ -65,7 +95,7 @@ export function upload(path, fileList, dispatch) {
         .catch(err => dispatch(uploadAcknowledged({ error: err.message })));
     return {
         type: FILES_UPLOAD,
-        payload: { path },
+        payload: {},
     };
 }
 
