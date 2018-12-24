@@ -9,9 +9,9 @@ dist/*
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
 
 config/*
-!config/custom-environment-variables.json
-!config/development.json
-!config/production.json
+!config/custom-environment-variables.js
+!config/development.js
+!config/production.js
+!webpack.config.js

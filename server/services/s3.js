@@ -7,6 +7,7 @@ const crypto = require('crypto');
 
 const BUCKET_NAME = 'media-archive-uploads';
 
+// generate and format an ISO date string as expected by the AWS APIs
 function dateString() {
     const date = new Date().toISOString();
     return `${date.substr(0, 4)}${date.substr(5, 2)}${date.substr(8, 2)}`;
@@ -23,13 +24,13 @@ function amzCredential(config) {
 }
 
 // Constructs the policy
-function s3UploadPolicy(config, filename, credential) {
+function s3UploadPolicy(config, filepath, credential) {
     return {
         // 5 minutes into the future
         expiration: new Date((new Date()).getTime() + (5 * 60 * 1000)).toISOString(),
         conditions: [
             { bucket: config.bucket },
-            { key: filename },
+            { key: filepath },
             { acl: 'public-read' },
             { success_action_status: '201' },
             // Optionally control content type and file size
@@ -51,12 +52,12 @@ function s3UploadSignature(config, policyBase64, credential) {
     return hmac(signingKey, policyBase64).toString('hex');
 }
 
-function s3Params(config, filename) {
+function s3Params(config, filepath) {
     const credential = amzCredential(config);
-    const policy = s3UploadPolicy(config, filename, credential);
+    const policy = s3UploadPolicy(config, filepath, credential);
     const policyBase64 = Buffer.from(JSON.stringify(policy)).toString('base64');
     return {
-        'key': filename,
+        'key': filepath,
         'acl': 'public-read',
         'successActionStatus': '201',
         'policy': 'policyBase64',
@@ -67,10 +68,10 @@ function s3Params(config, filename) {
     };
 }
 
-
-module.exports.getPolicy = () => {
+// return a policy that may be used to upload a single file
+module.exports.getPolicy = (config, filepath) => {
     return {
         endpointUrl: `https://${BUCKET_NAME}.s3.amazonaws.com`,
-        params: s3Params(config, filename),
+        params: s3Params(config, filepath),
     };
 };

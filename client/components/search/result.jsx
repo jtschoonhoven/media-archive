@@ -44,8 +44,8 @@ class SearchResult extends React.Component {
 SearchResult.propTypes = {
     id: PropTypes.number.isRequired,
     media_name: PropTypes.string.isRequired,
-    media_description: PropTypes.string.isRequired,
-    media_url_thumbnail: PropTypes.string.isRequired,
+    media_description: PropTypes.string,
+    media_url_thumbnail: PropTypes.string,
 };
 
 

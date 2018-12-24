@@ -25,7 +25,7 @@ apiRouter.use((req, res, next) => {
 /*
  * Handle error or return result of `func` in JSON response body.
  */
-async function sendResponse(req, res, func, ...args) {
+async function sendResponse(successStatusCode, req, res, func, ...args) {
     let result;
     try {
         result = await func(...args);
@@ -38,7 +38,7 @@ async function sendResponse(req, res, func, ...args) {
         logger.error(`API error on ${req.url}: ${result.error}`);
         return res.status(500).json(result);
     }
-    return res.json(result);
+    return res.status(successStatusCode).json(result);
 }
 
 /*
@@ -87,7 +87,7 @@ const SEARCH_SCHEMA = Joi.object({
 
 apiRouter.get('/search', validateReq.bind(null, SEARCH_SCHEMA), async (req, res) => {
     const { s, ...filters } = req.query;
-    return sendResponse(req, res, searchService.query, s, filters);
+    return sendResponse(200, req, res, searchService.query, s, filters);
 });
 
 /*
@@ -103,7 +103,7 @@ const FILE_VIEW_SCHEMA = Joi.object({
 
 apiRouter.get('/detail/:fileId', validateReq.bind(null, FILE_VIEW_SCHEMA), async (req, res) => {
     const fileId = parseInt(req.params.fileId, 10);
-    return sendResponse(req, res, filesService.detail, fileId);
+    return sendResponse(200, req, res, filesService.detail, fileId);
 });
 
 /*
@@ -119,7 +119,7 @@ const FILE_LIST_SCHEMA = Joi.object({
 
 apiRouter.get('/files/:path(*)', validateReq.bind(null, FILE_LIST_SCHEMA), async (req, res) => {
     const path = req.params.path;
-    return sendResponse(req, res, filesService.load, path, req.user.email);
+    return sendResponse(200, req, res, filesService.load, path, req.user.email);
 });
 
 /*
@@ -152,7 +152,7 @@ const UPLOADS_SCHEMA = Joi.object({
 apiRouter.post('/files/:path(*)', validateReq.bind(null, UPLOADS_SCHEMA), async (req, res) => {
     const dirPath = req.params.path;
     const fileList = req.body.files;
-    return sendResponse(req, res, uploadsService.upload, dirPath, fileList, req.user.email);
+    return sendResponse(201, req, res, uploadsService.upload, dirPath, fileList, req.user.email);
 });
 
 /*
@@ -168,7 +168,7 @@ const DELETE_SCHEMA = Joi.object({
 
 apiRouter.delete('/files/:fileId', validateReq.bind(null, DELETE_SCHEMA), async (req, res) => {
     const fileId = req.params.fileId;
-    return sendResponse(req, res, filesService.delete, fileId);
+    return sendResponse(200, req, res, filesService.delete, fileId);
 });
 
 /*
@@ -176,7 +176,7 @@ apiRouter.delete('/files/:fileId', validateReq.bind(null, DELETE_SCHEMA), async 
  * Endpoint to receive signed S3 policy for direct HTTP upload.
  */
 apiRouter.get('/s3/policy', authService.requireLogin, (req, res) => {
-    return sendResponse(req, res, s3Service.getPolicy);
+    return sendResponse(200, req, res, s3Service.getPolicy);
 });
 
 

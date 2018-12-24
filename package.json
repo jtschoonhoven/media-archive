@@ -53,6 +53,7 @@
         "react-router-dom": "^4.3.1",
         "redux": "^4.0.1",
         "sql-template-strings": "^2.2.2",
+        "uuid": "^3.3.2",
         "winston": "^3.1.0"
     },
     "devDependencies": {

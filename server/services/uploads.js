@@ -1,5 +1,6 @@
 const path = require('path');
 const sql = require('sql-template-strings');
+const uuidv4 = require('uuid/v4');
 
 const db = require('./database');
 const filesService = require('./files');
@@ -107,8 +108,10 @@ function getInsertSql(
     mediaSize,
     userEmail,
 ) {
+    const uuid = uuidv4(); // generate secure, random uuid
     return sql`
         INSERT INTO media (
+            uuid,
             media_name,
             media_type,
             media_file_name,
@@ -120,6 +123,7 @@ function getInsertSql(
             upload_started_at
         )
         VALUES (
+            ${uuid}, -- uuid
             ${mediaName}, -- media_name
             ${mediaType}, -- media_type
             ${mediaFile}, -- media_file_name

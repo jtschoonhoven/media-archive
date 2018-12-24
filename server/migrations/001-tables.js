@@ -4,7 +4,9 @@ exports.up = async (db) => {
      */
     await db.run(`
         CREATE TABLE media (
-            id SERIAL PRIMARY KEY,
+            -- identifiers
+            id SERIAL PRIMARY KEY, -- sequential primary ID
+            uuid UUID UNIQUE, -- client-facing, obscured ID, primarily for use with S3
 
             -- group info
             box_id INTEGER, -- (AKA "Unique Shipping Box") numeric ID that identifies the shipping box
