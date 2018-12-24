@@ -19,39 +19,11 @@ const VALID_EXTENSIONS = [
     '.PNG',
 ].join(',');
 
-const EXAMPLE_DATA = [ // eslint-disable-line no-unused-vars
-    // {
-    //     filename: 'file_1.jpg',
-    //     progress: 0,
-    //     status: UPLOAD_STATUS.PENDING,
-    // },
-    // {
-    //     filename: 'file_2.pdf',
-    //     progress: 20,
-    //     status: UPLOAD_STATUS.RUNNING,
-    // },
-    // {
-    //     filename: 'file_3.png',
-    //     progress: 50,
-    //     status: UPLOAD_STATUS.ABORTED,
-    // },
-    // {
-    //     filename: 'file_4.mp4',
-    //     progress: 100,
-    //     status: UPLOAD_STATUS.SUCCESS,
-    // },
-    // {
-    //     filename: 'file_5.doc',
-    //     progress: 100,
-    //     status: UPLOAD_STATUS.FAILURE,
-    // },
-];
-
 
 class ArchiveUpload extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { results: [], uploads: [] };
+        this.state = { currentPath: undefined };
         this.handleUploadSelect = this.handleUploadSelect.bind(this);
     }
 
@@ -64,21 +36,25 @@ class ArchiveUpload extends React.Component {
     }
 
     render() {
-        // const fileUploads = EXAMPLE_DATA.map(
-        //     (fileInfo, index) => <FileUpload {...fileInfo} key={index} />,
-        // );
         const props = this.props;
         const currentUrl = props.location.pathname;
         const pathArray = currentUrl.slice(1).split('/');
         const BreadCrumbs = pathArray.map((dirname, idx) => Breadcrumb(pathArray, dirname, idx));
-        const Files = props.results.map((fileObj) => {
+
+        // parse results objects to generate JSX for files, directories and uploads
+        const Files = [];
+        const Directories = [];
+        const Uploads = [];
+        props.results.forEach((fileObj) => {
             if (fileObj.type === 'upload') {
-                return <Upload fileObj={fileObj} key={fileObj.id} />;
+                Uploads.push(<Upload fileObj={ fileObj } onUploadCancel={ this.props.onUploadCancel } key={ fileObj.id } />); // eslint-disable-line max-len
             }
             if (fileObj.type === 'file') {
-                return File(fileObj);
+                Files.push(File(fileObj));
             }
-            return Directory(fileObj, currentUrl);
+            if (fileObj.type === 'directory') {
+                Directories.push(Directory(fileObj, currentUrl));
+            }
         });
         return (
             <div id="archive-upload">
@@ -90,7 +66,7 @@ class ArchiveUpload extends React.Component {
                 </nav>
                 {/* errors */}
                 <div id="archive-upload-errors" className="alert alert-danger" role="alert" style={{ display: props.error ? 'block' : 'none' }}>
-                    {props.error && props.error.toString()}
+                    { props.error }
                 </div>
                 {/* uploader */}
                 <div className="custom-file">
@@ -102,32 +78,25 @@ class ArchiveUpload extends React.Component {
                 {/* browse */}
                 <div id="archive-upload-browse">
                     <hr />
+                    { Uploads }
+                    { Directories }
                     { Files }
                 </div>
-                {/* uploads */}
-                {/*
-                <div id="archive-upload-files">
-                    <hr />
-                    {fileUploads}
-                </div>
-                */}
             </div>
         );
     }
 
     loadDir() {
         const currentPath = this.getFilePath();
-        const currentUploads = this.props.uploads;
+        const stateUpdate = {};
 
         // reload when URL changes
         if (currentPath !== this.state.currentPath) {
-            this.setState({ currentPath });
-            this.props.onLoad(currentPath);
+            stateUpdate.currentPath = currentPath;
         }
-
-        // reload when new uploads are added
-        if (currentUploads !== this.state.currentUploads) {
-            this.setState({ currentUploads });
+        // set new state and reload results on change
+        if (Object.keys(stateUpdate).length) {
+            this.setState(stateUpdate);
             this.props.onLoad(currentPath);
         }
     }

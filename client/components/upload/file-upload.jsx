@@ -6,39 +6,46 @@ import { UPLOAD_STATUS } from '../../constants';
 const SUCCESS_STATES = [UPLOAD_STATUS.SUCCESS];
 const FAILURE_STATES = [UPLOAD_STATUS.ABORTED, UPLOAD_STATUS.FAILURE];
 
-const S3_BUCKET = 'media-archive-uploads';
-
 
 class FileUpload extends React.Component {
     constructor(props) {
         super(props);
         this.state = { progress: 50 };
+        this.handleUploadCancel = this.handleUploadCancel.bind(this);
     }
+
 
     render() {
         const fileObj = this.props.fileObj;
         const progress = this.state.progress;
         const status = fileObj.status;
+        const isDeleting = fileObj.isDeleting;
 
         // defaults apply to "pending" states (not success or failure)
         let isAnimated = true;
         let isStriped = true;
         let styleName = 'info';
-        let actionName = 'cancel';
+        let ActionLink = <a href="#" onClick={ this.handleUploadCancel }>cancel</a>; // eslint-disable-line no-unused-vars
+
+        if (isDeleting) {
+            isAnimated = false;
+            styleName = 'danger';
+            ActionLink = <span className="text-muted">canceling</span>;
+        }
 
         // progress bars are not animated on success, no "retry" or "cancel" option
         if (SUCCESS_STATES.includes(status)) {
             isAnimated = false;
             isStriped = false;
             styleName = 'success';
-            actionName = '';
+            ActionLink = '';
         }
 
         // progress bars are not animated on failure, show "retry" option
         else if (FAILURE_STATES.includes(status)) {
             isAnimated = false;
             styleName = 'danger';
-            actionName = 'retry';
+            ActionLink = <a href="#" onClick={ this.onUploadRetry }>retry</a>;
         }
 
         return (
@@ -75,12 +82,17 @@ class FileUpload extends React.Component {
                     </div>
                     {/* button */}
                     <div className="col-sm-2 col-md-1">
-                        <a href="#">{ actionName }</a>
+                        { ActionLink }
                     </div>
                 </div>
                 <hr />
             </div>
         );
+    }
+
+    handleUploadCancel(event) {
+        event.preventDefault();
+        this.props.onUploadCancel(this.props.fileObj.id);
     }
 }
 

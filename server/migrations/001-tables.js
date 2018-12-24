@@ -28,10 +28,10 @@ exports.up = async (db) => {
 
             -- media file info
             media_file_name TEXT, -- original name of uploaded file
-            media_file_path TEXT UNIQUE, -- e.g. "/board/meetings/november.txt" path to the uploaded media at time of upload
+            media_file_path TEXT, -- e.g. "/board/meetings/november.txt" path to the uploaded media at time of upload
             media_file_path_array TEXT[], -- same as media_file_path but split on path delimeters
             media_file_extension TEXT, -- upper-case file extension, e.g. MP4, PDF, etc
-            media_file_size_bytes INTEGER, -- size of object on S3t s
+            media_file_size_bytes INTEGER, -- size of object on S3
 
             -- media source info
             media_url TEXT, -- path to file location on S3
@@ -57,6 +57,7 @@ exports.up = async (db) => {
             -- upload workflow
             upload_status TEXT,
             upload_error TEXT,
+            upload_email TEXT,
             upload_started_at TIMESTAMP,
             upload_finished_at TIMESTAMP,
 

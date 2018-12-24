@@ -17,7 +17,7 @@ function serializePageKey(id, relevanceScore) {
         return `${hexId}${hexScore}`;
     }
     catch (err) {
-        logger.error(`failed to serialize pagination key: ${err.toString()}`);
+        logger.error(`failed to serialize pagination key: ${err.message}`);
     }
     return null;
 }
@@ -33,7 +33,7 @@ function deserializePageKey(key) {
         };
     }
     catch (err) {
-        logger.error(`failed to deserialize pagination key: ${err.toString()}`);
+        logger.error(`failed to deserialize pagination key: ${err.message}`);
     }
     return null;
 }

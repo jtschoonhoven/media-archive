@@ -20,7 +20,7 @@ export default function searchReducer(state = INITIAL_STATE, action) {
         case SEARCH_COMPLETE: {
             const update = {
                 isFetching: false,
-                error: action.error ? data.toString() : null,
+                error: action.error ? data.message : null,
                 results: data.results || [],
                 nextKey: data.nextKey,
                 prevKey: data.prevKey,

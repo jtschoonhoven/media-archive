@@ -1,8 +1,9 @@
 const path = require('path');
 const sql = require('sql-template-strings');
 
-const db = require('../services/database');
-const logger = require('../services/logger');
+const db = require('./database');
+const filesService = require('./files');
+const logger = require('./logger');
 
 const EXTRA_SPACE_REGEX = new RegExp('\\s+', 'g');
 const MEDIA_NAME_BLACKLIST = new RegExp('[^0-9a-zA-Z -]', 'g');
@@ -26,15 +27,14 @@ const EXTENSION_TYPES = {
     'MP4': VIDEO,
 };
 
+const UPLOAD_TYPE = 'upload';
 const UPLOAD_PENDING = 'pending';
 const UPLOAD_FAILURE = 'failure';
-const UPLOAD_ABORTED = 'aborted';
 const UPLOAD_SUCCESS = 'success';
 
 const UPLOAD_STATUSES = {
     UPLOAD_PENDING,
     UPLOAD_FAILURE,
-    UPLOAD_ABORTED,
     UPLOAD_SUCCESS,
 };
 
@@ -54,6 +54,10 @@ function getDirPath(dirPath) {
 
 function getFileName(rawFileName) {
     return rawFileName.replace(FILE_NAME_BLACKLIST, '-');
+}
+
+function getFilePath(dirPath, fileName) {
+    return path.join(getDirPath(dirPath), getFileName(fileName));
 }
 
 function getMediaName(fileName) {
@@ -94,7 +98,15 @@ function getMediaType(fileName) {
     return mediaType;
 }
 
-function getSql(mediaName, mediaType, mediaFile, mediaPath, mediaExtn, mediaSize) {
+function getInsertSql(
+    mediaName,
+    mediaType,
+    mediaFile,
+    mediaPath,
+    mediaExtn,
+    mediaSize,
+    userEmail,
+) {
     return sql`
         INSERT INTO media (
             media_name,
@@ -103,6 +115,7 @@ function getSql(mediaName, mediaType, mediaFile, mediaPath, mediaExtn, mediaSize
             media_file_path,
             media_file_extension,
             media_file_size_bytes,
+            upload_email,
             upload_status,
             upload_started_at
         )
@@ -113,13 +126,43 @@ function getSql(mediaName, mediaType, mediaFile, mediaPath, mediaExtn, mediaSize
             ${mediaPath}, -- media_file_path
             ${mediaExtn}, -- media_file_extension
             ${mediaSize}, -- media_file_size_bytes
+            ${userEmail}, -- upload_email
             ${UPLOAD_PENDING}, -- upload_status
             NOW() -- upload_started_at
         );
     `;
 }
 
-async function addFilesToDb(dirPath, fileList) {
+/*
+ * Select all files with the given name in the given directory from a list of file objects.
+ */
+function getSelectSQL(dirPath, fileList) {
+    // FIXME: select specific columns here instead of the glob
+    const query = sql`
+        SELECT *, 'upload' AS type FROM media WHERE deleted_at IS NULL AND (FALSE
+    `;
+    fileList.forEach((fileInfo) => {
+        const mediaPath = getFilePath(dirPath, fileInfo.name);
+        query.append(sql`OR media_file_path = ${mediaPath}`);
+    });
+    query.append(sql`);`);
+    return query;
+}
+
+/*
+ * Throw an error if the DB already contains a file at the same path as an upload in fileList.
+ */
+async function checkDuplicates(dirPath, fileList) {
+    const query = getSelectSQL(dirPath, fileList);
+    const result = await db.all(query);
+    if (result.length) {
+        const dupeName = result[0].media_name;
+        const dupePath = result[0].media_file_path;
+        throw new Error(`Cannot upload batch with duplicate file "${dupeName}" at "${dupePath}"`);
+    }
+}
+
+async function addFilesToDb(dirPath, fileList, userEmail) {
     const transaction = new db.Transaction();
 
     fileList.forEach((fileInfo) => {
@@ -134,24 +177,34 @@ async function addFilesToDb(dirPath, fileList) {
             mediaName = getMediaName(fileInfo.name);
             mediaType = getMediaType(fileInfo.name);
             mediaFile = getFileName(fileInfo.name);
-            mediaPath = path.join(getDirPath(dirPath), getFileName(fileInfo.name));
+            mediaPath = getFilePath(dirPath, fileInfo.name);
             mediaExtn = getMediaFileExtension(fileInfo.name);
             mediaSize = parseInt(fileInfo.sizeInBytes, 10);
         }
         catch (err) {
             // add "error" property to fileInfo object on failure and continue
-            logger.warn(`ignoring uploaded file ${fileInfo.name}: ${err.toString()}`);
-            fileInfo.error = err.toString();
+            logger.warn(`ignoring uploaded file ${fileInfo.name}: ${err.message}`);
+            fileInfo.error = err.message;
             return;
         }
         // exectute query within a transaction
-        const query = getSql(mediaName, mediaType, mediaFile, mediaPath, mediaExtn, mediaSize);
+        const query = getInsertSql(
+            mediaName,
+            mediaType,
+            mediaFile,
+            mediaPath,
+            mediaExtn,
+            mediaSize,
+            userEmail,
+        );
         transaction.add(query);
 
         // update fileInfo with sanitized name
         fileInfo.originalName = fileInfo.name;
         fileInfo.name = mediaName;
+        fileInfo.path = mediaPath;
         fileInfo.status = UPLOAD_PENDING;
+        fileInfo.type = UPLOAD_TYPE;
     });
     await transaction.commit();
     return fileList;
@@ -159,11 +212,15 @@ async function addFilesToDb(dirPath, fileList) {
 
 /*
  * Add pending upload to media_uploads_pending table and return direct upload tokens for S3.
+ * Returns ALL files in directory (not just uploads).
  */
-module.exports.upload = async (dirPath, fileList) => {
-    if (!dirPath.replace('/', '').trim()) {
-        throw new Error('Cannot upload files to the root directory: please choose a folder.');
+module.exports.upload = async (dirPath, fileList, userEmail) => {
+    try {
+        await checkDuplicates(dirPath, fileList);
     }
-    const fileListResults = await addFilesToDb(dirPath, fileList);
-    return { uploads: fileListResults };
+    catch (err) {
+        return { error: err.message };
+    }
+    await addFilesToDb(dirPath, fileList, userEmail);
+    return filesService.load(dirPath, userEmail);
 };

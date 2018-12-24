@@ -2,6 +2,8 @@ export const FILES_LOAD = 'FILES_LOAD';
 export const FILES_LOAD_COMPLETE = 'FILES_LOAD_COMPLETE';
 export const FILES_UPLOAD = 'FILES_UPLOAD';
 export const FILES_UPLOAD_ACKNOWLEDGED = 'FILES_UPLOAD_ACKNOWLEDGED';
+export const FILES_UPLOAD_CANCEL = 'FILES_UPLOAD_CANCEL';
+export const FILES_UPLOAD_CANCEL_COMPLETE = 'FILES_UPLOAD_CANCEL_COMPLETE';
 
 const POST_HEADERS = { 'Content-Type': 'application/json' };
 
@@ -15,7 +17,7 @@ const POST_HEADERS = { 'Content-Type': 'application/json' };
  */
 export function loadComplete(filesResults) {
     const isError = !!filesResults.error;
-    const payload = isError ? new Error(filesResults.error.toString()) : filesResults;
+    const payload = isError ? new Error(filesResults.error) : filesResults;
     return {
         type: FILES_LOAD_COMPLETE,
         payload,
@@ -31,7 +33,7 @@ export function load(path, dispatch) {
     fetch(`/api/v1/files/${path}`)
         .then(response => response.json())
         .then(data => dispatch(loadComplete(data)))
-        .catch(err => dispatch(loadComplete({ error: err.toString() })));
+        .catch(err => dispatch(loadComplete({ error: err.message })));
     return {
         type: FILES_LOAD,
         payload: { path },
@@ -43,7 +45,7 @@ export function load(path, dispatch) {
  */
 export function uploadAcknowledged(uploadsResults) {
     const isError = !!uploadsResults.error;
-    const payload = isError ? new Error(uploadsResults.error.toString()) : uploadsResults;
+    const payload = isError ? new Error(uploadsResults.error) : uploadsResults;
     return {
         type: FILES_UPLOAD_ACKNOWLEDGED,
         payload,
@@ -60,9 +62,41 @@ export function upload(path, fileList, dispatch) {
     fetch(`/api/v1/files/${path}`, { method: 'POST', body, headers: POST_HEADERS })
         .then(response => response.json())
         .then(data => dispatch(uploadAcknowledged(data)))
-        .catch(err => dispatch(uploadAcknowledged({ error: err.toString() })));
+        .catch(err => dispatch(uploadAcknowledged({ error: err.message })));
     return {
         type: FILES_UPLOAD,
         payload: { path },
+    };
+}
+
+/*
+ * Server confirms that file has been deleted.
+ */
+export function uploadCancelComplete(uploadId, uploadsResults) {
+    let error;
+    const isError = !!uploadsResults.error;
+    if (isError) {
+        error = new Error(uploadsResults.error);
+        error.deletions = [uploadId]; // hack to know which upload failed in case there are several
+    }
+    const payload = isError ? error : uploadsResults;
+    return {
+        type: FILES_UPLOAD_CANCEL_COMPLETE,
+        payload,
+        error: isError,
+    };
+}
+
+/*
+ * Client sends request to delete file by ID.
+ */
+export function uploadCancel(uploadId, dispatch) {
+    fetch(`/api/v1/files/${uploadId}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => dispatch(uploadCancelComplete(uploadId, data)))
+        .catch(err => dispatch(uploadCancelComplete(uploadId, { error: err.message })));
+    return {
+        type: FILES_UPLOAD_CANCEL,
+        payload: { id: uploadId },
     };
 }

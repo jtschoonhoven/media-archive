@@ -6,8 +6,6 @@ const crypto = require('crypto');
  */
 
 const BUCKET_NAME = 'media-archive-uploads';
-const sts = new AWS.STS();
-
 
 function dateString() {
     const date = new Date().toISOString();

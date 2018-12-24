@@ -74,7 +74,7 @@ class Database {
         }
         catch (err) {
             logger.error(`\
-                failed to apply migration ${filename}: "${err.toString()}"\n${err.trace}\
+                failed to apply migration ${filename}: "${err.message}"\n${err.trace}\
             `);
             throw err;
         }
@@ -94,7 +94,7 @@ class Database {
         }
         catch (err) {
             logger.error(`\
-                failed to revert migration ${filename}: "${err.toString()}"\n${err.trace}\
+                failed to revert migration ${filename}: "${err.message}"\n${err.trace}\
             `);
             throw err;
         }
@@ -150,7 +150,7 @@ class Transaction {
             return client;
         }
         catch (err) {
-            logger.error(`failed to open transaction: ${err.toString()}`);
+            logger.error(`failed to open transaction: ${err.message}`);
             if (client) {
                 client.release();
             }
@@ -169,7 +169,7 @@ class Transaction {
             return this.client;
         }
         catch (err) {
-            logger.error(`failed to add query to transaction: ${err.toString()}`);
+            logger.error(`failed to add query to transaction: ${err.message}`);
             if (rollbackOnFailure) {
                 await this.rollback();
             }
@@ -187,7 +187,7 @@ class Transaction {
             return client.query('ROLLBACK;');
         }
         catch (err) {
-            logger.error(`Failed to roll back transaction: ${err.toString()}`);
+            logger.error(`Failed to roll back transaction: ${err.message}`);
             throw err;
         }
         finally {
@@ -206,7 +206,7 @@ class Transaction {
             client.release();
         }
         catch (err) {
-            logger.error(`failed to commit transaction: ${err.toString()}`);
+            logger.error(`failed to commit transaction: ${err.message}`);
             if (rollbackOnFailure) {
                 await this.rollback();
             }

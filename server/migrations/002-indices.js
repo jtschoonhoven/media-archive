@@ -5,6 +5,11 @@ exports.up = async (db) => {
     await db.run('CREATE INDEX idx_media_type ON media (media_type);');
 
     /*
+     * IDX_MEDIA_FILE_PATH: optimize queries on complete path to media file.
+     */
+    await db.run('CREATE INDEX idx_media_file_path ON media (media_file_path);');
+
+    /*
      * IDX_TSVECTOR: optimized search on lexemes.
      */
     await db.run('CREATE INDEX idx_tsvector ON media USING GIN(media_tsvector);');
@@ -30,5 +35,6 @@ exports.down = async (db) => {
     await db.run('DROP INDEX IF EXISTS idx_media_file_path_array_first;');
     await db.run('DROP INDEX IF EXISTS idx_media_file_path_array;');
     await db.run('DROP INDEX IF EXISTS idx_tsvector;');
+    await db.run('DROP INDEX IF EXISTS idx_media_file_path;');
     await db.run('DROP INDEX IF EXISTS idx_media_type;');
 };

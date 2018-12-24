@@ -96,7 +96,7 @@ class ArchiveSearch extends React.Component {
                 </div>
                 {/* errors */}
                 <div id="archive-search-errors" className="alert alert-danger" role="alert" style={{ display: props.error ? 'block' : 'none' }}>
-                    {props.error && props.error.toString()}
+                    { props.error }
                 </div>
                 {/* no results */}
                 <div className="alert alert-secondary text-center" role="alert" style={{ display: noResult ? 'block' : 'none' }}>

@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const Joi = require('joi');
 
 const logger = require('./logger');
 const settings = require('../settings');
@@ -10,6 +11,11 @@ const OAUTH2_CONFIG = {
     callbackURL: settings.OAUTH2_CALLBACK,
     accessType: 'offline',
 };
+
+const USER_SCHEMA = Joi.object({
+    isLoggedIn: Joi.boolean(),
+    email: Joi.string().email(),
+});
 
 /*
  * Middleware to conditionally apply settings depending on the environment.
@@ -29,8 +35,8 @@ module.exports.requireLogin = (req, res, next) => {
         logger.warn('bypassing login in development');
         return next();
     }
-    // continue if authorized
-    if (req.user) {
+    // continue if authorized with valid user schema
+    if (!Joi.validate(req.user, USER_SCHEMA).error) {
         return next();
     }
     // redirect to login page for all other routes

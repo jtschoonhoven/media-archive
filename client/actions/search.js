@@ -14,7 +14,7 @@ export const SEARCH_RESET = 'SEARCH_RESET';
  */
 export function searchComplete(searchResults) {
     const isError = !!searchResults.error;
-    const payload = isError ? new Error(searchResults.error.toString()) : searchResults;
+    const payload = isError ? new Error(searchResults.error.message) : searchResults;
     return {
         type: SEARCH_COMPLETE,
         payload,
@@ -31,7 +31,7 @@ export function search(searchString, filters, dispatch) {
     fetch(`/api/v1/search?${query}`)
         .then(response => response.json())
         .then(data => dispatch(searchComplete(data)))
-        .catch(err => dispatch(searchComplete({ error: err.toString() })));
+        .catch(err => dispatch(searchComplete({ error: err.message })));
     return {
         type: SEARCH,
         payload: { searchString, filters },

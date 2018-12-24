@@ -1,54 +1,45 @@
 import React from 'react';
 
 
-const EXAMPLE_DATA = {
-    id: 'aaabbbccc',
-    fileName: 'a_search_result.png',
-    title: 'A Search Result',
-    description: 'Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet.',
-    imgUrl: 'https://i.imgur.com/gn2JN3f.jpg',
-    fileUrl: 'https://i.imgur.com/gn2JN3f.jpg',
-    tags: ['lorem', 'ipsum', 'dolor'],
-};
-
-
 class ArchiveDetail extends React.Component {
     constructor(props) {
         super(props);
         this.handleClick = this.handleClick.bind(this);
-        this.state = {
-            isExpanded: false,
-            fileInfo: EXAMPLE_DATA,
-        };
+        this.state = { isExpanded: false };
+    }
+
+    componentDidMount() {
+        this.fetchData();
     }
 
     render() {
-        const fileInfo = this.state.fileInfo;
         const isExpanded = this.state.isExpanded;
+        const isFetching = this.props.isFetching;
 
-        const fileName = fileInfo.fileName;
-        const title = fileInfo.title || fileName;
-        const description = fileInfo.description;
-        const imgUrl = fileInfo.imgUrl;
-        const fileUrl = fileInfo.fileUrl;
-        const tags = fileInfo.tags || [];
+        const details = this.props.details || {};
+        const title = details.media_name;
+        const description = details.media_description;
+        const tags = details.media_tags;
+        const url = details.media_url;
+        const filename = details.media_file_name;
 
+        // FIXME: better behavior while loading
         return (
             <div id="archive-detail">
                 <div className="row">
                     {/* content */}
                     <div className={ `col-12 ${isExpanded || 'col-lg-6 order-lg-last'}` }>
-                        <h2>{ title }</h2>
+                        <h2>{ isFetching ? 'loading...' : title }</h2>
                         <p>{ description }</p>
-                        <p><strong>Tags: </strong>{ tags.join(', ') }</p>
+                        <p><strong>Tags: </strong>{ tags }</p>
                     </div>
                     {/* img */}
                     <div className={ `col-12 ${isExpanded || 'col-lg-6'}` }>
-                        <a href={ fileUrl } target="_blank">
-                            <img src={ imgUrl } className="img-fluid border rounded" alt={this.state.title} />
+                        <a href={ url } target="_blank">
+                            <img src={ url } className="img-fluid border rounded" alt={ title } />
                         </a>
                         <p>
-                            <a href={ fileUrl } download={ fileName } target="_blank">Download</a>
+                            <a href={ url } download={ filename } target="_blank">Download</a>
                             <span className="text-muted d-none d-lg-inline"> • </span>
                             <a href="#" onClick={ this.handleClick } className="d-none d-lg-inline">
                                 { isExpanded ? 'View smaller' : 'View larger' }
@@ -58,6 +49,16 @@ class ArchiveDetail extends React.Component {
                 </div>
             </div>
         );
+    }
+
+    getFileId() {
+        const idStr = this.props.location.pathname.replace('/detail/', '');
+        return parseInt(idStr, 10);
+    }
+
+    fetchData() {
+        const fileId = this.getFileId();
+        this.props.onGetFileDetail(fileId);
     }
 
     handleClick() {
