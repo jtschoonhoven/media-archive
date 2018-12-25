@@ -14,7 +14,7 @@ export const SEARCH_RESET = 'SEARCH_RESET';
  */
 export function searchComplete(searchResults) {
     const isError = !!searchResults.error;
-    const payload = isError ? new Error(searchResults.error.message) : searchResults;
+    const payload = isError ? new Error(searchResults.error) : searchResults;
     return {
         type: SEARCH_COMPLETE,
         payload,

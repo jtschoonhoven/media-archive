@@ -26,6 +26,9 @@ function serializePageKey(id, relevanceScore) {
  * Deserialize a page key back into its id and relevance score.
  */
 function deserializePageKey(key) {
+    if (!key) {
+        return null;
+    }
     try {
         return {
             id: parseInt(key.slice(0, -2), 16),

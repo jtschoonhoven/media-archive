@@ -74,6 +74,14 @@ const SEARCH_SCHEMA = Joi.object({
     query: Joi.object({
         s: Joi.string().regex(/^[0-9a-zA-Z _(&|!)-]+$/).required()
             .error(() => 'Search string must be letters, numbers, or the logical operators (!|&)'),
+        document: Joi.number().integer().min(0).max(1)
+            .error(() => 'Document filter must be either 0 or 1'),
+        audio: Joi.number().integer().min(0).max(1)
+            .error(() => 'Audio filter must be either 0 or 1'),
+        image: Joi.number().integer().min(0).max(1)
+            .error(() => 'Image filter must be either 0 or 1'),
+        video: Joi.number().integer().min(0).max(1)
+            .error(() => 'Video filter must be either 0 or 1'),
         limit: Joi.number().integer().min(1).max(100)
             .error(() => 'Limit must be an integer between 1 and 100'),
         nextKey: Joi.string().hex()
