@@ -114,6 +114,7 @@ async function runQuery(searchString, filters) {
         typeFilters.push('\'audio\'');
     }
 
+    // FIXME: use sql-template-strings
     const query = `
         SELECT media.*, relevance
         FROM
@@ -121,7 +122,8 @@ async function runQuery(searchString, filters) {
             TO_TSQUERY('english', '${safeSearchString}')    AS query_lex,
             TO_TSQUERY('simple',  '${firstWordMatch[0]}:*') AS query_pre,
             TS_RELEVANCE_V0(media_tsvector, query_lex, query_pre) AS relevance
-        WHERE (
+        WHERE deleted_at IS NULL
+        AND (
                 media_tsvector @@ query_lex -- matches word roots in parsed document
         ${!isPrecise ? `
             OR  media_tsvector @@ query_pre -- matches any prefix in parsed document

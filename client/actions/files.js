@@ -81,7 +81,7 @@ export function uploadFileToS3(file, uuid, uploadUrl, uploadPolicy, dispatch) {
  * This is called automatically by the UPLOAD action and should not be used elsewhere.
  *
  * dirContents: results of a Files API GET for the current directory
- * fileObjects: list of raw File objects for upload
+ * fileObjects: list of raw File objects pending upload
  * dispatch:    function to dispatch a redux action
  */
 export function _uploadAcknowledged(dirContentsQuery, rawFileObjects, dispatch) {
