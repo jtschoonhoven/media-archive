@@ -16,8 +16,9 @@ const POST_HEADERS = { 'Content-Type': 'application/json' };
 
 /*
  * Receive a list of files and directories from the files API as JSON.
+ * This is called automatically by the FILES_LOAD action and should not be used elsewhere.
  */
-export function loadComplete(filesResults) {
+export function _loadComplete(filesResults) {
     const isError = !!filesResults.error;
     const payload = isError ? new Error(filesResults.error) : filesResults;
     return {
@@ -34,15 +35,15 @@ export function load(path, dispatch) {
     path = path.startsWith('/') ? path.slice(1) : path; // remove leading slash
     fetch(`/api/v1/files/${path}`)
         .then(response => response.json())
-        .then(data => dispatch(loadComplete(data)))
-        .catch(err => dispatch(loadComplete({ error: err.message })));
+        .then(data => dispatch(_loadComplete(data)))
+        .catch(err => dispatch(_loadComplete({ error: err.message })));
     return {
         type: FILES_LOAD,
         payload: { path },
     };
 }
 
-export function uploadFileToS3Complete(filesResults) {
+export function _uploadFileToS3Complete(filesResults) {
     const isError = !!filesResults.error;
     const payload = isError ? new Error(filesResults.error) : filesResults;
     return {
@@ -52,18 +53,23 @@ export function uploadFileToS3Complete(filesResults) {
     };
 }
 
-export function uploadFileToS3(file, uuid, s3AuthConfig, dispatch) {
+export function uploadFileToS3(file, uuid, uploadUrl, uploadPolicy, dispatch) {
     // urlencode S3 auth config
     const formData = new FormData();
-    Object.keys(s3AuthConfig).forEach((configKey) => {
-        const configValue = s3AuthConfig[configKey];
+    Object.keys(uploadPolicy).forEach((configKey) => {
+        const configValue = uploadPolicy[configKey];
         formData.append(configKey, configValue);
     });
-    formData.append('file', file); // this must be added to formData last
-    fetch(`https://${SETTINGS.S3_BUCKET_NAME}.s3.amazonaws.com`, { method: 'POST', body: formData })
-        .then(response => response.json())
-        .then(data => dispatch(uploadFileToS3Complete(data)))
-        .catch(err => dispatch(uploadFileToS3Complete({ error: err.message })));
+    formData.append('file', file);
+    fetch(uploadUrl, { method: 'POST', body: formData })
+        .then((response) => {
+            const data = {};
+            if (!response.ok) {
+                data.error = response.statusText;
+            }
+            dispatch(_uploadFileToS3Complete(data));
+        })
+        .catch(err => dispatch(_uploadFileToS3Complete({ error: err.message })));
     return {
         type: FILES_UPLOAD_TO_S3,
         payload: {},
@@ -72,37 +78,89 @@ export function uploadFileToS3(file, uuid, s3AuthConfig, dispatch) {
 
 /*
  * Server acknowledges upload and returns signed tokens used for direct upload to S3.
+ * This is called automatically by the UPLOAD action and should not be used elsewhere.
+ *
+ * dirContents: results of a Files API GET for the current directory
+ * fileObjects: list of raw File objects for upload
+ * dispatch:    function to dispatch a redux action
  */
-export function uploadAcknowledged(uploadsResults) {
-    const isError = !!uploadsResults.error;
-    const payload = isError ? new Error(uploadsResults.error) : uploadsResults;
+export function _uploadAcknowledged(dirContentsQuery, rawFileObjects, dispatch) {
+    const isError = !!dirContentsQuery.error;
+    if (isError) {
+        return {
+            type: FILES_UPLOAD_ACKNOWLEDGED,
+            payload: new Error(dirContentsQuery.error),
+            error: true,
+        };
+    }
+
+    dirContentsQuery.results.forEach((dirItem) => {
+        if (dirItem.type !== 'upload') {
+            return;
+        }
+        const fileObj = rawFileObjects.find((file) => {
+            return file.name === dirItem.media_file_name_unsafe;
+        });
+        if (fileObj) {
+            dirItem.file = fileObj;
+            dispatch(
+                uploadFileToS3(
+                    fileObj,
+                    dirItem.uuid,
+                    dirItem.s3UploadUrl,
+                    dirItem.s3UploadPolicy,
+                    dispatch,
+                ),
+            );
+        }
+    });
+
     return {
         type: FILES_UPLOAD_ACKNOWLEDGED,
-        payload,
-        error: isError,
+        payload: dirContentsQuery.results,
+        error: false,
     };
 }
 
 /*
  * Upload a list of files to directory at the given path.
+ *
+ * path:     path to upload files to, e.g. /uploads (leading and trailing slashes are stripped)
+ * fileList: an instance of FileList, containing raw File objects for upload
+ * dispatch: function to dispatch a redux action
  */
 export function upload(path, fileList, dispatch) {
-    path = path.startsWith('/') ? path.slice(1) : path; // remove leading slash
-    const body = JSON.stringify({ files: fileList });
+    // remove leading slash from upload path
+    path = path.startsWith('/') ? path.slice(1) : path;
+
+    // get an array of raw File objects from FileList instance
+    const fileObjectsArray = Array.from(fileList);
+
+    // get an array of file metadata from File objects
+    const fileMetadataArray = fileObjectsArray.map((file) => {
+        return { name: file.name, sizeInBytes: file.size };
+    });
+
+    // POST metadata to server (NOT the files themselves, those will go directly to S3)
+    const body = JSON.stringify({ files: fileMetadataArray });
     fetch(`/api/v1/files/${path}`, { method: 'POST', body, headers: POST_HEADERS })
         .then(response => response.json())
-        .then(data => dispatch(uploadAcknowledged(data)))
-        .catch(err => dispatch(uploadAcknowledged({ error: err.message })));
+        .then(data => dispatch(_uploadAcknowledged(data, fileObjectsArray, dispatch)))
+        .catch(err => dispatch(_uploadAcknowledged({ error: err.message })));
+
+    // save array of *actual* File objects to state
     return {
         type: FILES_UPLOAD,
-        payload: {},
+        payload: {
+            uploads: fileObjectsArray,
+        },
     };
 }
 
 /*
  * Server confirms that file has been deleted.
  */
-export function uploadCancelComplete(uploadId, uploadsResults) {
+export function _uploadCancelComplete(uploadId, uploadsResults) {
     let error;
     const isError = !!uploadsResults.error;
     if (isError) {
@@ -121,10 +179,10 @@ export function uploadCancelComplete(uploadId, uploadsResults) {
  * Client sends request to delete file by ID.
  */
 export function uploadCancel(uploadId, dispatch) {
-    fetch(`/api/v1/files/${uploadId}`, { method: 'DELETE' })
+    fetch(`/api/v1/uploads/${uploadId}`, { method: 'DELETE' })
         .then(response => response.json())
-        .then(data => dispatch(uploadCancelComplete(uploadId, data)))
-        .catch(err => dispatch(uploadCancelComplete(uploadId, { error: err.message })));
+        .then(data => dispatch(_uploadCancelComplete(uploadId, data)))
+        .catch(err => dispatch(_uploadCancelComplete(uploadId, { error: err.message })));
     return {
         type: FILES_UPLOAD_CANCEL,
         payload: { id: uploadId },

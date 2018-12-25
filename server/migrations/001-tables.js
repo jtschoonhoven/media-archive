@@ -6,7 +6,7 @@ exports.up = async (db) => {
         CREATE TABLE media (
             -- identifiers
             id SERIAL PRIMARY KEY, -- sequential primary ID
-            uuid UUID UNIQUE, -- client-facing, obscured ID, primarily for use with S3
+            uuid TEXT UNIQUE, -- client-facing, obscured ID, primarily for use with S3
 
             -- group info
             box_id INTEGER, -- (AKA "Unique Shipping Box") numeric ID that identifies the shipping box
@@ -30,6 +30,7 @@ exports.up = async (db) => {
 
             -- media file info
             media_file_name TEXT, -- filename with extension, but without directory path
+            media_file_name_unsafe TEXT, -- original, unsanitized file name as it appeared on the uploader's computer
             media_file_path TEXT, -- e.g. "/board/meetings/november.txt" path to the uploaded media at time of upload
             media_file_path_array TEXT[], -- same as media_file_path but split on path delimeters
             media_file_extension TEXT, -- upper-case file extension, e.g. MP4, PDF, etc

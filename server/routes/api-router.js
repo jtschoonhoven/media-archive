@@ -139,7 +139,7 @@ const UPLOADS_SCHEMA = Joi.object({
         files: Joi.array().items(
             Joi.object({
                 name: Joi.string().regex(/^[0-9a-zA-Z ._-]+$/).required()
-                    .error(() => 'File must be letters, numbers, dashes, underscores, or spaces.'),
+                    .error(() => 'File name must be alphanumeric or have dashes and spaces.'),
                 sizeInBytes: Joi.number().integer().min(0)
                     .error(() => 'File size must be a positive integer.'),
             }),
@@ -151,6 +151,22 @@ apiRouter.post('/files/:path(*)', validateReq.bind(null, UPLOADS_SCHEMA), async 
     const dirPath = req.params.path;
     const fileList = req.body.files;
     return sendResponse(201, req, res, uploadsService.upload, dirPath, fileList, req.user.email);
+});
+
+/*
+ * Upload Cancel API.
+ * Cancel a pending upload by its ID.
+ */
+const CANCEL_SCHEMA = Joi.object({
+    params: Joi.object({
+        fileId: Joi.number().integer().min(1).required()
+            .error(() => 'File Delete API requires a valid file ID.'),
+    }).unknown(),
+}).unknown();
+
+apiRouter.delete('/uploads/:fileId', validateReq.bind(null, CANCEL_SCHEMA), async (req, res) => {
+    const fileId = req.params.fileId;
+    return sendResponse(200, req, res, uploadsService.cancel, fileId, req.user.email);
 });
 
 /*

@@ -47,7 +47,6 @@ class ArchiveUpload extends React.Component {
         const Uploads = [];
         props.results.forEach((fileObj) => {
             if (fileObj.type === 'upload') {
-                console.log(fileObj);
                 window.f = fileObj;
                 Uploads.push(<Upload fileObj={ fileObj } onUploadCancel={ this.props.onUploadCancel } key={ fileObj.id } />); // eslint-disable-line max-len
             }
@@ -110,11 +109,8 @@ class ArchiveUpload extends React.Component {
     handleUploadSelect(event) {
         event.preventDefault();
         const path = this.getFilePath();
-        const fileListObj = event.target.files || [];
-        const filesList = Object.values(fileListObj).map((file) => {
-            return { name: file.name, sizeInBytes: file.size };
-        });
-        this.props.onUpload(path, filesList);
+        const fileList = event.target.files || [];
+        this.props.onUpload(path, fileList);
     }
 }
 

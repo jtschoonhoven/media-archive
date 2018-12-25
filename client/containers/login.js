@@ -3,6 +3,11 @@ import { connect } from 'react-redux';
 import { ArchiveLogin } from '../components';
 
 
-const ArchiveLoginContainer = connect(() => ({}))(ArchiveLogin);
+function mapStateToProps(state) {
+    return { user: state.user || {} };
+}
+
+
+const ArchiveLoginContainer = connect(mapStateToProps)(ArchiveLogin);
 
 export default ArchiveLoginContainer;

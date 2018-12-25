@@ -5,12 +5,15 @@ import {
     FILES_UPLOAD_ACKNOWLEDGED,
     FILES_UPLOAD_CANCEL,
     FILES_UPLOAD_CANCEL_COMPLETE,
+    FILES_UPLOAD_TO_S3,
+    FILES_UPLOAD_TO_S3_COMPLETE,
 } from '../actions/files';
 
 
 const INITIAL_STATE = {
     isFetching: false,
     results: [],
+    uploads: [],
     deletions: [],
     path: undefined,
     error: null,
@@ -38,8 +41,12 @@ export default function filesReducer(state = INITIAL_STATE, action) {
         }
 
         // when client sends initial list of file descriptors to server
+        // add File objects to "uploads" array
         case FILES_UPLOAD: {
-            const update = { isAcknowledging: true };
+            const update = {
+                isAcknowledging: true,
+                uploads: state.uploads.concat(data.uploads || []),
+            };
             return Object.assign({}, state, update);
         }
 
@@ -48,7 +55,7 @@ export default function filesReducer(state = INITIAL_STATE, action) {
             const update = {
                 isAcknowledging: false,
                 error: action.error ? data.message : null,
-                results: data.results || state.results,
+                results: data || state.results.slice(),
             };
             return Object.assign({}, state, update);
         }

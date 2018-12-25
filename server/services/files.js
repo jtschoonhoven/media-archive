@@ -23,6 +23,10 @@ const getSQL = (path, userEmail) => {
             END AS type,
             media_file_path_array[${pathArray.length + 1}] AS name,
             MAX(id) AS id,
+            MAX(uuid) AS uuid,
+            MAX(media_file_name) AS media_file_name,
+            MAX(media_file_name_unsafe) AS media_file_name_unsafe,
+            MAX(media_file_extension) AS media_file_extension,
             COUNT(1) AS num_entries
         FROM media
         WHERE deleted_at IS NULL
@@ -38,8 +42,8 @@ const getSQL = (path, userEmail) => {
                 .join('\nAND ')
         }
         GROUP BY name, type
-        ORDER BY type ASC, num_entries DESC, name ASC
-        ;`;
+        ORDER BY type ASC, num_entries DESC, name ASC;
+    `;
 };
 
 module.exports.detail = async (fileId) => {
@@ -61,7 +65,13 @@ module.exports.load = async (path, userEmail) => {
     // add S3 upload credentials for each pending upload
     rows.forEach((fileObj) => {
         if (fileObj.type === 'upload') {
-            fileObj.s3UploadAuth = s3Service.getS3UploadAuth(fileObj.media_file_name);
+            const s3SignedPost = s3Service.getPresignedPost(
+                fileObj.uuid,
+                fileObj.media_file_name,
+                fileObj.media_file_extension,
+            );
+            fileObj.s3UploadUrl = s3SignedPost.url;
+            fileObj.s3UploadPolicy = s3SignedPost.fields;
         }
     });
     return { results: rows };

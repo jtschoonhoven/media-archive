@@ -1,8 +1,13 @@
 import React from 'react';
+import { Redirect } from 'react-router'; // eslint-disable-line no-unused-vars
 
 
 class ArchiveLogin extends React.Component {
     render() {
+        // redirect if already logged in
+        if (this.props.user.isLoggedIn) {
+            return <Redirect to="/" />;
+        }
         return (
             <div id="archive-login" className="jumbotron">
                 <h1 className="display-4">Please log in</h1>

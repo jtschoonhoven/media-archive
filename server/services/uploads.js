@@ -1,3 +1,4 @@
+const config = require('config');
 const path = require('path');
 const sql = require('sql-template-strings');
 const uuidv4 = require('uuid/v4');
@@ -6,38 +7,14 @@ const db = require('./database');
 const filesService = require('./files');
 const logger = require('./logger');
 
+const FILE_EXT_WHITELIST = config.get('CONSTANTS.FILE_EXT_WHITELIST');
+const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
+
 const EXTRA_SPACE_REGEX = new RegExp('\\s+', 'g');
 const MEDIA_NAME_BLACKLIST = new RegExp('[^0-9a-zA-Z -]', 'g');
 const FILE_NAME_BLACKLIST = new RegExp('[^0-9a-zA-Z._-]', 'g');
 const FILE_PATH_BLACKLIST = new RegExp('[^0-9a-zA-Z_/-]', 'g');
 const MEDIA_FILE_EXTENSION_BLACKLIST = new RegExp('[^0-9a-zA-Z]', 'g');
-
-const DOCUMENT = 'document';
-const IMAGE = 'image';
-const AUDIO = 'audio';
-const VIDEO = 'video';
-
-const EXTENSION_TYPES = {
-    'PDF': DOCUMENT,
-    'DOC': DOCUMENT,
-    'DOCX': DOCUMENT,
-    'TIFF': DOCUMENT,
-    'PNG': IMAGE,
-    'JPG': IMAGE,
-    'WAV': AUDIO,
-    'MP4': VIDEO,
-};
-
-const UPLOAD_TYPE = 'upload';
-const UPLOAD_PENDING = 'pending';
-const UPLOAD_FAILURE = 'failure';
-const UPLOAD_SUCCESS = 'success';
-
-const UPLOAD_STATUSES = {
-    UPLOAD_PENDING,
-    UPLOAD_FAILURE,
-    UPLOAD_SUCCESS,
-};
 
 
 function getDirPath(dirPath) {
@@ -92,7 +69,7 @@ function getMediaFileExtension(fileName) {
 
 function getMediaType(fileName) {
     const extension = getMediaFileExtension(fileName);
-    const mediaType = EXTENSION_TYPES[extension];
+    const mediaType = FILE_EXT_WHITELIST[extension].type;
     if (!mediaType) {
         throw new Error(`Cannot upload ${fileName}: extension ${extension} is not supported.`);
     }
@@ -100,6 +77,7 @@ function getMediaType(fileName) {
 }
 
 function getInsertSql(
+    mediaFileUnsafe,
     mediaName,
     mediaType,
     mediaFile,
@@ -115,6 +93,7 @@ function getInsertSql(
             media_name,
             media_type,
             media_file_name,
+            media_file_name_unsafe,
             media_file_path,
             media_file_extension,
             media_file_size_bytes,
@@ -127,11 +106,12 @@ function getInsertSql(
             ${mediaName}, -- media_name
             ${mediaType}, -- media_type
             ${mediaFile}, -- media_file_name
+            ${mediaFileUnsafe}, -- media_file_name_unsafe
             ${mediaPath}, -- media_file_path
             ${mediaExtn}, -- media_file_extension
             ${mediaSize}, -- media_file_size_bytes
             ${userEmail}, -- upload_email
-            ${UPLOAD_PENDING}, -- upload_status
+            ${UPLOAD_STATUSES.PENDING}, -- upload_status
             NOW() -- upload_started_at
         );
     `;
@@ -169,49 +149,36 @@ async function checkDuplicates(dirPath, fileList) {
 async function addFilesToDb(dirPath, fileList, userEmail) {
     const transaction = new db.Transaction();
 
-    fileList.forEach((fileInfo) => {
-        let mediaName;
-        let mediaType;
-        let mediaFile;
-        let mediaPath;
-        let mediaExtn;
-        let mediaSize;
-        try {
+    try {
+        fileList.forEach((fileInfo) => {
             // validate and sanitize uploaded file info
-            mediaName = getMediaName(fileInfo.name);
-            mediaType = getMediaType(fileInfo.name);
-            mediaFile = getFileName(fileInfo.name);
-            mediaPath = getFilePath(dirPath, fileInfo.name);
-            mediaExtn = getMediaFileExtension(fileInfo.name);
-            mediaSize = parseInt(fileInfo.sizeInBytes, 10);
-        }
-        catch (err) {
-            // add "error" property to fileInfo object on failure and continue
-            logger.warn(`ignoring uploaded file ${fileInfo.name}: ${err.message}`);
-            fileInfo.error = err.message;
-            return;
-        }
-        // exectute query within a transaction
-        const query = getInsertSql(
-            mediaName,
-            mediaType,
-            mediaFile,
-            mediaPath,
-            mediaExtn,
-            mediaSize,
-            userEmail,
-        );
-        transaction.add(query);
+            const mediaName = getMediaName(fileInfo.name);
+            const mediaType = getMediaType(fileInfo.name);
+            const mediaFile = getFileName(fileInfo.name);
+            const mediaPath = getFilePath(dirPath, fileInfo.name);
+            const mediaExtn = getMediaFileExtension(fileInfo.name);
+            const mediaSize = parseInt(fileInfo.sizeInBytes, 10);
 
-        // update fileInfo with sanitized name
-        fileInfo.originalName = fileInfo.name;
-        fileInfo.name = mediaName;
-        fileInfo.path = mediaPath;
-        fileInfo.status = UPLOAD_PENDING;
-        fileInfo.type = UPLOAD_TYPE;
-    });
+            // exectute query within a transaction
+            const query = getInsertSql(
+                fileInfo.name,
+                mediaName,
+                mediaType,
+                mediaFile,
+                mediaPath,
+                mediaExtn,
+                mediaSize,
+                userEmail,
+            );
+            transaction.add(query);
+        });
+    }
+    catch (err) {
+        logger.error(`rolling back files upload: "${err.message}"`);
+        await transaction.rollback();
+        throw err;
+    }
     await transaction.commit();
-    return fileList;
 }
 
 /*
@@ -235,4 +202,21 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
     }
     // return the list of all files in directory
     return directoryList;
+};
+
+/*
+ * Mark a file in the DB as deleted. Sets "deleted_at", does not *truly* delete anything.
+ */
+module.exports.cancel = async (fileId, userEmail) => {
+    // FIXME: first validate that the user is allowed to delete this file
+    const query = sql`
+        UPDATE media
+        SET deleted_at = NOW(), upload_status = ${UPLOAD_STATUSES.ABORTED}
+        WHERE id = ${fileId}
+        AND upload_status = ${UPLOAD_STATUSES.PENDING}
+        AND upload_email = ${userEmail};
+    `;
+    await db.run(query);
+    // FIXME: this shouldn't return as successful if nothing was deleted
+    return { deletions: [parseInt(fileId, 10)] };
 };
