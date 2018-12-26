@@ -1,3 +1,5 @@
+const sql = require('sql-template-strings');
+
 const db = require('../services/database');
 const logger = require('../services/logger');
 
@@ -82,6 +84,74 @@ function sanitizeSearchString(searchString) {
     });
 }
 
+function getSearchSql(searchString, typeFilters, prevKey, nextKey, limit) {
+    const safeSearchString = sanitizeSearchString(searchString);
+    const firstWord = toAlphaNum(safeSearchString);
+    const isPrecise = QUERY_LOGIC_CHARS.some(char => safeSearchString.includes(char));
+    const query = sql`
+        SELECT media.*, relevance
+        FROM
+            media,
+            TO_TSQUERY('english', ${safeSearchString}) AS query_lex,
+            TO_TSQUERY('simple',  ${`${firstWord}:*`}) AS query_pre,
+            TS_RELEVANCE_V0(media_tsvector, query_lex, query_pre) AS relevance
+        WHERE deleted_at IS NULL
+    `;
+
+    // if this is precise mode (i.e. a logical operator was used), search only on word roots
+    if (isPrecise) {
+        query.append('\nAND media_tsvector @@ query_lex');
+    }
+    // otherwise (no logical operator used), search on word roots and on prefixes
+    else {
+        query.append(sql`
+            AND (
+                media_tsvector @@ query_lex -- word roots
+                OR media_tsvector @@ query_pre -- word prefixes
+            )
+        `);
+    }
+
+    // filter on type of media if specified
+    if (typeFilters.length) {
+        query.append('\nAND (\n');
+        query.append(
+            typeFilters.map(typeFilter => sql`media_type = ${typeFilter}`).join('\nOR '),
+        );
+        query.append('\n)');
+    }
+
+    // add forward pagination key if set
+    if (nextKey) {
+        query.append(sql`
+            -- pagination: get next page of results
+            AND relevance <= ${nextKey.relevance}
+            AND NOT (relevance = ${nextKey.relevance} AND media.id >= ${nextKey.id})
+        `);
+    }
+    // add backward pagination key if set
+    else if (prevKey) {
+        query.append(sql`
+            -- pagination: get previous page of results
+            AND relevance >= ${prevKey.relevance}
+            AND NOT (relevance = ${prevKey.relevance} AND media.id <= ${prevKey.id})
+        `);
+    }
+
+    // sort by descending relevance unless we're paginating backwards
+    if (!prevKey) {
+        query.append('\nORDER BY relevance DESC, media.id DESC');
+    }
+    // if paginating backwards, reverse the usual order
+    else {
+        query.append('\nORDER BY relevance ASC, media.id ASC');
+    }
+
+    // fetch one extra row to detect extra pages (the extra is not returned to the client)
+    query.append(sql`\nLIMIT ${limit + 1}`);
+    return query;
+}
+
 /*
  * Query the database for media matching the given search string and filters.
  * For a good explanation of tsvector see
@@ -89,69 +159,23 @@ function sanitizeSearchString(searchString) {
  */
 async function runQuery(searchString, filters) {
     const { limit, prevKey, nextKey, document, image, video, audio } = filters;
-    const safeSearchString = sanitizeSearchString(searchString);
-    const firstWordMatch = toAlphaNum(safeSearchString);
-    const isPrecise = QUERY_LOGIC_CHARS.some(char => safeSearchString.includes(char));
-
-    if (!firstWordMatch) {
-        return { error: 'Search term must contain at least one letter or number' };
-    }
-    if (nextKey && prevKey) {
-        return { error: 'nextKey and prevKey query params are mutually exclusive' };
-    }
 
     const typeFilters = [];
     if (document) {
-        typeFilters.push('\'document\'');
+        typeFilters.push('document');
     }
     if (image) {
-        typeFilters.push('\'image\'');
+        typeFilters.push('image');
     }
     if (video) {
-        typeFilters.push('\'video\'');
+        typeFilters.push('video');
     }
     if (audio) {
-        typeFilters.push('\'audio\'');
+        typeFilters.push('audio');
     }
 
-    // FIXME: use sql-template-strings
-    const query = `
-        SELECT media.*, relevance
-        FROM
-            media,
-            TO_TSQUERY('english', '${safeSearchString}')    AS query_lex,
-            TO_TSQUERY('simple',  '${firstWordMatch[0]}:*') AS query_pre,
-            TS_RELEVANCE_V0(media_tsvector, query_lex, query_pre) AS relevance
-        WHERE deleted_at IS NULL
-        AND (
-                media_tsvector @@ query_lex -- matches word roots in parsed document
-        ${!isPrecise ? `
-            OR  media_tsvector @@ query_pre -- matches any prefix in parsed document
-            ` : '-- precise search enabled'
-        }
-        )
-        ${typeFilters.length ? `
-            AND media.media_type IN (${typeFilters.join(', ')})
-            ` : '-- type filters disabled'
-        }
-        ${nextKey ? `
-            -- pagination: get next page of results
-            AND relevance <= ${nextKey.relevance}
-            AND NOT (relevance = ${nextKey.relevance} AND media.id >= ${nextKey.id})
-        ` : '-- forward pagination disabled'
-        }
-        ${prevKey ? `
-            -- pagination: get previous page of results
-            AND relevance >= ${prevKey.relevance}
-            AND NOT (relevance = ${prevKey.relevance} AND media.id <= ${prevKey.id})
-        ` : '-- backwards pagination disabled'
-        }
-        ${!prevKey ? `
-             ORDER BY relevance DESC, media.id DESC
-        ` : 'ORDER BY relevance ASC, media.id ASC'
-        }
-        LIMIT ${limit + 1} -- fetch one extra row to detect extra pages
-    ;`;
+    const query = getSearchSql(searchString, typeFilters, prevKey, nextKey, limit);
+
     return db.all(query)
         .catch((err) => {
             logger.error(`${err.stack}\n${query}`);

@@ -88,7 +88,8 @@ const SEARCH_SCHEMA = Joi.object({
             .error(() => 'nextKey param must be a hexadecimal'),
         prevKey: Joi.string().hex()
             .error(() => 'prevKey param must be a hexadecimal'),
-    }),
+    }).oxor('nextKey', 'prevKey')
+        .error(() => 'nextKey and prevKey are mutually exclusive'),
 }).unknown();
 
 apiRouter.get('/search', validateReq.bind(null, SEARCH_SCHEMA), async (req, res) => {
