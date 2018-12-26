@@ -11,6 +11,11 @@ const precss = require('precss');
  * Common webpack config used in all builds.
  */
 const BASE_CONFIG = {
+    plugins: [
+        // expose a global CONFIG object
+        // see github.com/arthanzel/node-config-webpack
+        new ConfigWebpackPlugin(),
+    ],
     module: {
         rules: [
             // eslint: lint JS before bundling
@@ -60,8 +65,6 @@ const CLIENT_CONFIG = {
         filename: 'bundle.client.js',
     },
     plugins: [
-        // define a global SETTINGS object from config files
-        new ConfigWebpackPlugin('SETTINGS'),
         // make CSS available to client
         new MiniCssExtractPlugin({
             path: path.join(__dirname, '../dist'),

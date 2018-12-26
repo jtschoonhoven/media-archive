@@ -8,7 +8,6 @@ import FileUpload from './file-old.jsx'; // eslint-disable-line no-unused-vars
 import File from './file.jsx'; // eslint-disable-line no-unused-vars
 import Directory from './directory.jsx'; // eslint-disable-line no-unused-vars
 import Upload from './file-upload.jsx'; // eslint-disable-line no-unused-vars
-import { UPLOAD_STATUS } from '../../constants';
 
 const VALID_EXTENSIONS = [
     '.PDF',
@@ -116,4 +115,3 @@ class ArchiveUpload extends React.Component {
 
 
 export default ArchiveUpload;
-export { UPLOAD_STATUS };

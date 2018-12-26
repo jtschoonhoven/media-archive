@@ -114,10 +114,8 @@ function getSearchSql(searchString, typeFilters, prevKey, nextKey, limit) {
 
     // filter on type of media if specified
     if (typeFilters.length) {
-        query.append('\nAND (\n');
-        query.append(
-            typeFilters.map(typeFilter => sql`media_type = ${typeFilter}`).join('\nOR '),
-        );
+        query.append('AND ( FALSE\n');
+        typeFilters.forEach(typeFilter => query.append(sql`OR media_type = ${typeFilter}`));
         query.append('\n)');
     }
 

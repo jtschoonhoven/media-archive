@@ -8,6 +8,7 @@ import { Route, Switch } from 'react-router-dom'; // eslint-disable-line no-unus
 
 import reducer from '../reducers';
 import RestrictedRoute from './common'; // eslint-disable-line no-unused-vars
+import SETTINGS from '../settings';
 import {
     ArchiveDetailContainer, // eslint-disable-line no-unused-vars
     ArchiveLoginContainer, // eslint-disable-line no-unused-vars
@@ -22,7 +23,11 @@ import {
 class ArchiveApp extends React.Component {
     constructor(props) {
         super(props);
-        this.store = createStore(reducer, props.initialState);
+        this.store = createStore(
+            reducer,
+            props.initialState,
+            props.reduxDevtools,
+        );
     }
 
     render() {

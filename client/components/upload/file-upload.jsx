@@ -1,10 +1,11 @@
 import React from 'react'; // eslint-disable-line no-unused-vars
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
-import { UPLOAD_STATUS } from '../../constants';
+import SETTINGS from '../../settings';
 
-const SUCCESS_STATES = [UPLOAD_STATUS.SUCCESS];
-const FAILURE_STATES = [UPLOAD_STATUS.ABORTED, UPLOAD_STATUS.FAILURE];
+const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
+const SUCCESS_STATES = [UPLOAD_STATUSES.SUCCESS];
+const FAILURE_STATES = [UPLOAD_STATUSES.ABORTED, UPLOAD_STATUSES.FAILURE];
 
 
 class FileUpload extends React.Component {

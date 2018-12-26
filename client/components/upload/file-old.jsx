@@ -1,10 +1,11 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { UPLOAD_STATUS } from '../../constants';
+import SETTINGS from '../../settings';
 
-const SUCCESS_STATES = [UPLOAD_STATUS.SUCCESS];
-const FAILURE_STATES = [UPLOAD_STATUS.ABORTED, UPLOAD_STATUS.FAILURE];
+const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
+const SUCCESS_STATES = [UPLOAD_STATUSES.SUCCESS];
+const FAILURE_STATES = [UPLOAD_STATUSES.ABORTED, UPLOAD_STATUSES.FAILURE];
 
 
 class FileUpload extends React.Component {
@@ -77,7 +78,7 @@ class FileUpload extends React.Component {
 FileUpload.propTypes = {
     filename: PropTypes.string.isRequired,
     progress: PropTypes.number.isRequired,
-    status: PropTypes.oneOf(Object.values(UPLOAD_STATUS)).isRequired,
+    status: PropTypes.oneOf(Object.values(UPLOAD_STATUSES)).isRequired,
 };
 
 

@@ -117,7 +117,7 @@ export function _uploadAcknowledged(dirContentsQuery, rawFileObjects, dispatch) 
 
     return {
         type: FILES_UPLOAD_ACKNOWLEDGED,
-        payload: dirContentsQuery.results,
+        payload: dirContentsQuery,
         error: false,
     };
 }

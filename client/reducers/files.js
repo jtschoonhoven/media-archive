@@ -35,7 +35,7 @@ export default function filesReducer(state = INITIAL_STATE, action) {
             const update = {
                 isFetching: false,
                 error: action.error ? data.message : null,
-                results: data.results || state.results,
+                results: data.results || state.results.slice(),
             };
             return Object.assign({}, state, update);
         }
@@ -55,8 +55,9 @@ export default function filesReducer(state = INITIAL_STATE, action) {
             const update = {
                 isAcknowledging: false,
                 error: action.error ? data.message : null,
-                results: data || state.results.slice(),
+                results: data.results || state.results.slice(),
             };
+            console.log(update);
             return Object.assign({}, state, update);
         }
 
