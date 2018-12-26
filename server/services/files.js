@@ -11,8 +11,7 @@ const getSQL = (path, userEmail) => {
     if (path.trim()) {
         pathArray = path.split('/').map(dir => dir.replace(FILENAME_WHITELIST, '-'));
     }
-    // FIXME: use sql-template-strings here
-    return `
+    const query = sql`
         SELECT
             CASE
                 WHEN ARRAY_LENGTH(media_file_path_array, 1) > ${pathArray.length + 1}
@@ -33,17 +32,20 @@ const getSQL = (path, userEmail) => {
         AND (
             -- only include pending uploads from the current user
             upload_status != 'pending'
-            OR (upload_status = 'pending' AND upload_email = '${userEmail}')
+            OR (upload_status = 'pending' AND upload_email = ${userEmail})
         )
-        ${pathArray.length ? 'AND' : ''}
-        ${
-            pathArray
-                .map((dir, idx) => `media_file_path_array[${idx + 1}] = '${dir}'`)
-                .join('\nAND ')
-        }
+    `;
+
+    // match only items in this directory
+    pathArray.forEach((dir, idx) => {
+        query.append(sql`\nAND media_file_path_array[${idx + 1}] = ${dir}`);
+    });
+
+    query.append(`
         GROUP BY name, type
         ORDER BY type ASC, num_entries DESC, name ASC;
-    `;
+    `);
+    return query;
 };
 
 module.exports.detail = async (fileId) => {
