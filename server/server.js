@@ -13,7 +13,6 @@ const authRouter = require('./routes/auth-router');
 const authService = require('./services/auth');
 const db = require('./services/database');
 const logger = require('./services/logger');
-const settings = require('./settings');
 
 // constants
 const PORT = 8081; // nginx default
@@ -25,6 +24,7 @@ const SESSION_CONFIG = {
     maxAge: 1000 * 60 * 60 * 24, // 24h in ms
     sameSite: 'lax',
 };
+const NODE_ENV = config.get('NODE_ENV');
 
 
 // bootstrap database with test data for development
@@ -62,7 +62,7 @@ app.use(appRouter);
 
 // start server
 const server = app.listen(PORT, () => {
-    logger.info(`${settings.NODE_ENV} node server listening on http://localhost:${PORT}`);
+    logger.info(`${NODE_ENV} node server listening on http://localhost:${PORT}`);
 });
 
 // configure graceful shutdown and healthchecks

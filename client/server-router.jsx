@@ -13,7 +13,6 @@ class ServerRouter extends React.Component {
         const location = this.props.location;
         const context = this.props.context;
         const initialState = this.props.initialState;
-
         return (
             <StaticRouter location={location} context={context}>
                 <ArchiveApp initialState={initialState} />

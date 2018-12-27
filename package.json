@@ -13,11 +13,11 @@
     "scripts": {
         "analyze": "npx source-map-explorer dist/bundle.client.*",
         "clean": "find ./dist/* ! -name 'favicon.ico' | xargs rm",
-        "build-dev": "npm run clean && npx webpack --mode=development --config=config/webpack.config.js",
-        "watch": "npm run clean && npx webpack --watch --mode=development --config=config/webpack.config.js",
         "build": "npm run clean && npx webpack --mode=production --config=config/webpack.config.js",
-        "start-dev": "npx nodemon --inspect server/server.js",
+        "build:dev": "npm run clean && npx webpack --mode=development --config=config/webpack.config.js",
+        "watch": "npm run clean && npx webpack --watch --mode=development --config=config/webpack.config.js",
         "start": "node server/server.js",
+        "start:dev": "npx nodemon --inspect server/server.js",
         "zip": "npm run build && zip -r dist/archive.zip ./dist ./server ./config package.json",
         "deploy": "npm run zip && eb deploy --verbose",
         "db": "pg_ctl -D ./.pgdb start"
