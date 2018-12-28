@@ -1,3 +1,5 @@
+import { Map, OrderedMap, Record } from 'immutable';
+
 import {
     FILES_LOAD,
     FILES_LOAD_COMPLETE,
@@ -5,101 +7,127 @@ import {
     FILES_UPLOAD_ACKNOWLEDGED,
     FILES_UPLOAD_CANCEL,
     FILES_UPLOAD_CANCEL_COMPLETE,
+    FILES_UPLOAD_TO_S3,
+    FILES_UPLOAD_TO_S3_COMPLETE,
 } from '../actions/files';
+import { validateAction } from './index';
 
-
-const INITIAL_STATE = {
-    isFetching: false,
-    results: [],
-    uploads: [],
-    deletions: [],
-    path: undefined,
+const FilesState = Record({
     error: null,
-};
+    path: null,
+    isFetching: false,
+    isAcknowledging: false,
+    directoriesByName: OrderedMap(), // { str: DirectoryEntry }
+    filesById: OrderedMap(), // { int: FileEntry }
+    uploadsById: OrderedMap(), // { int: UploadEntry }
+    rawFileObjectsByName: OrderedMap(), // { str: RawFileObjEntry }
+});
 
+export const DirectoryEntry = Record({
+    name: null,
+    path: null,
+    numEntries: 0,
+});
 
-export default function filesReducer(state = INITIAL_STATE, action) {
-    const data = action.payload || {};
+export const RawFileObjEntry = Record({
+    nameUnsafe: null,
+    file: null,
+    size: null,
+});
+
+export const FileEntry = Record({
+    id: null,
+    uuid: null,
+    name: null,
+    path: null,
+    size: null,
+    nameUnsafe: null,
+    extension: null,
+    isDeleting: false,
+    isDeleted: false,
+});
+
+export const UploadEntry = Record({
+    id: null,
+    uuid: null,
+    name: null,
+    path: null,
+    size: null,
+    file: null,
+    error: null,
+    nameUnsafe: null,
+    extension: null,
+    rawFileObj: null,
+    s3UploadPolicy: null,
+    s3UploadUrl: null,
+    status: 'pending',
+    isUploading: false,
+    isDeleting: false,
+    isDeleted: false,
+});
+
+export default function filesReducer(state = FilesState(), action) {
+    validateAction(state, action);
+    const payload = action.payload;
 
     switch (action.type) {
         // when client has requested the list of files and directories at the given path
         case FILES_LOAD: {
-            const update = { isFetching: true };
-            return Object.assign({}, state, update);
+            const update = Map({ isFetching: true, error: null });
+            return state.merge(update, payload);
         }
 
         // when client has received the list of files and directories
         case FILES_LOAD_COMPLETE: {
-            const update = {
-                isFetching: false,
-                error: action.error ? data.message : null,
-                results: data.results || state.results.slice(),
-            };
-            return Object.assign({}, state, update);
+            if (action.error) {
+                return state.merge({ isFetching: false, error: payload.message });
+            }
+            const update = Map({ isFetching: false, error: null });
+            return state.merge(update, payload);
         }
 
         // when client sends initial list of file descriptors to server
-        // add File objects to "uploads" array
         case FILES_UPLOAD: {
-            const update = {
+            const oldFiles = state.get('rawFileObjectsByName');
+            const newFiles = payload.get('rawFileObjectsByName');
+            const update = Map({
                 isAcknowledging: true,
-                uploads: state.uploads.concat(data.uploads || []),
-            };
-            return Object.assign({}, state, update);
+                rawFileObjectsByName: oldFiles.merge(newFiles),
+                error: null,
+            });
+            return state.merge(update);
         }
 
         // server acknowledges receipt of file descriptors and returns upload tokens
         case FILES_UPLOAD_ACKNOWLEDGED: {
-            const update = {
-                isAcknowledging: false,
-                error: action.error ? data.message : null,
-                results: data.results || state.results.slice(),
-            };
-            console.log(update);
-            return Object.assign({}, state, update);
+            if (action.error) {
+                const update = Map({ isAcknowledging: false, error: payload.message });
+                return state.merge(update);
+            }
+            const update = Map({ isAcknowledging: false });
+            return state.merge(update, payload);
+        }
+
+        case FILES_UPLOAD_TO_S3: {
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
+            return state.merge({ uploadsById });
+        }
+
+        case FILES_UPLOAD_TO_S3_COMPLETE: {
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
+            return state.merge({ uploadsById });
         }
 
         // client requests to delete file by ID
         case FILES_UPLOAD_CANCEL: {
-            const fileId = data.id;
-            const newResults = state.results.map((fileObj) => {
-                const newFileObj = Object.assign({}, fileObj);
-                // set "isDeleting" on the file being deleted
-                if (newFileObj.id === fileId) {
-                    newFileObj.isDeleting = true;
-                }
-                return newFileObj;
-            });
-            const update = { results: newResults };
-            return Object.assign({}, state, update);
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
+            return state.merge({ uploadsById });
         }
 
         // server acknowledges file has been deleted
         case FILES_UPLOAD_CANCEL_COMPLETE: {
-            const deletions = data.deletions;
-
-            // copy the results with the deleted file removed (if no error)
-            const newResults = [];
-            state.results.forEach((oldFileObj) => {
-                const newFileObj = Object.assign({}, oldFileObj);
-                // if there was an error, unset "isDeleting" on the file object
-                if (action.error) {
-                    if (deletions.includes(newFileObj.id)) {
-                        newFileObj.isDeleting = false;
-                    }
-                    newResults.push(newFileObj);
-                }
-                else if (!deletions.includes(newFileObj.id)) {
-                    newResults.push(newFileObj);
-                }
-            });
-
-            const update = {
-                results: newResults,
-                deletions: data.deletions || [],
-                error: action.error ? data.message : null,
-            };
-            return Object.assign({}, state, update);
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
+            return state.merge({ uploadsById });
         }
 
         default: {

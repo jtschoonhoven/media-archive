@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 import SETTINGS from '../../settings';
 
 const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
-const SUCCESS_STATES = [UPLOAD_STATUSES.SUCCESS];
 const FAILURE_STATES = [UPLOAD_STATUSES.ABORTED, UPLOAD_STATUSES.FAILURE];
 
 
@@ -17,10 +16,8 @@ class FileUpload extends React.Component {
 
 
     render() {
-        const fileObj = this.props.fileObj;
+        const uploadEntry = this.props.uploadEntry;
         const progress = this.state.progress;
-        const status = fileObj.status;
-        const isDeleting = fileObj.isDeleting;
 
         // defaults apply to "pending" states (not success or failure)
         let isAnimated = true;
@@ -28,14 +25,18 @@ class FileUpload extends React.Component {
         let styleName = 'info';
         let ActionLink = <a href="#" onClick={ this.handleUploadCancel }>cancel</a>; // eslint-disable-line no-unused-vars
 
-        if (isDeleting) {
+        if (uploadEntry.isDeleted) {
+            return '';
+        }
+
+        if (uploadEntry.isDeleting) {
             isAnimated = false;
             styleName = 'danger';
             ActionLink = <span className="text-muted">canceling</span>;
         }
 
         // progress bars are not animated on success, no "retry" or "cancel" option
-        if (SUCCESS_STATES.includes(status)) {
+        if (uploadEntry.status === UPLOAD_STATUSES.SUCCESS) {
             isAnimated = false;
             isStriped = false;
             styleName = 'success';
@@ -43,10 +44,10 @@ class FileUpload extends React.Component {
         }
 
         // progress bars are not animated on failure, show "retry" option
-        else if (FAILURE_STATES.includes(status)) {
+        else if (FAILURE_STATES.includes(uploadEntry.status)) {
             isAnimated = false;
             styleName = 'danger';
-            ActionLink = <a href="#" onClick={ this.onUploadRetry }>retry</a>;
+            ActionLink = <a href="#" onClick={ this.handleUploadCancel }>remove</a>;
         }
 
         return (
@@ -54,8 +55,8 @@ class FileUpload extends React.Component {
                 <div className="row">
                     {/* filename */}
                     <span className="col-sm-6 col-md-4">
-                        📄 <Link to={`/detail/${fileObj.id}`}>
-                            { fileObj.name }
+                        📄 <Link to={`/detail/${uploadEntry.id}`}>
+                            { uploadEntry.name }
                         </Link>
                     </span>
                     {/* progress */}
@@ -79,7 +80,7 @@ class FileUpload extends React.Component {
                     </div>
                     {/* status */}
                     <div className="col-sm-2 col-md-2">
-                        <span>{ status }</span>
+                        <span>{ uploadEntry.status }</span>
                     </div>
                     {/* button */}
                     <div className="col-sm-2 col-md-1">
@@ -93,7 +94,7 @@ class FileUpload extends React.Component {
 
     handleUploadCancel(event) {
         event.preventDefault();
-        this.props.onUploadCancel(this.props.fileObj.id);
+        this.props.onUploadCancel(this.props.uploadEntry);
     }
 }
 

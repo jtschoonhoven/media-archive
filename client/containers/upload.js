@@ -6,7 +6,7 @@ import { load, upload, uploadCancel } from '../actions/files';
 
 
 function mapStateToProps(state) {
-    return state.files || {};
+    return { filesState: state.files };
 }
 
 function mapDispatchToProps(dispatch) {

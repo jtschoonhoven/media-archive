@@ -36,6 +36,7 @@ class ArchiveUpload extends React.Component {
 
     render() {
         const props = this.props;
+        const filesState = props.filesState;
         const currentUrl = props.location.pathname;
         const pathArray = currentUrl.slice(1).split('/');
         const BreadCrumbs = pathArray.map((dirname, idx) => Breadcrumb(pathArray, dirname, idx));
@@ -44,17 +45,17 @@ class ArchiveUpload extends React.Component {
         const Files = [];
         const Directories = [];
         const Uploads = [];
-        props.results.forEach((fileObj) => {
-            if (fileObj.type === 'upload') {
-                window.f = fileObj;
-                Uploads.push(<Upload fileObj={ fileObj } onUploadCancel={ this.props.onUploadCancel } key={ fileObj.id } />); // eslint-disable-line max-len
-            }
-            if (fileObj.type === 'file') {
-                Files.push(File(fileObj));
-            }
-            if (fileObj.type === 'directory') {
-                Directories.push(Directory(fileObj, currentUrl));
-            }
+
+        filesState.get('directoriesByName').forEach((directoryEntry) => {
+            Directories.push(Directory(directoryEntry));
+        });
+
+        filesState.get('filesById').forEach((fileEntry) => {
+            Files.push(File(fileEntry));
+        });
+
+        filesState.get('uploadsById').forEach((uploadEntry, id) => {
+            Uploads.push(<Upload uploadEntry={ uploadEntry } onUploadCancel={ this.props.onUploadCancel } key={ id } />); // eslint-disable-line max-len
         });
         return (
             <div id="archive-upload">
@@ -65,8 +66,8 @@ class ArchiveUpload extends React.Component {
                     </ol>
                 </nav>
                 {/* errors */}
-                <div id="archive-upload-errors" className="alert alert-danger" role="alert" style={{ display: props.error ? 'block' : 'none' }}>
-                    { props.error }
+                <div id="archive-upload-errors" className="alert alert-danger" role="alert" style={{ display: filesState.get('error') ? 'block' : 'none' }}>
+                    { filesState.get('error') }
                 </div>
                 {/* uploader */}
                 <div className="custom-file">

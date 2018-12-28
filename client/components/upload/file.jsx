@@ -2,14 +2,14 @@ import React from 'react'; // eslint-disable-line no-unused-vars
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
 
-export default (fileObj) => {
+export default (fileEntry) => {
     return (
-        <div className="archive-upload-result" key={fileObj.id}>
+        <div className="archive-upload-result" key={fileEntry.get('id')}>
             <div className="row">
                 {/* filename */}
                 <span className="col-12">
-                    📄 <Link to={`/detail/${fileObj.id}`}>
-                        { fileObj.name }
+                    📄 <Link to={`/detail/${fileEntry.get('id')}`}>
+                        { fileEntry.get('name') }
                     </Link>
                 </span>
             </div>
