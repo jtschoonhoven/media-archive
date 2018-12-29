@@ -205,6 +205,19 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
 };
 
 /*
+ * Mark an upload as successful.
+ */
+module.exports.confirm = async (fileId) => {
+    const query = sql`
+        UPDATE media
+        SET upload_status = ${UPLOAD_STATUSES.SUCCESS}
+        WHERE id = ${fileId};
+    `;
+    await db.run(query);
+    return {};
+};
+
+/*
  * Mark a file in the DB as deleted. Sets "deleted_at", does not *truly* delete anything.
  */
 module.exports.cancel = async (fileId, userEmail) => {
@@ -218,5 +231,5 @@ module.exports.cancel = async (fileId, userEmail) => {
     `;
     await db.run(query);
     // FIXME: this shouldn't return as successful if nothing was deleted
-    return { deletions: [parseInt(fileId, 10)] };
+    return {};
 };

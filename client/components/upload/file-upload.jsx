@@ -10,14 +10,12 @@ const FAILURE_STATES = [UPLOAD_STATUSES.ABORTED, UPLOAD_STATUSES.FAILURE];
 class FileUpload extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { progress: 50 };
         this.handleUploadCancel = this.handleUploadCancel.bind(this);
     }
 
 
     render() {
         const uploadEntry = this.props.uploadEntry;
-        const progress = this.state.progress;
 
         // defaults apply to "pending" states (not success or failure)
         let isAnimated = true;
@@ -69,8 +67,8 @@ class FileUpload extends React.Component {
                                     ${isAnimated && 'progress-bar-animated'}
                                     bg-${styleName}
                                 `}
-                                style={{ width: `${progress}%` }}
-                                aria-valuenow={ progress }
+                                style={{ width: `${uploadEntry.uploadPercent}%` }}
+                                aria-valuenow={ uploadEntry.uploadPercent }
                                 aria-valuemin="0"
                                 aria-valuemax="100"
                                 role="progressbar"

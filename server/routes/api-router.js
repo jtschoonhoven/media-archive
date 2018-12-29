@@ -1,3 +1,4 @@
+const config = require('config');
 const express = require('express');
 const Joi = require('joi');
 
@@ -5,6 +6,8 @@ const filesService = require('../services/files');
 const logger = require('../services/logger');
 const searchService = require('../services/search');
 const uploadsService = require('../services/uploads');
+
+const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
 
 
 // this router handles private API routes to serve data in JSON format
@@ -44,9 +47,10 @@ async function sendResponse(successStatusCode, req, res, func, ...args) {
  * Must be bound to a schema with `validateReq.bind(null, SCHEMA)`
  */
 function validateReq(schema, req, res, next) {
-    const result = Joi.validate(req, schema);
-    if (result.error) {
-        const errorStr = result.error.details[0].message;
+    console.log(req.body);
+    const validation = Joi.validate(req, schema);
+    if (validation.error) {
+        const errorStr = validation.error.details[0].message;
         logger.warn(`bad API request on ${req.url}: ${errorStr}`);
         return res.status(400).json({ error: errorStr });
     }
@@ -147,7 +151,7 @@ const UPLOADS_SCHEMA = Joi.object({
     body: Joi.object({
         files: Joi.array().items(
             Joi.object({
-                name: Joi.string().regex(/^[0-9a-zA-Z ._-]+$/).required()
+                name: Joi.string().required()
                     .error(() => 'File name must be alphanumeric or have dashes and spaces.'),
                 sizeInBytes: Joi.number().integer().min(0)
                     .error(() => 'File size must be a positive integer.'),
@@ -160,6 +164,26 @@ apiRouter.post('/files/:path(*)', validateReq.bind(null, UPLOADS_SCHEMA), async 
     const dirPath = req.params.path;
     const fileList = req.body.files;
     return sendResponse(201, req, res, uploadsService.upload, dirPath, fileList, req.user.email);
+});
+
+/*
+ * Upload Status API.
+ * Register a successful or failed upload to S3.
+ */
+const UPDATE_SCHEMA = Joi.object({
+    params: Joi.object({
+        fileId: Joi.number().integer().min(1).required()
+            .error(() => 'Upload Status API requires a valid file ID.'),
+    }).unknown(),
+    body: Joi.object({
+        status: Joi.string().allow(Object.values(UPLOAD_STATUSES)).required()
+            .error(() => 'Upload Status API requires a valid status in the request body.'),
+    }),
+}).unknown();
+
+apiRouter.put('/uploads/:fileId', validateReq.bind(null, UPDATE_SCHEMA), async (req, res) => {
+    const fileId = req.params.fileId;
+    return sendResponse(200, req, res, uploadsService.confirm, fileId);
 });
 
 /*

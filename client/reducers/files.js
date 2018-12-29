@@ -8,7 +8,9 @@ import {
     FILES_UPLOAD_CANCEL,
     FILES_UPLOAD_CANCEL_COMPLETE,
     FILES_UPLOAD_TO_S3,
+    FILES_UPLOAD_TO_S3_PROGRESS,
     FILES_UPLOAD_TO_S3_COMPLETE,
+    FILES_UPLOAD_TO_S3_CONFIRMED,
 } from '../actions/files';
 import { validateAction } from './index';
 
@@ -61,7 +63,9 @@ export const UploadEntry = Record({
     s3UploadPolicy: null,
     s3UploadUrl: null,
     status: 'pending',
+    uploadPercent: 0,
     isUploading: false,
+    isUploaded: false,
     isDeleting: false,
     isDeleted: false,
 });
@@ -113,7 +117,17 @@ export default function filesReducer(state = FilesState(), action) {
             return state.merge({ uploadsById });
         }
 
+        case FILES_UPLOAD_TO_S3_PROGRESS: {
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
+            return state.merge({ uploadsById });
+        }
+
         case FILES_UPLOAD_TO_S3_COMPLETE: {
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
+            return state.merge({ uploadsById });
+        }
+
+        case FILES_UPLOAD_TO_S3_CONFIRMED: {
             const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
             return state.merge({ uploadsById });
         }

@@ -10,7 +10,9 @@ export const FILES_UPLOAD_ACKNOWLEDGED = 'FILES_UPLOAD_ACKNOWLEDGED';
 export const FILES_UPLOAD_CANCEL = 'FILES_UPLOAD_CANCEL';
 export const FILES_UPLOAD_CANCEL_COMPLETE = 'FILES_UPLOAD_CANCEL_COMPLETE';
 export const FILES_UPLOAD_TO_S3 = 'FILES_UPLOAD_TO_S3';
+export const FILES_UPLOAD_TO_S3_PROGRESS = 'FILES_UPLOAD_TO_S3_PROGRESS';
 export const FILES_UPLOAD_TO_S3_COMPLETE = 'FILES_UPLOAD_TO_S3_COMPLETE';
+export const FILES_UPLOAD_TO_S3_CONFIRMED = 'FILES_UPLOAD_TO_S3_CONFIRMED';
 
 const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
 const DIRECTORY_TYPE = SETTINGS.DIRECTORY_CONTENT_TYPES.DIRECTORY;
@@ -69,7 +71,7 @@ export function load(path, dispatch) {
  * Receive a list of files and directories from the files API as JSON.
  * This is called automatically by the FILES_LOAD action and should not be used elsewhere.
  */
-export function _loadComplete(loadResponse) {
+function _loadComplete(loadResponse) {
     if (loadResponse.error) {
         return {
             type: FILES_LOAD_COMPLETE,
@@ -129,7 +131,7 @@ export function upload(path, fileList, dispatch) {
  * rawFileObjectsByName: OrderedMap of raw File objects pending upload
  * dispatch:             function to dispatch a redux action
  */
-export function _uploadAcknowledged(loadResponse, rawFileObjectsByName, dispatch) {
+function _uploadAcknowledged(loadResponse, rawFileObjectsByName, dispatch) {
     if (loadResponse.error) {
         return {
             type: FILES_UPLOAD_ACKNOWLEDGED,
@@ -166,7 +168,11 @@ export function _uploadAcknowledged(loadResponse, rawFileObjectsByName, dispatch
 }
 
 export function uploadFileToS3(uploadEntry, dispatch) {
-    uploadEntry = uploadEntry.set('status', UPLOAD_STATUSES.RUNNING);
+    uploadEntry = uploadEntry.merge({
+        isUploading: true,
+        status: UPLOAD_STATUSES.RUNNING,
+        error: null,
+    });
 
     const file = uploadEntry.file;
     const uploadPolicy = uploadEntry.s3UploadPolicy;
@@ -180,17 +186,22 @@ export function uploadFileToS3(uploadEntry, dispatch) {
     });
     formData.append('file', file);
 
-    // POST file to S3 with auth
-    let uploadError;
-    fetch(uploadUrl, { method: 'POST', body: formData })
-        .then((res) => {
-            uploadError = !res.ok ? new Error(res.statusText) : null;
+    // Fetch doesn't support progress events, so fall back to XHR
+    // based on github.com/github/fetch/issues/89#issuecomment-256610849
+    new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', uploadUrl);
+        xhr.onload = event => resolve(event.target.responseText);
+        xhr.onerror = reject.bind(null, xhr);
+        xhr.upload.onprogress = _uploadFileToS3Progress.bind(null, uploadEntry);
+        xhr.send(formData);
+    })
+        .then(() => {
+            dispatch(_uploadFileToS3Complete(uploadEntry, null, dispatch));
         })
-        .catch((err) => {
-            uploadError = new Error(err.message);
-        })
-        .finally(() => {
-            dispatch(_uploadFileToS3Complete(uploadEntry, uploadError));
+        .catch((xhr) => {
+            const uploadError = new Error(xhr.statusText);
+            dispatch(_uploadFileToS3Complete(uploadEntry, uploadError, dispatch));
         });
 
     return {
@@ -199,19 +210,62 @@ export function uploadFileToS3(uploadEntry, dispatch) {
     };
 }
 
-export function _uploadFileToS3Complete(uploadEntry, uploadError) {
+function _uploadFileToS3Progress(uploadEntry, xhrProgressEvent) {
+    const bytesLoaded = xhrProgressEvent.loaded;
+    const bytesTotal = xhrProgressEvent.total;
+    const uploadPercent = Math.round(bytesLoaded / bytesTotal * 100);
+    uploadEntry = uploadEntry.set('uploadPercent', uploadPercent);
+    return {
+        type: FILES_UPLOAD_TO_S3_PROGRESS,
+        payload: Map({ uploadsById: OrderedMap([[uploadEntry.id, uploadEntry]]) }),
+    };
+}
+
+function _uploadFileToS3Complete(uploadEntry, uploadError, dispatch) {
     // NOTE: never returns an error action, but sets error prop on uploadEntry on failure
     if (uploadError) {
         uploadEntry = uploadEntry.merge({
+            isUploading: false,
             status: UPLOAD_STATUSES.FAILURE,
             error: uploadError.message,
         });
     }
     else {
-        uploadEntry = uploadEntry.set('status', UPLOAD_STATUSES.SUCCESS);
+        uploadEntry = uploadEntry.merge({ uploadPercent: 100 });
+        fetch(`/api/v1/uploads/${uploadEntry.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ status: UPLOAD_STATUSES.SUCCESS }),
+            headers: POST_HEADERS,
+        })
+            .then(response => response.json())
+            .then(data => dispatch(_uploadFileToS3Confirmed(data, uploadEntry)))
+            .catch(err => dispatch(_uploadFileToS3Confirmed({ error: err.message }, uploadEntry)));
     }
     return {
         type: FILES_UPLOAD_TO_S3_COMPLETE,
+        payload: Map({ uploadsById: OrderedMap([[uploadEntry.id, uploadEntry]]) }),
+    };
+}
+
+function _uploadFileToS3Confirmed(cancelResponse, uploadEntry) {
+    // NOTE: never returns an error action, but sets error prop on uploadEntry on failure
+    if (cancelResponse.error) {
+        uploadEntry = uploadEntry.merge({
+            isUploading: false,
+            status: UPLOAD_STATUSES.FAILURE,
+            error: `Error while canceling ${uploadEntry.name}: ${cancelResponse.error}.`,
+        });
+    }
+    else {
+        uploadEntry = uploadEntry.merge({
+            isUploading: false,
+            isUploaded: true,
+            status: UPLOAD_STATUSES.SUCCESS,
+            error: null,
+        });
+    }
+    return {
+        type: FILES_UPLOAD_TO_S3_CONFIRMED,
         payload: Map({ uploadsById: OrderedMap([[uploadEntry.id, uploadEntry]]) }),
     };
 }
