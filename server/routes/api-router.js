@@ -37,7 +37,7 @@ async function sendResponse(successStatusCode, req, res, func, ...args) {
     }
     if (result.error) {
         logger.error(`API error on ${req.url}: ${result.error}`);
-        return res.status(500).json(result);
+        return res.status(result.statusCode || 500).json(result);
     }
     return res.status(successStatusCode).json(result);
 }

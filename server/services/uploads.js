@@ -72,7 +72,7 @@ function getMediaType(fileName) {
 }
 
 function getInsertSql(
-    uploadStartedAt,
+    uploadBatchId,
     mediaFileUnsafe,
     mediaName,
     mediaType,
@@ -95,6 +95,7 @@ function getInsertSql(
             media_file_size_bytes,
             upload_email,
             upload_status,
+            upload_batch_id,
             upload_started_at
         )
         VALUES (
@@ -108,32 +109,28 @@ function getInsertSql(
             ${mediaSize}, -- media_file_size_bytes
             ${userEmail}, -- upload_email
             ${UPLOAD_STATUSES.PENDING}, -- upload_status
-            ${uploadStartedAt} -- upload_started_at
+            ${uploadBatchId}, -- upload_batch_id
+            NOW() -- upload_started_at
         );
     `;
-}
-
-/*
- * Select all files with the given name in the given directory from a list of file objects.
- */
-function getSelectSQL(dirPath, fileList) {
-    // FIXME: select specific columns here instead of the glob
-    const query = sql`
-        SELECT *, 'upload' AS type FROM media WHERE deleted_at IS NULL AND (FALSE
-    `;
-    fileList.forEach((fileInfo) => {
-        const mediaPath = getFilePath(dirPath, fileInfo.name);
-        query.append(sql`OR media_file_path = ${mediaPath}`);
-    });
-    query.append(sql`);`);
-    return query;
 }
 
 /*
  * Throw an error if the DB already contains a file at the same path as an upload in fileList.
  */
 async function checkDuplicates(dirPath, fileList) {
-    const query = getSelectSQL(dirPath, fileList);
+    const query = sql`
+        SELECT *
+        FROM media
+        WHERE deleted_at IS NULL
+        AND upload_status = ${UPLOAD_STATUSES.SUCCESS}
+        AND media_file_path LIKE ${dirPath} || '/%'
+        AND (FALSE
+    `;
+    fileList.forEach((fileInfo) => {
+        query.append(sql`OR media_file_name_unsafe = ${fileInfo.name}\n`);
+    });
+    query.append(sql`)`);
     const result = await db.all(query);
     if (result.length) {
         const dupeName = result[0].media_name;
@@ -143,7 +140,7 @@ async function checkDuplicates(dirPath, fileList) {
 }
 
 async function addFilesToDb(dirPath, fileList, userEmail) {
-    const uploadStartedAt = new Date().toISOString();
+    const uploadBatchId = uuidv4();
     const transaction = new db.Transaction();
 
     try {
@@ -158,7 +155,7 @@ async function addFilesToDb(dirPath, fileList, userEmail) {
 
             // exectute query within a transaction
             const query = getInsertSql(
-                uploadStartedAt,
+                uploadBatchId,
                 fileInfo.name,
                 mediaName,
                 mediaType,
@@ -177,28 +174,28 @@ async function addFilesToDb(dirPath, fileList, userEmail) {
         throw err;
     }
     await transaction.commit();
-    return uploadStartedAt;
+    return uploadBatchId;
 }
 
 /*
  * Add pending upload to media_uploads_pending table and return direct upload auth for S3.
  */
 module.exports.upload = async (dirPath, fileList, userEmail) => {
-    dirPath = path.startsWith('/') ? path.slice(1) : path;
-    dirPath = path.endsWith('/') ? path.slice(0, -1) : path;
+    dirPath = dirPath.startsWith('/') ? path.slice(1) : dirPath;
+    dirPath = dirPath.endsWith('/') ? path.slice(0, -1) : dirPath;
 
     // throw an error if any uploaded file contains a filename already in the directory
     try {
         await checkDuplicates(dirPath, fileList);
     }
     catch (err) {
-        return { error: err.message };
+        return { error: err.message, statusCode: 400 };
     }
     // add all files to the DB in "pending" state
-    const uploadStartedAt = await addFilesToDb(path, fileList, userEmail);
+    const uploadBatchId = await addFilesToDb(dirPath, fileList, userEmail);
 
     // return all pending uploads from this batch
-    const rows = db.all(`
+    const rows = await db.all(sql`
         SELECT
             id,
             uuid,
@@ -206,25 +203,24 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
             media_file_name AS "name",
             media_file_name_unsafe AS "nameUnsafe",
             media_type AS "mediaType",
+            media_file_extension AS "extension"
         FROM media
         WHERE deleted_at IS NULL
         AND upload_status = ${UPLOAD_STATUSES.PENDING}
         AND upload_email = ${userEmail}
-        AND upload_started_at = ${uploadStartedAt}
+        AND upload_batch_id = ${uploadBatchId}
         ORDER BY created_at, media_file_name;
     `);
 
     // add S3 upload credentials to each item
     rows.forEach((fileObj) => {
-        if (fileObj.type === UPLOAD_TYPE) {
-            const s3SignedPost = s3Service.getPresignedPost(
-                fileObj.uuid,
-                fileObj.name,
-                fileObj.extension,
-            );
-            fileObj.s3UploadUrl = s3SignedPost.url;
-            fileObj.s3UploadPolicy = s3SignedPost.fields;
-        }
+        const s3SignedPost = s3Service.getPresignedPost(
+            fileObj.uuid,
+            fileObj.name,
+            fileObj.extension,
+        );
+        fileObj.s3UploadUrl = s3SignedPost.url;
+        fileObj.s3UploadPolicy = s3SignedPost.fields;
     });
     return { uploads: rows };
 };

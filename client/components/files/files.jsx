@@ -36,7 +36,7 @@ export default class ArchiveFiles extends React.Component {
         const BreadCrumbs = pathArray.map((dirname, idx) => Breadcrumb(pathArray, dirname, idx));
 
         const Errors = [];
-        filesState.errors.forEach((errorMsg) => {
+        filesState.errors.concat(uploadsState.errors).forEach((errorMsg) => {
             Errors.push(Alert(errorMsg));
         });
 

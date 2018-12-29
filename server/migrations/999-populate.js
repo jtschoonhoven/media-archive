@@ -1,7 +1,7 @@
 exports.up = async (db) => {
     for (let i = 0; i < 100; i += 1) { // eslint-disable-next-line no-await-in-loop
         await db.run(`
-            INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, upload_status, upload_error, upload_started_at, upload_finished_at, created_at, updated_at, deleted_at)
+            INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, upload_status, upload_started_at, upload_finished_at, created_at, updated_at, deleted_at)
             VALUES (
                 ${i}, -- box_id
                 '2018', -- box_name
@@ -37,7 +37,6 @@ exports.up = async (db) => {
                 null, -- legal_is_confidential
                 FALSE, -- legal_can_license
                 'success', -- upload_status
-                null, -- upload_error
                 NOW(), -- upload_started_at
                 null, -- upload_finished_at
                 current_timestamp, -- created_at
@@ -48,7 +47,7 @@ exports.up = async (db) => {
     }
 
     await db.run(`
-        INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, upload_status, upload_error, upload_started_at, upload_finished_at, created_at, updated_at, deleted_at)
+        INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, upload_status, upload_started_at, upload_finished_at, created_at, updated_at, deleted_at)
         VALUES (
             1, -- box_id
             '2017', -- box_name
@@ -84,7 +83,6 @@ exports.up = async (db) => {
             null, -- legal_is_confidential
             FALSE, -- legal_can_license
             'success', -- upload_status
-            null, -- upload_error
             NOW(), -- upload_started_at
             null, -- upload_finished_at
             current_timestamp, -- created_at
@@ -94,7 +92,7 @@ exports.up = async (db) => {
     `);
 
     await db.run(`
-        INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, upload_status, upload_error, upload_started_at, upload_finished_at, created_at, updated_at, deleted_at)
+        INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, upload_status, upload_started_at, upload_finished_at, created_at, updated_at, deleted_at)
         VALUES (
             2, -- box_id
             '2017', -- box_name
@@ -130,7 +128,6 @@ exports.up = async (db) => {
             null, -- legal_is_confidential
             FALSE, -- legal_can_license
             'success', -- upload_status
-            null, -- upload_error
             NOW(), -- upload_started_at
             null, -- upload_finished_at
             current_timestamp, -- created_at
@@ -140,7 +137,7 @@ exports.up = async (db) => {
     `);
 
     await db.run(`
-        INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, upload_status, upload_error, upload_started_at, upload_finished_at, created_at, updated_at, deleted_at)
+        INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, upload_status, upload_started_at, upload_finished_at, created_at, updated_at, deleted_at)
         VALUES (
             3, -- box_id
             '2018', -- box_name
@@ -176,7 +173,6 @@ exports.up = async (db) => {
             null, -- legal_is_confidential
             FALSE, -- legal_can_license
             'success', -- upload_status
-            null, -- upload_error
             NOW(), -- upload_started_at
             null, -- upload_finished_at
             current_timestamp, -- created_at
@@ -186,7 +182,7 @@ exports.up = async (db) => {
     `);
 
     await db.run(`
-        INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, upload_status, upload_error, upload_started_at, upload_finished_at, created_at, updated_at, deleted_at)
+        INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, upload_status, upload_started_at, upload_finished_at, created_at, updated_at, deleted_at)
         VALUES (
             3, -- box_id
             '2018', -- box_name
@@ -222,7 +218,6 @@ exports.up = async (db) => {
             null, -- legal_is_confidential
             FALSE, -- legal_can_license
             'success', -- upload_status
-            null, -- upload_error
             NOW(), -- upload_started_at
             null, -- upload_finished_at
             current_timestamp, -- created_at
@@ -232,7 +227,7 @@ exports.up = async (db) => {
     `);
 
     await db.run(`
-        INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, upload_status, upload_error, upload_started_at, upload_finished_at, created_at, updated_at, deleted_at)
+        INSERT INTO media (box_id, box_name, box_or_cabinet, folder_id, folder_name, series_name, series_description, series_index_id, media_name, media_description, media_authors, media_notes, media_transcript, media_date, media_tags, media_type, media_file_extension, media_file_name, media_file_path, media_file_size_bytes, media_url, media_url_thumbnail, origin_location, origin_medium, origin_medium_notes, audio_lecturers, audio_video_length_seconds, image_photographer, image_color, image_location_or_people_unknown, image_professional_or_personal, legal_is_confidential, legal_can_license, upload_status, upload_started_at, upload_finished_at, created_at, updated_at, deleted_at)
         VALUES (
             3, -- box_id
             '2018', -- box_name
@@ -268,7 +263,6 @@ exports.up = async (db) => {
             null, -- legal_is_confidential
             FALSE, -- legal_can_license
             'success', -- upload_status
-            null, -- upload_error
             NOW(), -- upload_started_at
             null, -- upload_finished_at
             current_timestamp, -- created_at

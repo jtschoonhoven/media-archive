@@ -49,55 +49,49 @@ export default function uploadsReducer(state = uploadsState(), action) {
     switch (action.type) {
         // when client sends initial list of file descriptors to server
         case UPLOAD_BATCH_START: {
-            const update = Map({
-                isAcknowledging: true,
-                errors: List(),
-            });
+            const update = Map({ errors: List() });
             return state.merge(update);
         }
 
         // server acknowledges receipt of file descriptors and returns upload tokens
         case UPLOAD_BATCH_SAVED_TO_SERVER: {
             if (action.error) {
-                const update = Map({
-                    isAcknowledging: false,
-                    errors: state.errors.push(payload.message),
-                });
+                const update = Map({ errors: state.errors.push(payload.message) });
                 return state.merge(update);
             }
-            const update = Map({ isAcknowledging: false });
-            return state.merge(update, payload);
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
+            return state.merge({ uploadsById });
         }
 
         case UPLOAD_FILE_TO_S3_START: {
-            const uploadsById = state.uploadsById.merge(payload.uploadsById);
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
             return state.merge({ uploadsById });
         }
 
         case UPLOAD_FILE_TO_S3_PROGRESS: {
-            const uploadsById = state.uploadsById.merge(payload.uploadsById);
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
             return state.merge({ uploadsById });
         }
 
         case UPLOAD_FILE_TO_S3_FINISHED: {
-            const uploadsById = state.uploadsById.merge(payload.uploadsById);
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
             return state.merge({ uploadsById });
         }
 
         case UPLOAD_FILE_COMPLETE: {
-            const uploadsById = state.uploadsById.merge(payload.uploadsById);
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
             return state.merge({ uploadsById });
         }
 
         // client requests to delete file by ID
         case UPLOAD_FILE_CANCEL: {
-            const uploadsById = state.uploadsById.merge(payload.uploadsById);
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
             return state.merge({ uploadsById });
         }
 
         // server acknowledges file has been deleted
         case UPLOAD_FILE_CANCEL_COMPLETE: {
-            const uploadsById = state.uploadsById.merge(payload.uploadsById);
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
             return state.merge({ uploadsById });
         }
 

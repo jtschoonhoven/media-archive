@@ -20,9 +20,9 @@ const POST_HEADERS = { 'Content-Type': 'application/json' };
 /*
  * Upload a list of files to directory at the given path.
  *
- * path:     path to upload files to, e.g. /uploads (leading and trailing slashes are stripped)
- * fileList: an instance of FileList, containing raw File objects for upload
- * dispatch: function to dispatch a redux action
+ * :path:     path to upload files to, e.g. /uploads (leading and trailing slashes are stripped)
+ * :fileList: an instance of FileList, containing raw File objects for upload
+ * :dispatch: function to dispatch a redux action
  */
 export function upload(path, fileList, dispatch) {
     // get an array of file metadata from File objects to POST to server
@@ -33,9 +33,9 @@ export function upload(path, fileList, dispatch) {
     // POST metadata to server (NOT the files themselves, those will go directly to S3)
     const body = JSON.stringify({ files: filesMetadata });
     fetch(urlJoin('/api/v1/uploads/', path), { method: 'POST', body, headers: POST_HEADERS })
+        .catch(err => dispatch(_uploadBatchSavedToServer({ error: err.message })))
         .then(response => response.json())
-        .then(data => dispatch(_uploadAcknowledged(data, fileList, dispatch)))
-        .catch(err => dispatch(_uploadAcknowledged({ error: err.message })));
+        .then(data => dispatch(_uploadBatchSavedToServer(data, fileList, dispatch)));
 
     return {
         type: UPLOAD_BATCH_START,
@@ -45,13 +45,12 @@ export function upload(path, fileList, dispatch) {
 
 /*
  * Server acknowledges upload and returns signed tokens used for direct upload to S3.
- * This is called automatically by the UPLOAD action and should not be used elsewhere.
  *
- * loadResponse: results of a Files API GET for the current directory
- * fileList:     an instance of FileList, containing raw File objects for upload
- * dispatch:     function to dispatch a redux action
+ * :loadResponse: results of a Files API GET for the current directory
+ * :fileList:     an instance of FileList, containing raw File objects for upload
+ * :dispatch:     function to dispatch a redux action
  */
-function _uploadAcknowledged(loadResponse, fileList, dispatch) {
+function _uploadBatchSavedToServer(loadResponse, fileList, dispatch) {
     if (loadResponse.error) {
         return {
             type: UPLOAD_BATCH_SAVED_TO_SERVER,
@@ -61,7 +60,9 @@ function _uploadAcknowledged(loadResponse, fileList, dispatch) {
     }
     // populate an OrderedMap of uploadsById with the raw file object attached
     const uploadsById = OrderedMap(loadResponse.uploads.map((uploadInfo) => {
-        uploadInfo.file = fileList.find(fileItem => fileItem.name === uploadInfo.nameUnsafe);
+        uploadInfo.file = Array.from(fileList).find((fileItem) => {
+            return fileItem.name === uploadInfo.nameUnsafe;
+        });
         return [uploadInfo.id, new UploadModel(uploadInfo)];
     }));
 
@@ -104,16 +105,15 @@ export function uploadFileToS3(uploadModel, dispatch) {
         xhr.open('POST', uploadUrl);
         xhr.onload = event => resolve(event.target.responseText);
         xhr.onerror = reject.bind(null, xhr);
-        // dispatch _uploadFileToS3Progress for each progress event
         xhr.upload.onprogress = e => dispatch(_uploadFileToS3Progress(uploadModel, e));
         xhr.send(formData);
     })
-        .then(() => {
-            dispatch(_uploadFileToS3Complete(uploadModel, null, dispatch));
-        })
         .catch((xhr) => {
             const uploadError = new Error(xhr.statusText);
-            dispatch(_uploadFileToS3Complete(uploadModel, uploadError, dispatch));
+            dispatch(_uploadFileToS3Finished(uploadModel, uploadError, dispatch));
+        })
+        .then(() => {
+            dispatch(_uploadFileToS3Finished(uploadModel, null, dispatch));
         });
 
     return {
@@ -133,7 +133,7 @@ function _uploadFileToS3Progress(uploadModel, xhrProgressEvent) {
     };
 }
 
-function _uploadFileToS3Complete(uploadModel, uploadError, dispatch) {
+function _uploadFileToS3Finished(uploadModel, uploadError, dispatch) {
     // NOTE: never returns an error action, but sets error prop on uploadModel on failure
     if (uploadError) {
         uploadModel = uploadModel.merge({
@@ -144,14 +144,14 @@ function _uploadFileToS3Complete(uploadModel, uploadError, dispatch) {
     }
     else {
         uploadModel = uploadModel.merge({ uploadPercent: 100 });
-        fetch(`/api/v1/uploads/${uploadModel.id}`, {
+        fetch(urlJoin('/api/v1/uploads/', uploadModel.id.toString()), {
             method: 'PUT',
             body: JSON.stringify({ status: UPLOAD_STATUSES.SUCCESS }),
             headers: POST_HEADERS,
         })
+            .catch(err => dispatch(_uploadFileComplete({ error: err.message }, uploadModel)))
             .then(response => response.json())
-            .then(data => dispatch(_uploadFileToS3Confirmed(data, uploadModel)))
-            .catch(err => dispatch(_uploadFileToS3Confirmed({ error: err.message }, uploadModel)));
+            .then(data => dispatch(_uploadFileComplete(data, uploadModel)));
     }
     return {
         type: UPLOAD_FILE_TO_S3_FINISHED,
@@ -159,7 +159,7 @@ function _uploadFileToS3Complete(uploadModel, uploadError, dispatch) {
     };
 }
 
-function _uploadFileToS3Confirmed(cancelResponse, uploadModel) {
+function _uploadFileComplete(cancelResponse, uploadModel) {
     // NOTE: never returns an error action, but sets error prop on uploadEntry on failure
     if (cancelResponse.error) {
         uploadModel = uploadModel.merge({
@@ -187,10 +187,10 @@ function _uploadFileToS3Confirmed(cancelResponse, uploadModel) {
  */
 export function uploadCancel(uploadModel, dispatch) {
     uploadModel = uploadModel.merge({ isDeleting: true, status: UPLOAD_STATUSES.ABORTED });
-    fetch(urlJoin('/api/v1/uploads/', uploadModel.id), { method: 'DELETE' })
+    fetch(urlJoin('/api/v1/uploads/', uploadModel.id.toString()), { method: 'DELETE' })
+        .catch(err => dispatch(_uploadCancelComplete({ error: err.message }, uploadModel)))
         .then(response => response.json())
-        .then(data => dispatch(_uploadCancelComplete(data, uploadModel)))
-        .catch(err => dispatch(_uploadCancelComplete({ error: err.message }, uploadModel)));
+        .then(data => dispatch(_uploadCancelComplete(data, uploadModel)));
     return {
         type: UPLOAD_FILE_CANCEL,
         payload: Map({ uploadsById: OrderedMap([[uploadModel.id, uploadModel]]) }),
