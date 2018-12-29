@@ -94,7 +94,6 @@ const SEARCH_SCHEMA = Joi.object({
     }).oxor('nextKey', 'prevKey')
         .error(() => 'nextKey and prevKey are mutually exclusive'),
 }).unknown();
-
 apiRouter.get('/search', validateReq.bind(null, SEARCH_SCHEMA), async (req, res) => {
     const { s, ...filters } = req.query;
     return sendResponse(200, req, res, searchService.query, s, filters);
@@ -110,7 +109,6 @@ const FILE_VIEW_SCHEMA = Joi.object({
             .error(() => 'File View API requires a valid file ID.'),
     }).unknown(),
 }).unknown();
-
 apiRouter.get('/detail/:fileId', validateReq.bind(null, FILE_VIEW_SCHEMA), async (req, res) => {
     const fileId = parseInt(req.params.fileId, 10);
     return sendResponse(200, req, res, filesService.detail, fileId);
@@ -126,11 +124,11 @@ const FILE_LIST_SCHEMA = Joi.object({
             .error(() => 'Files API requires a valid directory path.'),
     }).unknown(),
 }).unknown();
-
 apiRouter.get('/files/:path(*)', validateReq.bind(null, FILE_LIST_SCHEMA), async (req, res) => {
     const path = req.params.path;
-    return sendResponse(200, req, res, filesService.load, path, req.user.email);
+    return sendResponse(200, req, res, filesService.load, path);
 });
+apiRouter.get('/files', async (req, res) => sendResponse(200, req, res, filesService.load, '/'));
 
 /*
  * Uploads API.
@@ -158,8 +156,7 @@ const UPLOADS_SCHEMA = Joi.object({
         ),
     }),
 }).unknown();
-
-apiRouter.post('/files/:path(*)', validateReq.bind(null, UPLOADS_SCHEMA), async (req, res) => {
+apiRouter.post('/uploads/:path(*)', validateReq.bind(null, UPLOADS_SCHEMA), async (req, res) => {
     const dirPath = req.params.path;
     const fileList = req.body.files;
     return sendResponse(201, req, res, uploadsService.upload, dirPath, fileList, req.user.email);
@@ -167,7 +164,7 @@ apiRouter.post('/files/:path(*)', validateReq.bind(null, UPLOADS_SCHEMA), async 
 
 /*
  * Upload Status API.
- * Register a successful or failed upload to S3.
+ * Register a successful or failed upload.
  */
 const UPDATE_SCHEMA = Joi.object({
     params: Joi.object({
@@ -179,7 +176,6 @@ const UPDATE_SCHEMA = Joi.object({
             .error(() => 'Upload Status API requires a valid status in the request body.'),
     }),
 }).unknown();
-
 apiRouter.put('/uploads/:fileId', validateReq.bind(null, UPDATE_SCHEMA), async (req, res) => {
     const fileId = req.params.fileId;
     return sendResponse(200, req, res, uploadsService.confirm, fileId);
@@ -195,7 +191,6 @@ const CANCEL_SCHEMA = Joi.object({
             .error(() => 'File Delete API requires a valid file ID.'),
     }).unknown(),
 }).unknown();
-
 apiRouter.delete('/uploads/:fileId', validateReq.bind(null, CANCEL_SCHEMA), async (req, res) => {
     const fileId = req.params.fileId;
     return sendResponse(200, req, res, uploadsService.cancel, fileId, req.user.email);
@@ -211,7 +206,6 @@ const DELETE_SCHEMA = Joi.object({
             .error(() => 'File Delete API requires a valid file ID.'),
     }).unknown(),
 }).unknown();
-
 apiRouter.delete('/files/:fileId', validateReq.bind(null, DELETE_SCHEMA), async (req, res) => {
     const fileId = req.params.fileId;
     return sendResponse(200, req, res, filesService.delete, fileId);

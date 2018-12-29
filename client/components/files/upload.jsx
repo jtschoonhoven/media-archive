@@ -7,7 +7,7 @@ const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
 const FAILURE_STATES = [UPLOAD_STATUSES.ABORTED, UPLOAD_STATUSES.FAILURE];
 
 
-class FileUpload extends React.Component {
+export default class Upload extends React.Component {
     constructor(props) {
         super(props);
         this.handleUploadCancel = this.handleUploadCancel.bind(this);
@@ -95,5 +95,3 @@ class FileUpload extends React.Component {
         this.props.onUploadCancel(this.props.uploadEntry);
     }
 }
-
-export default FileUpload;

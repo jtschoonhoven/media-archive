@@ -7,10 +7,13 @@ export default (directoryEntry) => { // eslint-disable-line
         <div className="archive-upload-result" key={directoryEntry.get('name')}>
             <div className="row">
                 {/* filename */}
-                <span className="col-12">
-                    🗂️ <Link to={`${directoryEntry.get('path')}/${directoryEntry.get('name')}`}>
-                        { directoryEntry.get('name') }
+                <span className="col-9 col-sm-10">
+                    🗂️ <Link to={`/files/${directoryEntry.path}`}>
+                        { directoryEntry.name }
                     </Link>
+                </span>
+                <span className="col-3 col-sm-2 small text-muted">
+                    {directoryEntry.numEntries} items
                 </span>
             </div>
             <hr />

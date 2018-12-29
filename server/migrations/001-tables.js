@@ -59,7 +59,6 @@ exports.up = async (db) => {
 
             -- upload workflow
             upload_status TEXT,
-            upload_error TEXT,
             upload_email TEXT,
             upload_started_at TIMESTAMP,
             upload_finished_at TIMESTAMP,

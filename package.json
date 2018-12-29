@@ -17,7 +17,7 @@
         "build:dev": "npm run clean && npx webpack --mode=development --config=config/webpack.config.js",
         "watch": "npm run clean && npx webpack --watch --mode=development --config=config/webpack.config.js",
         "start": "node server/server.js",
-        "start:dev": "npx nodemon --inspect server/server.js",
+        "start:dev": "npx nodemon --inspect server/server.js --watch ./server --watch ./dist/bundle.server.js",
         "zip": "npm run build && zip -r dist/archive.zip ./dist ./server ./config package.json",
         "deploy": "npm run zip && eb deploy --verbose",
         "db": "pg_ctl -D ./.pgdb start"
@@ -54,6 +54,7 @@
         "react-router-dom": "^4.3.1",
         "redux": "^4.0.1",
         "sql-template-strings": "^2.2.2",
+        "url-join": "^4.0.0",
         "uuid": "^3.3.2",
         "winston": "^3.1.0"
     },

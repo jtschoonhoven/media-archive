@@ -4,11 +4,12 @@ const sql = require('sql-template-strings');
 const uuidv4 = require('uuid/v4');
 
 const db = require('./database');
-const filesService = require('./files');
 const logger = require('./logger');
+const s3Service = require('./s3');
 
 const FILE_EXT_WHITELIST = config.get('CONSTANTS.FILE_EXT_WHITELIST');
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
+const UPLOAD_TYPE = config.get('CONSTANTS.DIRECTORY_CONTENT_TYPES.UPLOAD');
 
 const EXTRA_SPACE_REGEX = new RegExp('\\s+', 'g');
 const MEDIA_NAME_BLACKLIST = new RegExp('[^0-9a-zA-Z -]', 'g');
@@ -18,12 +19,6 @@ const MEDIA_FILE_EXTENSION_BLACKLIST = new RegExp('[^0-9a-zA-Z]', 'g');
 
 
 function getDirPath(dirPath) {
-    if (dirPath.startsWith('/')) { // strip leading slashes
-        dirPath = dirPath.slice(1);
-    }
-    if (dirPath.endsWith('/')) { // strip trailing slashes
-        dirPath = dirPath.slice(0, -1);
-    }
     if (dirPath.match(FILE_PATH_BLACKLIST)) {
         throw new Error(`Cannot upload to ${dirPath}: contains illegal characters`);
     }
@@ -77,6 +72,7 @@ function getMediaType(fileName) {
 }
 
 function getInsertSql(
+    uploadStartedAt,
     mediaFileUnsafe,
     mediaName,
     mediaType,
@@ -112,7 +108,7 @@ function getInsertSql(
             ${mediaSize}, -- media_file_size_bytes
             ${userEmail}, -- upload_email
             ${UPLOAD_STATUSES.PENDING}, -- upload_status
-            NOW() -- upload_started_at
+            ${uploadStartedAt} -- upload_started_at
         );
     `;
 }
@@ -147,6 +143,7 @@ async function checkDuplicates(dirPath, fileList) {
 }
 
 async function addFilesToDb(dirPath, fileList, userEmail) {
+    const uploadStartedAt = new Date().toISOString();
     const transaction = new db.Transaction();
 
     try {
@@ -161,6 +158,7 @@ async function addFilesToDb(dirPath, fileList, userEmail) {
 
             // exectute query within a transaction
             const query = getInsertSql(
+                uploadStartedAt,
                 fileInfo.name,
                 mediaName,
                 mediaType,
@@ -179,13 +177,16 @@ async function addFilesToDb(dirPath, fileList, userEmail) {
         throw err;
     }
     await transaction.commit();
+    return uploadStartedAt;
 }
 
 /*
  * Add pending upload to media_uploads_pending table and return direct upload auth for S3.
- * Returns ALL files in directory (not just uploads).
  */
 module.exports.upload = async (dirPath, fileList, userEmail) => {
+    dirPath = path.startsWith('/') ? path.slice(1) : path;
+    dirPath = path.endsWith('/') ? path.slice(0, -1) : path;
+
     // throw an error if any uploaded file contains a filename already in the directory
     try {
         await checkDuplicates(dirPath, fileList);
@@ -194,14 +195,38 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
         return { error: err.message };
     }
     // add all files to the DB in "pending" state
-    await addFilesToDb(dirPath, fileList, userEmail);
-    // load the list of all files in the directory (not just uploads)
-    const directoryList = await filesService.load(dirPath, userEmail);
-    if (directoryList.error) {
-        return directoryList;
-    }
-    // return the list of all files in directory
-    return directoryList;
+    const uploadStartedAt = await addFilesToDb(path, fileList, userEmail);
+
+    // return all pending uploads from this batch
+    const rows = db.all(`
+        SELECT
+            id,
+            uuid,
+            ${dirPath} AS "path",
+            media_file_name AS "name",
+            media_file_name_unsafe AS "nameUnsafe",
+            media_type AS "mediaType",
+        FROM media
+        WHERE deleted_at IS NULL
+        AND upload_status = ${UPLOAD_STATUSES.PENDING}
+        AND upload_email = ${userEmail}
+        AND upload_started_at = ${uploadStartedAt}
+        ORDER BY created_at, media_file_name;
+    `);
+
+    // add S3 upload credentials to each item
+    rows.forEach((fileObj) => {
+        if (fileObj.type === UPLOAD_TYPE) {
+            const s3SignedPost = s3Service.getPresignedPost(
+                fileObj.uuid,
+                fileObj.name,
+                fileObj.extension,
+            );
+            fileObj.s3UploadUrl = s3SignedPost.url;
+            fileObj.s3UploadPolicy = s3SignedPost.fields;
+        }
+    });
+    return { uploads: rows };
 };
 
 /*
@@ -210,7 +235,9 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
 module.exports.confirm = async (fileId) => {
     const query = sql`
         UPDATE media
-        SET upload_status = ${UPLOAD_STATUSES.SUCCESS}
+        SET
+            upload_status = ${UPLOAD_STATUSES.SUCCESS},
+            upload_finished_at = NOW()
         WHERE id = ${fileId};
     `;
     await db.run(query);
