@@ -193,7 +193,8 @@ export function uploadFileToS3(uploadEntry, dispatch) {
         xhr.open('POST', uploadUrl);
         xhr.onload = event => resolve(event.target.responseText);
         xhr.onerror = reject.bind(null, xhr);
-        xhr.upload.onprogress = _uploadFileToS3Progress.bind(null, uploadEntry);
+        // dispatch _uploadFileToS3Progress for each progress event
+        xhr.upload.onprogress = e => dispatch(_uploadFileToS3Progress(uploadEntry, e));
         xhr.send(formData);
     })
         .then(() => {

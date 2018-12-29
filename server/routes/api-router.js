@@ -47,7 +47,6 @@ async function sendResponse(successStatusCode, req, res, func, ...args) {
  * Must be bound to a schema with `validateReq.bind(null, SCHEMA)`
  */
 function validateReq(schema, req, res, next) {
-    console.log(req.body);
     const validation = Joi.validate(req, schema);
     if (validation.error) {
         const errorStr = validation.error.details[0].message;

@@ -12,9 +12,9 @@ const precss = require('precss');
  */
 const BASE_CONFIG = {
     plugins: [
-        // expose a global CONFIG object
+        // expose a global _CONFIG object
         // see github.com/arthanzel/node-config-webpack
-        new ConfigWebpackPlugin(),
+        new ConfigWebpackPlugin('_CONFIG'),
     ],
     module: {
         rules: [

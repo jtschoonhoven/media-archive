@@ -3,20 +3,14 @@ import './style.scss';
 import React from 'react';
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
+import SETTINGS from '../../settings';
 import Breadcrumb from './breadcrumb.jsx'; // eslint-disable-line no-unused-vars
 import FileUpload from './file-old.jsx'; // eslint-disable-line no-unused-vars
 import File from './file.jsx'; // eslint-disable-line no-unused-vars
 import Directory from './directory.jsx'; // eslint-disable-line no-unused-vars
 import Upload from './file-upload.jsx'; // eslint-disable-line no-unused-vars
 
-const VALID_EXTENSIONS = [
-    '.PDF',
-    '.DOC',
-    '.DOCX',
-    '.TIFF',
-    '.JPG',
-    '.PNG',
-].join(',');
+const VALID_EXTENSIONS = Object.keys(SETTINGS.FILE_EXT_WHITELIST).map(ext => `.${ext}`);
 
 
 class ArchiveUpload extends React.Component {
@@ -71,7 +65,7 @@ class ArchiveUpload extends React.Component {
                 </div>
                 {/* uploader */}
                 <div className="custom-file">
-                    <input id="archive-upload-input" type="file" className="custom-file-input" onChange={this.handleUploadSelect} accept={VALID_EXTENSIONS} multiple />
+                    <input id="archive-upload-input" type="file" className="custom-file-input" onChange={this.handleUploadSelect} accept={VALID_EXTENSIONS.join(',')} multiple />
                     <label className="custom-file-label" htmlFor="archive-upload-input">
                         Upload
                     </label>
