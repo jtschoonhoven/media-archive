@@ -1,30 +1,45 @@
-import { GET_FILE_DETAIL, GET_FILE_DETAIL_COMPLETE } from '../actions/detail';
+import { List, Map, Record } from 'immutable';
 
+import { DETAILS_FETCH_START, DETAILS_FETCH_COMPLETE } from '../actions/detail';
 
-const INITIAL_STATE = {
+export class DetailsModel extends Record({
+    title: null,
+    description: null,
+    tags: null,
+    url: null,
+    filename: null,
+}) {}
+
+const INITIAL_STATE = Record({
     isFetching: false,
-    fileId: undefined,
-    details: undefined,
-    error: null,
-};
+    fileId: null,
+    details: new DetailsModel(),
+    errors: List(),
+});
 
 
-export default function searchReducer(state = INITIAL_STATE, action) {
-    const data = action.payload || {};
+export default function detailReducer(state = INITIAL_STATE(), action) {
+    const payload = action.payload;
 
     switch (action.type) {
-        case GET_FILE_DETAIL: {
-            const update = { isFetching: true, details: undefined, fileId: data.fileId };
-            return Object.assign({}, state, update);
+        case DETAILS_FETCH_START: {
+            const update = Map({
+                isFetching: true,
+                errors: List(), // clear any errors from previous state
+                details: Map({}), // clear details from previous state
+            });
+            return state.merge(update, payload);
         }
 
-        case GET_FILE_DETAIL_COMPLETE: {
-            const update = {
-                isFetching: false,
-                error: action.error ? data.message : null,
-                details: data.details || {},
-            };
-            return Object.assign({}, state, update);
+        case DETAILS_FETCH_COMPLETE: {
+            if (action.error) {
+                return state.merge({
+                    isFetching: false,
+                    errors: List([payload.message]),
+                });
+            }
+            const update = Map({ isFetching: false });
+            return state.merge(update, payload);
         }
 
         default: {

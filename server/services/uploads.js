@@ -7,9 +7,11 @@ const db = require('./database');
 const logger = require('./logger');
 const s3Service = require('./s3');
 
+const S3_BUCKET = config.get('S3_BUCKET_NAME');
+const S3_REGION = config.get('S3_BUCKET_REGION');
+
 const FILE_EXT_WHITELIST = config.get('CONSTANTS.FILE_EXT_WHITELIST');
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
-const UPLOAD_TYPE = config.get('CONSTANTS.DIRECTORY_CONTENT_TYPES.UPLOAD');
 
 const EXTRA_SPACE_REGEX = new RegExp('\\s+', 'g');
 const MEDIA_NAME_BLACKLIST = new RegExp('[^0-9a-zA-Z -]', 'g');
@@ -71,6 +73,10 @@ function getMediaType(fileName) {
     return mediaType;
 }
 
+function getMediaUrl(uuid, mediaExtn) {
+    return `https://${S3_BUCKET}.s3.amazonaws.com/${uuid}.${mediaExtn.toLowerCase()}`;
+}
+
 function getInsertSql(
     uploadBatchId,
     mediaFileUnsafe,
@@ -83,10 +89,12 @@ function getInsertSql(
     userEmail,
 ) {
     const uuid = uuidv4(); // generate secure, random uuid
+    const mediaUrl = getMediaUrl(uuid, mediaExtn);
     return sql`
         INSERT INTO media (
             uuid,
             media_name,
+            media_url,
             media_type,
             media_file_name,
             media_file_name_unsafe,
@@ -101,6 +109,7 @@ function getInsertSql(
         VALUES (
             ${uuid}, -- uuid
             ${mediaName}, -- media_name
+            ${mediaUrl}, -- media_url
             ${mediaType}, -- media_type
             ${mediaFile}, -- media_file_name
             ${mediaFileUnsafe}, -- media_file_name_unsafe

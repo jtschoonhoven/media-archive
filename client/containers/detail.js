@@ -6,14 +6,15 @@ import { getFileDetail } from '../actions/detail';
 
 
 function mapStateToProps(state) {
-    return state.detail || {};
+    return { detailState: state.detail };
 }
 
 function mapDispatchToProps(dispatch) {
     return {
-        // fetch file details
-        onGetFileDetail: (path) => {
-            dispatch(getFileDetail(path, dispatch));
+        actions: {
+            getFileDetail: (id) => {
+                dispatch(getFileDetail(id, dispatch));
+            },
         },
     };
 }

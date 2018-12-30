@@ -55,7 +55,7 @@ export default class ArchiveFiles extends React.Component {
             // FIXME: only include uploads for the current directory
             Uploads.push(
                 <Upload
-                    uploadEntry={ uploadModel }
+                    uploadModel={ uploadModel }
                     onUploadCancel={ this.props.actions.onUploadCancel }
                     key={ id }
                 />,

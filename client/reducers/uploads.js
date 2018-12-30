@@ -2,11 +2,14 @@ import { List, Map, OrderedMap, Record } from 'immutable';
 
 import SETTINGS from '../settings';
 import {
+    uploadCancel,
+    uploadFileToS3,
     UPLOAD_BATCH_START,
     UPLOAD_BATCH_SAVED_TO_SERVER,
     UPLOAD_FILE_TO_S3_START,
     UPLOAD_FILE_TO_S3_PROGRESS,
     UPLOAD_FILE_TO_S3_FINISHED,
+    UPLOAD_FILE_TO_S3_RETRY,
     UPLOAD_FILE_COMPLETE,
     UPLOAD_FILE_CANCEL,
     UPLOAD_FILE_CANCEL_COMPLETE,
@@ -15,7 +18,7 @@ import { validateAction } from './index';
 
 const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
 
-const uploadsState = Record({
+const INITIAL_STATE = Record({
     errors: List(),
     uploadsById: OrderedMap(),
 });
@@ -40,9 +43,19 @@ export class UploadModel extends Record({
     isUploaded: false,
     isDeleting: false,
     isDeleted: false,
-}) {}
+    xhrRequest: null,
+    dispatch: null,
+}) {
+    cancel() {
+        return this.dispatch(uploadCancel(this, this.dispatch));
+    }
 
-export default function uploadsReducer(state = uploadsState(), action) {
+    retry() {
+        return this.dispatch(uploadFileToS3(this, this.dispatch));
+    }
+}
+
+export default function uploadsReducer(state = INITIAL_STATE(), action) {
     validateAction(state, action);
     const payload = action.payload;
 
@@ -79,6 +92,11 @@ export default function uploadsReducer(state = uploadsState(), action) {
         }
 
         case UPLOAD_FILE_COMPLETE: {
+            const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
+            return state.merge({ uploadsById });
+        }
+
+        case UPLOAD_FILE_TO_S3_RETRY: {
             const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
             return state.merge({ uploadsById });
         }

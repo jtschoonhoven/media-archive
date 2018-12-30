@@ -1,23 +1,10 @@
-export const GET_FILE_DETAIL = 'GET_FILE_DETAILS';
-export const GET_FILE_DETAIL_COMPLETE = 'GET_FILE_DETAILS_COMPLETE';
+import { Map } from 'immutable';
 
-/*
- * Actions must be "standard flux actions".
- * Refer to https://github.com/redux-utilities/flux-standard-action
- */
+import { DetailsModel } from '../reducers/detail';
 
-/*
- * Receive the JSON file details as JSON.
- */
-export function getFileDetailComplete(fileDetails) {
-    const isError = !!fileDetails.error;
-    const payload = isError ? new Error(fileDetails.error.message) : fileDetails;
-    return {
-        type: GET_FILE_DETAIL_COMPLETE,
-        payload,
-        error: isError,
-    };
-}
+export const DETAILS_FETCH_START = 'DETAILS_FETCH_START';
+export const DETAILS_FETCH_COMPLETE = 'DETAILS_FETCH_COMPLETE';
+
 
 /*
  * Retrieve file data from DB. Automatically send fetchComplete action on success/failure.
@@ -28,7 +15,24 @@ export function getFileDetail(fileId, dispatch) {
         .then(data => dispatch(getFileDetailComplete(data)))
         .catch(err => dispatch(getFileDetailComplete({ error: err.message })));
     return {
-        type: GET_FILE_DETAIL,
-        payload: { id: fileId },
+        type: DETAILS_FETCH_START,
+        payload: Map({ fileId }),
+    };
+}
+
+/*
+ * Receive the JSON file details as JSON.
+ */
+export function getFileDetailComplete(response) {
+    if (response.error) {
+        return {
+            type: DETAILS_FETCH_COMPLETE,
+            payload: new Error(response.error),
+            error: true,
+        };
+    }
+    return {
+        type: DETAILS_FETCH_COMPLETE,
+        payload: Map({ details: new DetailsModel(response.details) }),
     };
 }

@@ -16,18 +16,13 @@ import {
     ArchiveNavbarContainer, // eslint-disable-line no-unused-vars
     ArchivePrivacyContainer, // eslint-disable-line no-unused-vars
     ArchiveSearchContainer, // eslint-disable-line no-unused-vars
-    ArchiveUploadsContainer, // eslint-disable-line no-unused-vars
 } from '../containers';
 
 
 class ArchiveApp extends React.Component {
     constructor(props) {
         super(props);
-        this.store = createStore(
-            reducer,
-            props.initialState,
-            props.reduxDevTools,
-        );
+        this.store = createStore(reducer, props.initialState, props.reduxDevTools);
     }
 
     render() {
@@ -45,7 +40,6 @@ class ArchiveApp extends React.Component {
                             <Route component={ArchiveMissingContainer} />
                         </Switch>
                     </div>
-                    <ArchiveUploadsContainer />
                 </div>
             </Provider>
         );

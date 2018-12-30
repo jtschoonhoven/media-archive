@@ -47,8 +47,19 @@ const getSQL = (path) => {
 };
 
 module.exports.detail = async (fileId) => {
-    // FIXME: return whitelisted fields instead of entire row
-    const details = await db.get(sql`SELECT * FROM media WHERE id = ${fileId};`);
+    const details = await db.get(sql`
+        SELECT
+            media_name AS "title",
+            media_description AS "description",
+            media_tags AS "tags",
+            media_url AS "url",
+            media_file_name AS "filename"
+        FROM media
+        WHERE id = ${fileId};
+    `);
+    if (!details) {
+        return { error: `No file exists with id ${fileId}`, statusCode: 404 };
+    }
     return { details };
 };
 

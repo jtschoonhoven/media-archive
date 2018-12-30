@@ -15,7 +15,7 @@ export default class Upload extends React.Component {
 
 
     render() {
-        const uploadEntry = this.props.uploadEntry;
+        const uploadModel = this.props.uploadModel;
 
         // defaults apply to "pending" states (not success or failure)
         let isAnimated = true;
@@ -23,18 +23,18 @@ export default class Upload extends React.Component {
         let styleName = 'info';
         let ActionLink = <a href="#" onClick={ this.handleUploadCancel }>cancel</a>; // eslint-disable-line no-unused-vars
 
-        if (uploadEntry.isDeleted) {
+        if (uploadModel.isDeleted) {
             return '';
         }
 
-        if (uploadEntry.isDeleting) {
+        if (uploadModel.isDeleting) {
             isAnimated = false;
             styleName = 'danger';
             ActionLink = <span className="text-muted">canceling</span>;
         }
 
         // progress bars are not animated on success, no "retry" or "cancel" option
-        if (uploadEntry.status === UPLOAD_STATUSES.SUCCESS) {
+        if (uploadModel.status === UPLOAD_STATUSES.SUCCESS) {
             isAnimated = false;
             isStriped = false;
             styleName = 'success';
@@ -42,7 +42,7 @@ export default class Upload extends React.Component {
         }
 
         // progress bars are not animated on failure, show "retry" option
-        else if (FAILURE_STATES.includes(uploadEntry.status)) {
+        else if (FAILURE_STATES.includes(uploadModel.status)) {
             isAnimated = false;
             styleName = 'danger';
             ActionLink = <a href="#" onClick={ this.handleUploadCancel }>remove</a>;
@@ -53,8 +53,8 @@ export default class Upload extends React.Component {
                 <div className="row">
                     {/* filename */}
                     <span className="col-sm-6 col-md-4">
-                        📄 <Link to={`/detail/${uploadEntry.id}`}>
-                            { uploadEntry.name }
+                        📄 <Link to={`/detail/${uploadModel.id}`}>
+                            { uploadModel.name }
                         </Link>
                     </span>
                     {/* progress */}
@@ -67,8 +67,8 @@ export default class Upload extends React.Component {
                                     ${isAnimated && 'progress-bar-animated'}
                                     bg-${styleName}
                                 `}
-                                style={{ width: `${uploadEntry.uploadPercent}%` }}
-                                aria-valuenow={ uploadEntry.uploadPercent }
+                                style={{ width: `${uploadModel.uploadPercent}%` }}
+                                aria-valuenow={ uploadModel.uploadPercent }
                                 aria-valuemin="0"
                                 aria-valuemax="100"
                                 role="progressbar"
@@ -77,13 +77,16 @@ export default class Upload extends React.Component {
                         </div>
                     </div>
                     {/* status */}
-                    <div className="col-sm-2 col-md-2">
-                        <span>{ uploadEntry.status }</span>
+                    <div className="col-sm-2 col-md-2 text-muted">
+                        <span>{ uploadModel.status }</span>
                     </div>
                     {/* button */}
                     <div className="col-sm-2 col-md-1">
                         { ActionLink }
                     </div>
+                </div>
+                <div className="row">
+                    {uploadModel.error ? <span className="text-danger">{uploadModel.error}</span> : ''}
                 </div>
                 <hr />
             </div>
@@ -92,6 +95,6 @@ export default class Upload extends React.Component {
 
     handleUploadCancel(event) {
         event.preventDefault();
-        this.props.onUploadCancel(this.props.uploadEntry);
+        this.props.uploadModel.cancel();
     }
 }

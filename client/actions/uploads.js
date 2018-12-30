@@ -9,6 +9,7 @@ export const UPLOAD_BATCH_SAVED_TO_SERVER = 'UPLOAD_BATCH_SAVED_TO_SERVER';
 export const UPLOAD_FILE_TO_S3_START = 'UPLOAD_FILE_TO_S3_START';
 export const UPLOAD_FILE_TO_S3_PROGRESS = 'UPLOAD_FILE_TO_S3_PROGRESS';
 export const UPLOAD_FILE_TO_S3_FINISHED = 'UPLOAD_FILE_TO_S3_FINISHED';
+export const UPLOAD_FILE_TO_S3_RETRY = 'UPLOAD_FILE_TO_S3_RETRY';
 export const UPLOAD_FILE_COMPLETE = 'UPLOAD_FILE_COMPLETE';
 export const UPLOAD_FILE_CANCEL = 'UPLOAD_FILE_CANCEL';
 export const UPLOAD_FILE_CANCEL_COMPLETE = 'UPLOAD_FILE_CANCEL_COMPLETE';
@@ -33,9 +34,9 @@ export function upload(path, fileList, dispatch) {
     // POST metadata to server (NOT the files themselves, those will go directly to S3)
     const body = JSON.stringify({ files: filesMetadata });
     fetch(urlJoin('/api/v1/uploads/', path), { method: 'POST', body, headers: POST_HEADERS })
-        .catch(err => dispatch(_uploadBatchSavedToServer({ error: err.message })))
         .then(response => response.json())
-        .then(data => dispatch(_uploadBatchSavedToServer(data, fileList, dispatch)));
+        .then(data => dispatch(_uploadBatchSavedToServer(data, fileList, dispatch)))
+        .catch(err => dispatch(_uploadBatchSavedToServer({ error: err.message })));
 
     return {
         type: UPLOAD_BATCH_START,
@@ -58,8 +59,9 @@ function _uploadBatchSavedToServer(loadResponse, fileList, dispatch) {
             error: true,
         };
     }
-    // populate an OrderedMap of uploadsById with the raw file object attached
+    // populate an OrderedMap of uploadsById with dispatch and raw file object attached
     const uploadsById = OrderedMap(loadResponse.uploads.map((uploadInfo) => {
+        uploadInfo.dispatch = dispatch;
         uploadInfo.file = Array.from(fileList).find((fileItem) => {
             return fileItem.name === uploadInfo.nameUnsafe;
         });
@@ -80,9 +82,16 @@ function _uploadBatchSavedToServer(loadResponse, fileList, dispatch) {
 }
 
 export function uploadFileToS3(uploadModel, dispatch) {
+    const xhr = new XMLHttpRequest();
+
     uploadModel = uploadModel.merge({
-        isUploading: true,
         status: UPLOAD_STATUSES.RUNNING,
+        isUploading: true,
+        isUploaded: false,
+        isDeleting: false,
+        isDeleted: false,
+        uploadPercent: 0,
+        xhrRequest: xhr,
         error: null,
     });
 
@@ -101,19 +110,18 @@ export function uploadFileToS3(uploadModel, dispatch) {
     // Fetch doesn't support progress events, so fall back to XHR
     // based on github.com/github/fetch/issues/89#issuecomment-256610849
     new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
         xhr.open('POST', uploadUrl);
         xhr.onload = event => resolve(event.target.responseText);
-        xhr.onerror = reject.bind(null, xhr);
+        xhr.onerror = reject.bind(null, xhr.statusText);
         xhr.upload.onprogress = e => dispatch(_uploadFileToS3Progress(uploadModel, e));
         xhr.send(formData);
     })
-        .catch((xhr) => {
-            const uploadError = new Error(xhr.statusText);
-            dispatch(_uploadFileToS3Finished(uploadModel, uploadError, dispatch));
-        })
         .then(() => {
             dispatch(_uploadFileToS3Finished(uploadModel, null, dispatch));
+        })
+        .catch((err) => {
+            const uploadError = new Error(err);
+            dispatch(_uploadFileToS3Finished(uploadModel, uploadError, dispatch));
         });
 
     return {
@@ -144,36 +152,41 @@ function _uploadFileToS3Finished(uploadModel, uploadError, dispatch) {
     }
     else {
         uploadModel = uploadModel.merge({ uploadPercent: 100 });
-        fetch(urlJoin('/api/v1/uploads/', uploadModel.id.toString()), {
-            method: 'PUT',
-            body: JSON.stringify({ status: UPLOAD_STATUSES.SUCCESS }),
-            headers: POST_HEADERS,
-        })
-            .catch(err => dispatch(_uploadFileComplete({ error: err.message }, uploadModel)))
-            .then(response => response.json())
-            .then(data => dispatch(_uploadFileComplete(data, uploadModel)));
     }
+
+    fetch(urlJoin('/api/v1/uploads/', uploadModel.id.toString()), {
+        method: 'PUT',
+        body: JSON.stringify({ status: uploadModel.status }),
+        headers: POST_HEADERS,
+    })
+        .then(response => response.json())
+        .then(data => dispatch(_uploadFileComplete(data, uploadModel)))
+        .catch(err => dispatch(_uploadFileComplete({ error: err.message }, uploadModel)));
+
     return {
         type: UPLOAD_FILE_TO_S3_FINISHED,
         payload: Map({ uploadsById: OrderedMap([[uploadModel.id, uploadModel]]) }),
     };
 }
 
-function _uploadFileComplete(cancelResponse, uploadModel) {
-    // NOTE: never returns an error action, but sets error prop on uploadEntry on failure
-    if (cancelResponse.error) {
+function _uploadFileComplete(response, uploadModel) {
+    if (response.error) {
         uploadModel = uploadModel.merge({
             isUploading: false,
             status: UPLOAD_STATUSES.FAILURE,
-            error: `Error while canceling ${uploadModel.name}: ${cancelResponse.error}.`,
+            error: `Error while finalizing upload: ${response.error}.`,
+        });
+    }
+    else if (uploadModel.error) {
+        uploadModel = uploadModel.merge({
+            isUploading: false,
         });
     }
     else {
         uploadModel = uploadModel.merge({
+            status: UPLOAD_STATUSES.SUCCESS,
             isUploading: false,
             isUploaded: true,
-            status: UPLOAD_STATUSES.SUCCESS,
-            error: null,
         });
     }
     return {
@@ -186,11 +199,14 @@ function _uploadFileComplete(cancelResponse, uploadModel) {
  * Client sends request to delete file by ID.
  */
 export function uploadCancel(uploadModel, dispatch) {
+    if (uploadModel.xhrRequest && uploadModel.xhrRequest.readyState !== 4) {
+        uploadModel.xhrRequest.abort();
+    }
     uploadModel = uploadModel.merge({ isDeleting: true, status: UPLOAD_STATUSES.ABORTED });
     fetch(urlJoin('/api/v1/uploads/', uploadModel.id.toString()), { method: 'DELETE' })
-        .catch(err => dispatch(_uploadCancelComplete({ error: err.message }, uploadModel)))
         .then(response => response.json())
-        .then(data => dispatch(_uploadCancelComplete(data, uploadModel)));
+        .then(data => dispatch(_uploadCancelComplete(data, uploadModel)))
+        .catch(err => dispatch(_uploadCancelComplete({ error: err.message }, uploadModel)));
     return {
         type: UPLOAD_FILE_CANCEL,
         payload: Map({ uploadsById: OrderedMap([[uploadModel.id, uploadModel]]) }),
