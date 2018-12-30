@@ -1,7 +1,6 @@
 import { List, Map, OrderedMap, Record } from 'immutable';
 
 import { FILES_LOAD, FILES_LOAD_COMPLETE } from '../actions/files';
-import { validateAction } from './index';
 
 const FilesState = Record({
     path: null,
@@ -29,7 +28,6 @@ export class FileModel extends Record({
 
 
 export default function filesReducer(state = FilesState(), action) {
-    validateAction(state, action);
     const payload = action.payload;
 
     switch (action.type) {

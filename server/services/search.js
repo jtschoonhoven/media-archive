@@ -1,8 +1,10 @@
+const config = require('config');
 const sql = require('sql-template-strings');
 
 const db = require('../services/database');
 const logger = require('../services/logger');
 
+const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
 const REGEX_ALPHA_NUM = new RegExp('[0-9a-zA-Z]+');
 const QUERY_LOGIC_CHARS = ['!', '&', '|', '(', ')'];
 const QUERY_GROUP_CHARS = ['&', '|', '(', ')'];
@@ -89,13 +91,21 @@ function getSearchSql(searchString, typeFilters, prevKey, nextKey, limit) {
     const firstWord = toAlphaNum(safeSearchString);
     const isPrecise = QUERY_LOGIC_CHARS.some(char => safeSearchString.includes(char));
     const query = sql`
-        SELECT media.*, relevance
+        SELECT
+            id,
+            media_type AS "type",
+            media_name AS "name",
+            media_description AS "description",
+            media_url AS "url",
+            media_url_thumbnail AS "thumbnailUrl",
+            relevance
         FROM
             media,
             TO_TSQUERY('english', ${safeSearchString}) AS query_lex,
             TO_TSQUERY('simple',  ${`${firstWord}:*`}) AS query_pre,
             TS_RELEVANCE_V0(media_tsvector, query_lex, query_pre) AS relevance
         WHERE deleted_at IS NULL
+        AND upload_status = ${UPLOAD_STATUSES.SUCCESS}
     `;
 
     // if this is precise mode (i.e. a logical operator was used), search only on word roots

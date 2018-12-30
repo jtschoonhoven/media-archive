@@ -5,9 +5,11 @@ import { DETAILS_FETCH_START, DETAILS_FETCH_COMPLETE } from '../actions/detail';
 export class DetailsModel extends Record({
     title: null,
     description: null,
-    tags: null,
-    url: null,
     filename: null,
+    path: null,
+    type: null,
+    url: null,
+    tags: null,
 }) {}
 
 const INITIAL_STATE = Record({

@@ -1,8 +1,8 @@
 import './style.scss';
 
-import PropTypes from 'prop-types';
 import React from 'react';
 import queryString from 'query-string';
+import { Map } from 'immutable';
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
 import SearchResult from './result.jsx'; // eslint-disable-line no-unused-vars
@@ -13,18 +13,7 @@ const SEARCH_INPUT_ID = 'archive-search-form-input';
 class ArchiveSearch extends React.Component {
     constructor(props) {
         super(props);
-        const query = queryString.parse(this.props.location.search);
-        const { s, ...filters } = query;
-        const searchTerm = s || '';
-
-        // set default filter values
-        filters.document = filters.document || 0;
-        filters.image = filters.image || 0;
-        filters.video = filters.video || 0;
-        filters.audio = filters.audio || 0;
-
-        // set initial state
-        this.state = { searchTerm, filters };
+        this.state = this.getStateFromQueryString();
 
         // bind event handlers
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -44,26 +33,54 @@ class ArchiveSearch extends React.Component {
     }
 
     componentWillUnmount() {
-        this.props.onSearchReset();
+        this.props.actions.reset();
         this.setState({ isDirty: false });
     }
 
     render() {
         const props = this.props;
-        const state = this.state;
-        const results = props.results || [];
-        const Results = results.map(result => <SearchResult {...result} key={result.id} />);
-        const noResult = !results.length && state.isSubmitted && !state.isFetching && !props.error;
+        const internalState = this.state;
+        const searchState = this.props.searchState;
+
+        const Results = searchState.results.map((resultModel) => {
+            return SearchResult(resultModel);
+        });
+
+        const noResult = (
+            !searchState.results.size
+            && internalState.isSubmitted
+            && !internalState.isFetching
+            && !props.error
+        );
+
         return (
             <div id="archive-search">
                 {/* searchbar */}
-                <form id="archive-search-form" className="form-inline form-row" onSubmit={this.handleSubmit}>
+                <form
+                    id="archive-search-form"
+                    className="form-inline form-row"
+                    onSubmit={this.handleSubmit}
+                >
                     <div className="form-group col-7 col-sm-9 col-lg-10">
                         <label className="sr-only" htmlFor="archive-search-input">Search</label>
-                        <input id={SEARCH_INPUT_ID} type="text" name="search" className="form-control form-control-lg" placeholder="Search" value={state.searchTerm} onChange={this.handleChange} />
+                        <input
+                            id={SEARCH_INPUT_ID}
+                            type="text"
+                            name="search"
+                            className="form-control form-control-lg"
+                            placeholder="Search"
+                            value={internalState.searchTerm}
+                            onChange={this.handleChange}
+                        />
                     </div>
                     <div className="form-group col-5 col-sm-3 col-lg-2">
-                        <button type="submit" className="btn btn-primary btn-lg" disabled={!state.searchTerm.trim() || this.props.isFetching}>Search</button>
+                        <button
+                            type="submit"
+                            className="btn btn-primary btn-lg"
+                            disabled={!internalState.searchTerm.trim() || this.props.isFetching}
+                        >
+                            Search
+                        </button>
                     </div>
                 </form>
                 {/* filters */}
@@ -72,46 +89,111 @@ class ArchiveSearch extends React.Component {
                 </div>
                 {/* documents */}
                 <div className="form-check form-check-inline">
-                    <input id="archive-search-filter-documents" className="form-check-input" type="checkbox" value="document" onChange={this.handleCheck} checked={!!state.filters.document}/>
-                    <label className="form-check-label" htmlFor="archive-search-filter-documents">documents</label>
+                    <input
+                        id="archive-search-filter-documents"
+                        className="form-check-input"
+                        type="checkbox"
+                        value="document"
+                        onChange={this.handleCheck}
+                        checked={!!internalState.filters.document}
+                    />
+                    <label
+                        className="form-check-label"
+                        htmlFor="archive-search-filter-documents"
+                    >
+                        documents
+                    </label>
                 </div>
                 {/* images */}
                 <div className="form-check form-check-inline">
-                    <input id="archive-search-filter-images" className="form-check-input" type="checkbox" value="image" onChange={this.handleCheck} checked={!!state.filters.image} />
-                    <label className="form-check-label" htmlFor="archive-search-filter-images">images</label>
+                    <input
+                        id="archive-search-filter-images"
+                        className="form-check-input"
+                        type="checkbox"
+                        value="image"
+                        onChange={this.handleCheck}
+                        checked={!!internalState.filters.image}
+                    />
+                    <label
+                        className="form-check-label"
+                        htmlFor="archive-search-filter-images"
+                    >
+                        images
+                    </label>
                 </div>
                 {/* videos */}
                 <div className="form-check form-check-inline">
-                    <input id="archive-search-filter-videos" className="form-check-input" type="checkbox" value="video" onChange={this.handleCheck} checked={!!state.filters.video} />
-                    <label className="form-check-label" htmlFor="archive-search-filter-videos">videos</label>
+                    <input
+                        id="archive-search-filter-videos"
+                        className="form-check-input"
+                        type="checkbox"
+                        value="video"
+                        onChange={this.handleCheck}
+                        checked={!!internalState.filters.video}
+                    />
+                    <label
+                        className="form-check-label"
+                        htmlFor="archive-search-filter-videos"
+                    >
+                        videos
+                    </label>
                 </div>
                 {/* audio */}
                 <div className="form-check form-check-inline">
-                    <input id="archive-search-filter-audio" className="form-check-input" type="checkbox" value="audio" onChange={this.handleCheck} checked={!!state.filters.audio} />
-                    <label className="form-check-label" htmlFor="archive-search-filter-audio">audio</label>
+                    <input
+                        id="archive-search-filter-audio"
+                        className="form-check-input"
+                        type="checkbox"
+                        value="audio"
+                        onChange={this.handleCheck}
+                        checked={!!internalState.filters.audio}
+                    />
+                    <label
+                        className="form-check-label"
+                        htmlFor="archive-search-filter-audio"
+                    >
+                        audio
+                    </label>
                 </div>
                 {/* results */}
                 <div id="archive-search-results">
                     {Results}
                 </div>
                 {/* errors */}
-                <div id="archive-search-errors" className="alert alert-danger" role="alert" style={{ display: props.error ? 'block' : 'none' }}>
+                <div
+                    id="archive-search-errors"
+                    className="alert alert-danger"
+                    role="alert"
+                    style={{ display: props.error ? 'block' : 'none' }}
+                >
                     { props.error }
                 </div>
                 {/* no results */}
-                <div className="alert alert-secondary text-center" role="alert" style={{ display: noResult ? 'block' : 'none' }}>
+                <div
+                    className="alert alert-secondary text-center"
+                    role="alert"
+                    style={{ display: noResult ? 'block' : 'none' }}
+                >
                     <span className="text-muted">No results.</span>
                 </div>
                 {/* pagination */}
                 <nav aria-label="pagination">
                     <ul className="pagination justify-content-center">
                         <li className="page-item">
-                            <button className="page-link btn btn-link btn-lg" onClick={this.handlePrevPage} disabled={!props.prevKey || state.isDirty}>
+                            <button
+                                className="page-link btn btn-link btn-lg"
+                                onClick={this.handlePrevPage}
+                                disabled={!props.prevKey || internalState.isDirty}
+                            >
                                 Previous
                             </button>
                         </li>
                         <li className="page-item">
-                            <button className="page-link btn btn-link btn-lg" onClick={this.handleNextPage} disabled={!props.nextKey || state.isDirty}>
+                            <button
+                                className="page-link btn btn-link btn-lg"
+                                onClick={this.handleNextPage}
+                                disabled={!props.nextKey || internalState.isDirty}
+                            >
                                 Next
                             </button>
                         </li>
@@ -119,6 +201,20 @@ class ArchiveSearch extends React.Component {
                 </nav>
             </div>
         );
+    }
+
+    getStateFromQueryString() {
+        const query = queryString.parse(this.props.location.search);
+        const { s, ...filters } = query;
+        const searchTerm = s || '';
+
+        // set default filter values
+        filters.document = filters.document || 0;
+        filters.image = filters.image || 0;
+        filters.video = filters.video || 0;
+        filters.audio = filters.audio || 0;
+
+        return { searchTerm, filters };
     }
 
     search({ nextKey, prevKey }) {
@@ -155,8 +251,8 @@ class ArchiveSearch extends React.Component {
 
         const query = queryString.stringify({ s: searchTerm, ...filters });
         this.props.history.push({ search: `?${query}` });
-        this.props.onSearchReset();
-        this.props.onSearchSubmit(searchTerm, filters);
+        this.props.actions.reset();
+        this.props.actions.search(searchTerm, filters);
         this.setState({ isSubmitted: true, isDirty: false, filters });
     }
 
@@ -206,10 +302,6 @@ class ArchiveSearch extends React.Component {
         this.setState({ isDirty: true, filters: { ...filters, [filterName]: isChecked } });
     }
 }
-
-ArchiveSearch.propTypes = {
-    onSearchSubmit: PropTypes.func.isRequired,
-};
 
 
 export default ArchiveSearch;

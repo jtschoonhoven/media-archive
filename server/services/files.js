@@ -7,7 +7,7 @@ const FILENAME_WHITELIST = new RegExp('[^0-9a-zA-Z_-]+', 'g');
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
 
 
-const getSQL = (path) => {
+const getLoadSQL = (path) => {
     path = path.startsWith('/') ? path.slice(1) : path;
     path = path.endsWith('/') ? path.slice(0, -1) : path;
 
@@ -46,6 +46,18 @@ const getSQL = (path) => {
     return query;
 };
 
+/*
+ * Retrieve a list of directories and files at the given path.
+ */
+module.exports.load = async (path) => {
+    const query = getLoadSQL(path);
+    const rows = await db.all(query);
+    return { results: rows };
+};
+
+/*
+ * Get metadata for a file with the given id for display.
+ */
 module.exports.detail = async (fileId) => {
     const details = await db.get(sql`
         SELECT
@@ -53,7 +65,8 @@ module.exports.detail = async (fileId) => {
             media_description AS "description",
             media_tags AS "tags",
             media_url AS "url",
-            media_file_name AS "filename"
+            media_file_name AS "filename",
+            media_file_path AS "path"
         FROM media
         WHERE id = ${fileId};
     `);
@@ -61,12 +74,6 @@ module.exports.detail = async (fileId) => {
         return { error: `No file exists with id ${fileId}`, statusCode: 404 };
     }
     return { details };
-};
-
-module.exports.load = async (path) => {
-    const query = getSQL(path);
-    const rows = await db.all(query);
-    return { results: rows };
 };
 
 /*

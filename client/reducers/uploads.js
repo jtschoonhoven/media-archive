@@ -14,7 +14,6 @@ import {
     UPLOAD_FILE_CANCEL,
     UPLOAD_FILE_CANCEL_COMPLETE,
 } from '../actions/uploads';
-import { validateAction } from './index';
 
 const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
 
@@ -56,7 +55,6 @@ export class UploadModel extends Record({
 }
 
 export default function uploadsReducer(state = INITIAL_STATE(), action) {
-    validateAction(state, action);
     const payload = action.payload;
 
     switch (action.type) {

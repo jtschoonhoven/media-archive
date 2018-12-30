@@ -8,13 +8,13 @@ const ALERT_STYLES = {
 };
 
 
-export default (message, style = ALERT_STYLES.DANGER) => {
+export default (msg, idx, style = ALERT_STYLES.DANGER) => {
     if (!Object.values(ALERT_STYLES).includes(style)) {
         throw new Error(`Alert created with invalid style argument "${style}".`);
     }
     return (
-        <div id="archive-alert" className={`alert alert-${style} w-100`} role="alert" key={message}>
-            { message }
+        <div id="archive-alert" className={`alert alert-${style} w-100`} role="alert" key={idx}>
+            { msg }
         </div>
     );
 };

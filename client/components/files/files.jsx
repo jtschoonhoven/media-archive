@@ -3,7 +3,7 @@ import './style.scss';
 import React from 'react';
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
-import Breadcrumb from './breadcrumb.jsx';
+import Breadcrumbs from '../common/breadcrumbs.jsx';
 import Directory from './directory.jsx';
 import File from './file.jsx';
 import SETTINGS from '../../settings';
@@ -32,12 +32,15 @@ export default class ArchiveFiles extends React.Component {
         const filesState = props.filesState;
         const uploadsState = props.uploadsState;
         const currentUrl = props.location.pathname;
-        const pathArray = currentUrl.slice(1).split('/');
-        const BreadCrumbs = pathArray.map((dirname, idx) => Breadcrumb(pathArray, dirname, idx));
+        const pathArray = currentUrl.replace('/files', '').split('/');
+
+        const BreadCrumbs = pathArray.map((dirname, idx) => {
+            return Breadcrumbs(pathArray, dirname, idx);
+        });
 
         const Errors = [];
-        filesState.errors.concat(uploadsState.errors).forEach((errorMsg) => {
-            Errors.push(Alert(errorMsg));
+        filesState.errors.concat(uploadsState.errors).forEach((msg, idx) => {
+            Errors.push(Alert(msg, idx));
         });
 
         const Directories = [];
@@ -82,6 +85,7 @@ export default class ArchiveFiles extends React.Component {
                         className="custom-file-input"
                         onChange={this.handleUploadClick}
                         accept={VALID_EXTENSIONS.map(ext => `.${ext}`).join(',')}
+                        disabled={!pathArray.join('')}
                         multiple
                     />
                     <label className="custom-file-label" htmlFor="archive-files-input">

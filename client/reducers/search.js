@@ -1,42 +1,57 @@
-import { SEARCH, SEARCH_COMPLETE, SEARCH_RESET } from '../actions/search';
+import { List, Map, Record } from 'immutable';
 
+import { SEARCH_START, SEARCH_COMPLETE, SEARCH_RESET } from '../actions/search';
 
-const INITIAL_STATE = {
+export class FiltersModel extends Record({
+    document: 0,
+    image: 0,
+    video: 0,
+    audio: 0,
+}) {}
+
+export class ResultModel extends Record({
+    id: null,
+    name: null,
+    description: null,
+    thumbnailUrl: null,
+    relevance: 0,
+}) {}
+
+const INITIAL_STATE = Record({
     isFetching: false,
-    results: [],
-    error: null,
-};
+    nextKey: null,
+    prevKey: null,
+    results: List(),
+    errors: List(),
+});
 
 
-export default function searchReducer(state = INITIAL_STATE, action) {
-    const data = action.payload || {};
+export default function searchReducer(state = INITIAL_STATE(), action) {
+    const payload = action.payload;
 
     switch (action.type) {
-        case SEARCH: {
-            const update = { isFetching: true };
-            return Object.assign({}, state, update);
+        case SEARCH_START: {
+            const update = Map({
+                isFetching: true,
+                results: List(), // clear any results from previous search
+                errors: List(), // clear any errors from previous search
+            });
+            return state.merge(update, payload);
         }
 
         case SEARCH_COMPLETE: {
-            const update = {
-                isFetching: false,
-                error: action.error ? data.message : null,
-                results: data.results || [],
-                nextKey: data.nextKey,
-                prevKey: data.prevKey,
-            };
-            return Object.assign({}, state, update);
+            if (action.error) {
+                return state.merge({
+                    isFetching: false,
+                    errors: List([action.error]),
+                });
+            }
+            const update = Map({ isFetching: false });
+            return state.merge(update, payload);
         }
 
         case SEARCH_RESET: {
-            const update = {
-                results: [],
-                isFetching: false,
-                error: null,
-                nextKey: null,
-                prevKey: null,
-            };
-            return Object.assign({}, state, update);
+            return INITIAL_STATE();
         }
 
         default: {

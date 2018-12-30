@@ -1,13 +1,14 @@
 import React from 'react';
 
 import Alert from '../common/alert.jsx';
+import Breadcrumbs from '../common/breadcrumbs.jsx';
 
 
 class ArchiveDetail extends React.Component {
     constructor(props) {
         super(props);
         this.handleClick = this.handleClick.bind(this);
-        this.state = { isExpanded: false };
+        this.state = { isExpanded: true };
     }
 
     componentDidMount() {
@@ -19,16 +20,27 @@ class ArchiveDetail extends React.Component {
         const isExpanded = this.state.isExpanded;
         const isFetching = detailState.isFetching;
         const detailsModel = detailState.details;
-        const { tags, title, description, filename, url } = detailsModel;
+        const { tags, title, description, filename, url, path } = detailsModel;
+
+        const pathArray = path ? path.split('/') : [];
+        const BreadCrumbs = pathArray.map((dirname, idx) => {
+            return Breadcrumbs(pathArray, dirname, idx);
+        });
 
         const Errors = [];
-        detailState.errors.forEach((errorMessage) => {
-            Errors.push(Alert(errorMessage));
+        detailState.errors.forEach((msg, idx) => {
+            Errors.push(Alert(msg, idx));
         });
 
         // FIXME: better behavior while loading
         return (
             <div id="archive-detail">
+                {/* breadcrumbs */}
+                <nav id="archive-upload-breadcrumbs" aria-label="breadcrumb">
+                    <ol className="breadcrumb">
+                        <strong>Archive</strong> &nbsp; / &nbsp; { BreadCrumbs }
+                    </ol>
+                </nav>
                 {/* errors */}
                 <div id="archive-detail-errors" className="row">
                     { Errors }
@@ -37,7 +49,10 @@ class ArchiveDetail extends React.Component {
                     {/* content */}
                     <div className={ `col-12 ${isExpanded || 'col-lg-6 order-lg-last'}` }>
                         <h2>{ isFetching ? 'loading...' : title }</h2>
-                        { description ? <p>{ description }</p> : '' }
+                        { description
+                            ? <p>{ description }</p>
+                            : <p className="text-muted"><em>No description.</em></p>
+                        }
                         { tags ? <p><strong>Tags: </strong>{ tags }</p> : '' }
                     </div>
                     {/* img */}
@@ -53,6 +68,7 @@ class ArchiveDetail extends React.Component {
                             <a href={ url } download={ filename } target="_blank">
                                 Download
                             </a>
+                            {/* options */}
                             <span className="text-muted d-none d-lg-inline"> • </span>
                             <a href="#" onClick={ this.handleClick } className="d-none d-lg-inline">
                                 { isExpanded ? 'View smaller' : 'View larger' }

@@ -8,8 +8,6 @@ const logger = require('./logger');
 const s3Service = require('./s3');
 
 const S3_BUCKET = config.get('S3_BUCKET_NAME');
-const S3_REGION = config.get('S3_BUCKET_REGION');
-
 const FILE_EXT_WHITELIST = config.get('CONSTANTS.FILE_EXT_WHITELIST');
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
 

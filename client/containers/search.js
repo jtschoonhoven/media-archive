@@ -6,16 +6,18 @@ import { search, searchReset } from '../actions/search';
 
 
 function mapStateToProps(state) {
-    return state.search || {};
+    return { searchState: state.search };
 }
 
 function mapDispatchToProps(dispatch) {
     return {
-        onSearchSubmit: (searchString, filters) => {
-            dispatch(search(searchString, filters, dispatch));
-        },
-        onSearchReset: () => {
-            dispatch(searchReset());
+        actions: {
+            search: (searchString, filters) => {
+                dispatch(search(searchString, filters, dispatch));
+            },
+            reset: () => {
+                dispatch(searchReset());
+            },
         },
     };
 }
