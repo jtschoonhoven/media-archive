@@ -1,7 +1,13 @@
 import React from 'react';
+import urlJoin from 'url-join';
 
 import Alert from '../common/alert.jsx';
 import Breadcrumbs from '../common/breadcrumbs.jsx';
+import SETTINGS from '../../settings';
+
+const MEDIA_TYPES = SETTINGS.MEDIA_TYPES;
+const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
+const THUMBNAILS_PUBLIC_PATH = SETTINGS.THUMBNAILS_PUBLIC_PATH;
 
 
 class ArchiveDetail extends React.Component {
@@ -59,7 +65,7 @@ class ArchiveDetail extends React.Component {
                     <div className={ `col-12 ${isExpanded || 'col-lg-6'}` }>
                         <a href={ url } target="_blank">
                             <img
-                                src={ url }
+                                src={ this.getImgUrl(detailsModel) }
                                 className="img-fluid border rounded w-100"
                                 alt={ filename }
                             />
@@ -78,6 +84,18 @@ class ArchiveDetail extends React.Component {
                 </div>
             </div>
         );
+    }
+
+    getImgUrl(detailsModel) {
+        if (!detailsModel.extension) {
+            return urlJoin(THUMBNAILS_PUBLIC_PATH, 'other.png');
+        }
+        if (detailsModel.uploadStatus === UPLOAD_STATUSES.SUCCESS) {
+            if (detailsModel.type === MEDIA_TYPES.IMAGE) {
+                return detailsModel.url;
+            }
+        }
+        return urlJoin(THUMBNAILS_PUBLIC_PATH, `${detailsModel.extension.toLowerCase()}.png`);
     }
 
     getFileId() {

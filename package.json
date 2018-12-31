@@ -12,7 +12,7 @@
     },
     "scripts": {
         "analyze": "npx source-map-explorer dist/bundle.client.*",
-        "clean": "find ./dist/* ! -name 'favicon.ico' | xargs rm",
+        "clean": "find ./dist/* ! -name 'favicon.ico' -name 'public/*' | xargs rm",
         "build": "npm run clean && npx webpack --mode=production --config=config/webpack.config.js",
         "build:dev": "npm run clean && npx webpack --mode=development --config=config/webpack.config.js",
         "watch": "npm run clean && npx webpack --watch --mode=development --config=config/webpack.config.js",

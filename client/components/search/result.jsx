@@ -1,6 +1,22 @@
 import React from 'react'; // eslint-disable-line no-unused-vars
+import urlJoin from 'url-join';
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
+import SETTINGS from '../../settings';
+
+const MEDIA_TYPES = SETTINGS.MEDIA_TYPES;
+const THUMBNAILS_PUBLIC_PATH = SETTINGS.THUMBNAILS_PUBLIC_PATH;
+
+
+function getImgUrl(resultModel) {
+    if (resultModel.thumbnailUrl) {
+        return resultModel.thumbnailUrl;
+    }
+    if (resultModel.type === MEDIA_TYPES.IMAGE) {
+        return resultModel.url;
+    }
+    return urlJoin(THUMBNAILS_PUBLIC_PATH, `${resultModel.extension.toLowerCase()}.png`);
+}
 
 export default function SearchResult(resultModel) {
     return (
@@ -10,7 +26,7 @@ export default function SearchResult(resultModel) {
                 <div className="col-5 col-sm-4 col-md-3 col-lg-2">
                     <Link to={ `detail/${resultModel.id}` }>
                         <img
-                            src={ resultModel.thumbnailUrl || resultModel.url }
+                            src={ getImgUrl(resultModel) }
                             alt={ resultModel.name }
                             className="img-thumbnail"
                         />

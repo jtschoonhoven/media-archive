@@ -26,9 +26,11 @@ export class FiltersModel extends Record({
 export class ResultModel extends Record({
     id: null,
     name: null,
+    type: null,
     description: null,
     url: null,
     thumbnailUrl: null,
+    extension: null,
     relevance: 0,
 }) {}
 

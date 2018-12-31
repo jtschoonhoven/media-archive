@@ -5,6 +5,7 @@ node_modules/
 # build artifacts
 dist/*
 !dist/favicon.ico
+!dist/public
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*

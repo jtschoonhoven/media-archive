@@ -62,11 +62,14 @@ module.exports.detail = async (fileId) => {
     const details = await db.get(sql`
         SELECT
             media_name AS "title",
+            media_type AS "type",
             media_description AS "description",
             media_tags AS "tags",
             media_url AS "url",
             media_file_name AS "filename",
-            media_file_path AS "path"
+            media_file_path AS "path",
+            media_file_extension AS "extension",
+            upload_status AS "uploadStatus"
         FROM media
         WHERE id = ${fileId};
     `);

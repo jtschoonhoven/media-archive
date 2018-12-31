@@ -10,6 +10,8 @@ export class DetailsModel extends Record({
     type: null,
     url: null,
     tags: null,
+    uploadStatus: null,
+    extension: null,
 }) {}
 
 const INITIAL_STATE = Record({

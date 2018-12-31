@@ -98,6 +98,7 @@ function getSearchSql(searchString, typeFilters, prevKey, nextKey, limit) {
             media_description AS "description",
             media_url AS "url",
             media_url_thumbnail AS "thumbnailUrl",
+            media_file_extension AS "extension",
             relevance
         FROM
             media,
