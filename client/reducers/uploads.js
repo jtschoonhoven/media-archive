@@ -19,21 +19,22 @@ const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
 
 const INITIAL_STATE = Record({
     errors: List(),
+    isRegisteringWithServer: false,
     uploadsById: OrderedMap(),
 });
 
 
 export class UploadModel extends Record({
+    error: null,
     id: null,
     uuid: null,
     name: null,
-    path: null,
     size: null,
     file: null,
-    error: null,
-    nameUnsafe: null,
+    path: null,
+    directoryPath: null,
     extension: null,
-    rawFileObj: null,
+    nameUnsafe: null,
     s3UploadPolicy: null,
     s3UploadUrl: null,
     status: UPLOAD_STATUSES.PENDING,
@@ -60,18 +61,25 @@ export default function uploadsReducer(state = INITIAL_STATE(), action) {
     switch (action.type) {
         // when client sends initial list of file descriptors to server
         case UPLOAD_BATCH_START: {
-            const update = Map({ errors: List() });
+            const update = Map({
+                errors: List(),
+                isRegisteringWithServer: true,
+            });
             return state.merge(update);
         }
 
         // server acknowledges receipt of file descriptors and returns upload tokens
         case UPLOAD_BATCH_SAVED_TO_SERVER: {
             if (action.error) {
-                const update = Map({ errors: state.errors.push(payload.message) });
+                const update = Map({
+                    errors: state.errors.push(payload.message),
+                    isRegisteringWithServer: false,
+                });
                 return state.merge(update);
             }
+            const update = Map({ isRegisteringWithServer: false });
             const uploadsById = state.uploadsById.merge(payload.get('uploadsById'));
-            return state.merge({ uploadsById });
+            return state.merge(update, { uploadsById });
         }
 
         case UPLOAD_FILE_TO_S3_START: {

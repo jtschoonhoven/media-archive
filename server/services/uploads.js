@@ -206,7 +206,8 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
         SELECT
             id,
             uuid,
-            ${dirPath} AS "path",
+            ${dirPath} AS "directoryPath",
+            media_file_path AS "path",
             media_file_name AS "name",
             media_file_name_unsafe AS "nameUnsafe",
             media_type AS "mediaType",

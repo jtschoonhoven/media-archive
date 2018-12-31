@@ -237,6 +237,5 @@ module.exports.query = async (searchString, filters) => {
         nextKey: newNextKey,
         prevKey: newPrevKey,
         results: rows,
-        success: true,
     };
 };

@@ -37,10 +37,15 @@ function parseLoadResponse(loadResponse) {
  * Fetch the contents of the directory at `path` from the server.
  */
 export function load(path, dispatch) {
+    // remove leading and trailing slashes
+    path = path.startsWith('/') ? path.slice(1) : path;
+    path = path.endsWith('/') ? path.slice(0, -1) : path;
+
     fetch(urlJoin('/api/v1/files/', path))
         .then(response => response.json())
         .then(data => dispatch(_loadComplete(data)))
         .catch(err => dispatch(_loadComplete({ error: err.message })));
+
     return {
         type: FILES_LOAD,
         payload: Map({ path }),

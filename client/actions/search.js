@@ -1,9 +1,9 @@
 import queryString from 'query-string';
 import { List, Map } from 'immutable';
 
-import { FiltersModel, ResultModel } from '../reducers/search';
+import { ResultModel } from '../reducers/search';
 
-export const SEARCH_START = 'SEARCH';
+export const SEARCH_START = 'SEARCH_START';
 export const SEARCH_COMPLETE = 'SEARCH_COMPLETE';
 export const SEARCH_RESET = 'SEARCH_RESET';
 
@@ -12,26 +12,25 @@ export const SEARCH_RESET = 'SEARCH_RESET';
  * Query the database for media matching the given search string and filters.
  * Automatically send searchComplete action on success/failure.
  */
-export function search(searchString, filters, dispatch) {
-    const filtersModel = new FiltersModel(filters);
-    const filtersMap = Map(filtersModel).filter(filter => !!filter).toObject();
-    const query = queryString.stringify({ s: searchString, ...filtersMap });
+export function search(searchTerm, filtersModel, dispatch) {
+    const filtersObj = filtersModel.toFilteredObject();
+    const query = queryString.stringify({ s: searchTerm, ...filtersObj });
 
     fetch(`/api/v1/search?${query}`)
         .then(response => response.json())
-        .then(data => dispatch(searchComplete(data)))
+        .then(data => dispatch(searchComplete(data, filtersModel)))
         .catch(err => dispatch(searchComplete({ error: err.message })));
 
     return {
         type: SEARCH_START,
-        payload: Map(),
+        payload: Map({ filters: filtersModel, searchTerm }),
     };
 }
 
 /*
  * Receive the JSON search results as JSON.
  */
-export function searchComplete(response) {
+export function searchComplete(response, filtersModel) {
     if (response.error) {
         return {
             type: SEARCH_COMPLETE,
@@ -48,8 +47,10 @@ export function searchComplete(response) {
         type: SEARCH_COMPLETE,
         payload: Map({
             results: resultModels,
-            nextKey: response.nextKey,
-            prevKey: response.prevKey,
+            filters: filtersModel.merge({
+                nextKey: response.nextKey,
+                prevKey: response.prevKey,
+            }),
         }),
     };
 }

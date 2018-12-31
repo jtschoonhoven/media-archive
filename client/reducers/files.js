@@ -5,7 +5,6 @@ import { FILES_LOAD, FILES_LOAD_COMPLETE } from '../actions/files';
 const FilesState = Record({
     path: null,
     isFetching: false,
-    isAcknowledging: false,
     errors: List(),
     directoriesByName: OrderedMap(),
     filesById: OrderedMap(),
@@ -35,7 +34,9 @@ export default function filesReducer(state = FilesState(), action) {
         case FILES_LOAD: {
             const update = Map({
                 isFetching: true,
-                errors: List(),
+                directoriesByName: OrderedMap(), // clear dirs from previous state
+                filesById: OrderedMap(), // clear files from previous state
+                errors: List(), // clear errors from previous state
             });
             return state.merge(update, payload);
         }

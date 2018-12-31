@@ -50,19 +50,24 @@ export default class ArchiveFiles extends React.Component {
 
         const Files = [];
         filesState.filesById.forEach((fileModel) => {
+            if (uploadsState.uploadsById.get(fileModel.id)) {
+                return; // skip files that are also included in uploads
+            }
             Files.push(File(fileModel));
         });
 
         const Uploads = [];
         uploadsState.uploadsById.forEach((uploadModel, id) => {
-            // FIXME: only include uploads for the current directory
+            if (uploadModel.directoryPath !== filesState.path) {
+                return; // skip uploads that are not in the current directory
+            }
             Uploads.push(
                 <Upload
                     uploadModel={ uploadModel }
                     onUploadCancel={ this.props.actions.onUploadCancel }
                     key={ id }
                 />,
-            ); // eslint-disable-line max-len
+            );
         });
 
         return (
@@ -108,7 +113,10 @@ export default class ArchiveFiles extends React.Component {
      * The URL maps 1:1 to the virtual filesystem, but we have to strip the `/files` prefix.
      */
     getFilePath() {
-        return this.props.location.pathname.replace('/files', '');
+        let path = this.props.location.pathname.replace('/files', '');
+        path = path.startsWith('/') ? path.slice(1) : path;
+        path = path.endsWith('/') ? path.slice(0, -1) : path;
+        return path;
     }
 
     /*

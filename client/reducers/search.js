@@ -7,32 +7,47 @@ export class FiltersModel extends Record({
     image: 0,
     video: 0,
     audio: 0,
-}) {}
+    nextKey: null,
+    prevKey: null,
+}) {
+    /*
+     * Return a plain JS object containing only truthy values.
+     */
+    toFilteredObject() {
+        const obj = Map(this).filter(val => !!val).toObject();
+        if (obj.document && obj.image && obj.video && obj.audio) {
+            const { document, image, video, audio, ...rest } = obj;
+            return rest;
+        }
+        return obj;
+    }
+}
 
 export class ResultModel extends Record({
     id: null,
     name: null,
     description: null,
+    url: null,
     thumbnailUrl: null,
     relevance: 0,
 }) {}
 
-const INITIAL_STATE = Record({
-    isFetching: false,
-    nextKey: null,
-    prevKey: null,
-    results: List(),
+export class SearchState extends Record({
     errors: List(),
-});
+    searchTerm: '',
+    filters: new FiltersModel(),
+    results: List(),
+    isFetching: false,
+}) {}
 
-
-export default function searchReducer(state = INITIAL_STATE(), action) {
+export default function searchReducer(state = new SearchState(), action) {
     const payload = action.payload;
 
     switch (action.type) {
         case SEARCH_START: {
             const update = Map({
                 isFetching: true,
+                filters: new FiltersModel(),
                 results: List(), // clear any results from previous search
                 errors: List(), // clear any errors from previous search
             });
@@ -51,7 +66,7 @@ export default function searchReducer(state = INITIAL_STATE(), action) {
         }
 
         case SEARCH_RESET: {
-            return INITIAL_STATE();
+            return new SearchState();
         }
 
         default: {

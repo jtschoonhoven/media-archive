@@ -8,7 +8,7 @@ class ArchiveDetail extends React.Component {
     constructor(props) {
         super(props);
         this.handleClick = this.handleClick.bind(this);
-        this.state = { isExpanded: true };
+        this.state = { isExpanded: false };
     }
 
     componentDidMount() {
