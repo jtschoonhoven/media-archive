@@ -18,10 +18,10 @@ exports.up = async (db) => {
                 null, -- media_transcript
                 null, -- media_date
                 'tag-${i}', -- media_tags
-                'document', -- media_type
-                'PDF', -- media_file_extension
-                '${i}.pdf', -- media_file_name
-                'uploads/${i}.pdf', -- media_file_path
+                'image', -- media_type
+                'JPG', -- media_file_extension
+                '${i}.jpg', -- media_file_name
+                'uploads/${i}.jpg', -- media_file_path
                 ${i}, -- media_file_size_bytes
                 'https://i.imgur.com/fqRBCko.jpg', -- media_url
                 'https://i.imgur.com/fqRBCko.jpg', -- media_url_thumbnail
@@ -154,10 +154,10 @@ exports.up = async (db) => {
             null, -- media_transcript
             null, -- media_date
             'safety, lifestyle, advice', -- media_tags
-            'document', -- media_type
-            'PDF', -- media_file_extension
-            'safety.pdf', -- media_file_name
-            'clippings/safety.pdf', -- media_file_path
+            'image', -- media_type
+            'JPG', -- media_file_extension
+            'safety.jpg', -- media_file_name
+            'clippings/safety.jpg', -- media_file_path
             256, -- media_file_size_bytes
             'https://i.imgur.com/xYbJwhM.jpg', -- media_url
             'https://i.imgur.com/xYbJwhM.jpg', -- media_url_thumbnail
@@ -199,10 +199,10 @@ exports.up = async (db) => {
             null, -- media_transcript
             null, -- media_date
             'morality, shame', -- media_tags
-            'document', -- media_type
-            'PDF', -- media_file_extension
-            'shame.pdf', -- media_file_name
-            'clippings/shame.pdf', -- media_file_path
+            'image', -- media_type
+            'PNG', -- media_file_extension
+            'shame.png', -- media_file_name
+            'clippings/shame.png', -- media_file_path
             256, -- media_file_size_bytes
             'https://i.imgur.com/UecRQCU.png', -- media_url
             'https://i.imgur.com/UecRQCU.png', -- media_url_thumbnail
@@ -244,10 +244,10 @@ exports.up = async (db) => {
             null, -- media_transcript
             null, -- media_date
             'advice, lifestyle, special interest', -- media_tags
-            'document', -- media_type
-            'PDF', -- media_file_extension
-            'care.pdf', -- media_file_name
-            'clippings/care.pdf', -- media_file_path
+            'image', -- media_type
+            'JPG', -- media_file_extension
+            'care.jpg', -- media_file_name
+            'clippings/care.jpg', -- media_file_path
             256, -- media_file_size_bytes
             'https://i.imgur.com/fqRBCko.jpg', -- media_url
             'https://i.imgur.com/fqRBCko.jpg', -- media_url_thumbnail

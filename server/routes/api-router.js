@@ -1,6 +1,8 @@
 const config = require('config');
 const express = require('express');
+const fs = require('fs');
 const Joi = require('joi');
+const path = require('path');
 
 const filesService = require('../services/files');
 const logger = require('../services/logger');
@@ -125,8 +127,8 @@ const FILE_LIST_SCHEMA = Joi.object({
     }).unknown(),
 }).unknown();
 apiRouter.get('/files/:path(*)', validateReq.bind(null, FILE_LIST_SCHEMA), async (req, res) => {
-    const path = req.params.path;
-    return sendResponse(200, req, res, filesService.load, path);
+    const filePath = req.params.path;
+    return sendResponse(200, req, res, filesService.load, filePath);
 });
 apiRouter.get('/files', async (req, res) => sendResponse(200, req, res, filesService.load, '/'));
 
@@ -178,7 +180,8 @@ const UPDATE_SCHEMA = Joi.object({
 }).unknown();
 apiRouter.put('/uploads/:fileId', validateReq.bind(null, UPDATE_SCHEMA), async (req, res) => {
     const fileId = req.params.fileId;
-    return sendResponse(200, req, res, uploadsService.confirm, fileId);
+    const status = req.body.status;
+    return sendResponse(200, req, res, uploadsService.update, fileId, status);
 });
 
 /*
@@ -208,7 +211,26 @@ const DELETE_SCHEMA = Joi.object({
 }).unknown();
 apiRouter.delete('/files/:fileId', validateReq.bind(null, DELETE_SCHEMA), async (req, res) => {
     const fileId = req.params.fileId;
-    return sendResponse(200, req, res, filesService.delete, fileId);
+    return sendResponse(200, req, res, filesService.remove, fileId);
+});
+
+/*
+ * Get a stock thumbnail for the given file type.
+ */
+const IMAGE_SCHEMA = Joi.object({
+    params: Joi.object({
+        extension: Joi.string().alphanum()
+            .error(() => 'Image thumbnail API requires a valid file extension'),
+    }).unknown(),
+}).unknown();
+apiRouter.get('/images/thumbnails/:extension', validateReq.bind(IMAGE_SCHEMA), async (req, res) => {
+    const extension = req.params.extension;
+    const thumbailsPath = '../../dist/assets/thumbnails/file-extensions/';
+    const extensionPath = path.join(__dirname, thumbailsPath, `${extension}.png`);
+    if (fs.existsSync(extensionPath)) {
+        return res.sendFile(extensionPath);
+    }
+    return res.sendFile(path.join(__dirname, thumbailsPath, 'other.png'));
 });
 
 

@@ -112,15 +112,16 @@ export function uploadFileToS3(uploadModel, dispatch) {
     new Promise((resolve, reject) => {
         xhr.open('POST', uploadUrl);
         xhr.onload = event => resolve(event.target.responseText);
-        xhr.onerror = reject.bind(null, xhr.statusText);
+        xhr.onerror = reject;
         xhr.upload.onprogress = e => dispatch(_uploadFileToS3Progress(uploadModel, e));
         xhr.send(formData);
     })
         .then(() => {
             dispatch(_uploadFileToS3Finished(uploadModel, null, dispatch));
         })
-        .catch((err) => {
-            const uploadError = new Error(err);
+        .catch(() => {
+            const statusText = xhr.statusText || 'Server Error';
+            const uploadError = new Error(`Upload to S3 failed: ${statusText}`);
             dispatch(_uploadFileToS3Finished(uploadModel, uploadError, dispatch));
         });
 
@@ -143,20 +144,24 @@ function _uploadFileToS3Progress(uploadModel, xhrProgressEvent) {
 
 function _uploadFileToS3Finished(uploadModel, uploadError, dispatch) {
     // NOTE: never returns an error action, but sets error prop on uploadModel on failure
+    let uploadStatus;
+
     if (uploadError) {
+        uploadStatus = UPLOAD_STATUSES.FAILURE;
         uploadModel = uploadModel.merge({
             isUploading: false,
-            status: UPLOAD_STATUSES.FAILURE,
+            status: uploadStatus,
             error: uploadError.message,
         });
     }
     else {
+        uploadStatus = UPLOAD_STATUSES.SUCCESS;
         uploadModel = uploadModel.merge({ uploadPercent: 100 });
     }
 
     fetch(urlJoin('/api/v1/uploads/', uploadModel.id.toString()), {
         method: 'PUT',
-        body: JSON.stringify({ status: uploadModel.status }),
+        body: JSON.stringify({ status: uploadStatus }),
         headers: POST_HEADERS,
     })
         .then(response => response.json())

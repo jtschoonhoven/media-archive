@@ -1,11 +1,12 @@
 const config = require('config');
 const sql = require('sql-template-strings');
 
-const db = require('../services/database');
-const logger = require('../services/logger');
+const db = require('./database');
+const logger = require('./logger');
+const s3Service = require('./s3');
+const filesService = require('./files');
 
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
-const REGEX_ALPHA_NUM = new RegExp('[0-9a-zA-Z]+');
 const QUERY_LOGIC_CHARS = ['!', '&', '|', '(', ')'];
 const QUERY_GROUP_CHARS = ['&', '|', '(', ')'];
 const DEFAULT_LIMIT = 10;
@@ -46,17 +47,6 @@ function deserializePageKey(key) {
 }
 
 /*
- * Remove any non-alphamueric (English) characters.
- */
-function toAlphaNum(str) {
-    const match = str.match(REGEX_ALPHA_NUM);
-    if (match) {
-        return match[0];
-    }
-    return '';
-}
-
-/*
  * Sanitize and prepare a search query.
  * Enforces use of logical operators.
  */
@@ -81,14 +71,14 @@ function sanitizeSearchString(searchString) {
             return `${result} & ${word}`;
         }
         // prepend OR operator before a positive term if not otherwise specified
-        const safeWord = toAlphaNum(word);
+        const safeWord = filesService.toAlphaNum(word);
         return safeWord ? `${result} | ${safeWord}` : result;
     });
 }
 
 function getSearchSql(searchString, typeFilters, prevKey, nextKey, limit) {
     const safeSearchString = sanitizeSearchString(searchString);
-    const firstWord = toAlphaNum(safeSearchString);
+    const firstWord = filesService.toAlphaNum(safeSearchString);
     const isPrecise = QUERY_LOGIC_CHARS.some(char => safeSearchString.includes(char));
     const query = sql`
         SELECT
@@ -96,7 +86,6 @@ function getSearchSql(searchString, typeFilters, prevKey, nextKey, limit) {
             media_type AS "type",
             media_name AS "name",
             media_description AS "description",
-            media_url AS "url",
             media_url_thumbnail AS "thumbnailUrl",
             media_file_extension AS "extension",
             relevance
@@ -233,6 +222,13 @@ module.exports.query = async (searchString, filters) => {
         newPrevKey = _newNextKey;
         rows.reverse();
     }
+
+    // get signed URL for thumbnail if retrieving from S3
+    rows.forEach((result) => {
+        if (s3Service.isS3Url(result.thumbnailUrl)) {
+            result.thumbnailUrl = s3Service.getPresignedUrl(result.thumbnailUrl);
+        }
+    });
 
     return {
         nextKey: newNextKey,

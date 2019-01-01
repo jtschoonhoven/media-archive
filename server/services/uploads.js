@@ -6,74 +6,10 @@ const uuidv4 = require('uuid/v4');
 const db = require('./database');
 const logger = require('./logger');
 const s3Service = require('./s3');
+const filesService = require('./files');
 
-const S3_BUCKET = config.get('S3_BUCKET_NAME');
-const FILE_EXT_WHITELIST = config.get('CONSTANTS.FILE_EXT_WHITELIST');
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
 
-const EXTRA_SPACE_REGEX = new RegExp('\\s+', 'g');
-const MEDIA_NAME_BLACKLIST = new RegExp('[^0-9a-zA-Z -]', 'g');
-const FILE_NAME_BLACKLIST = new RegExp('[^0-9a-zA-Z._-]', 'g');
-const FILE_PATH_BLACKLIST = new RegExp('[^0-9a-zA-Z_/-]', 'g');
-const MEDIA_FILE_EXTENSION_BLACKLIST = new RegExp('[^0-9a-zA-Z]', 'g');
-
-
-function getDirPath(dirPath) {
-    if (dirPath.match(FILE_PATH_BLACKLIST)) {
-        throw new Error(`Cannot upload to ${dirPath}: contains illegal characters`);
-    }
-    return dirPath;
-}
-
-function getFileName(rawFileName) {
-    return rawFileName.replace(FILE_NAME_BLACKLIST, '-');
-}
-
-function getFilePath(dirPath, fileName) {
-    return path.join(getDirPath(dirPath), getFileName(fileName));
-}
-
-function getMediaName(fileName) {
-    const extension = path.extname(fileName);
-    const mediaName = fileName
-        .slice(0, -extension.length) // remove file extension
-        .replace(MEDIA_NAME_BLACKLIST, ' ') // remove illegal characters
-        .replace(EXTRA_SPACE_REGEX, ' '); // remove redundant whitespace
-    if (!mediaName.length) {
-        throw new Error(`Cannot upload ${fileName}: contains illegal characters.`);
-    }
-    return mediaName;
-}
-
-function getMediaFileExtension(fileName) {
-    const extension = fileName
-        .toUpperCase()
-        .split('.')
-        .pop();
-    if (extension.match(MEDIA_FILE_EXTENSION_BLACKLIST)) {
-        throw new Error(`Cannot upload ${fileName}: extension contains illegal characters.`);
-    }
-    if (fileName.startsWith('.')) {
-        throw new Error(`Cannot upload ${fileName}: names cannot start with a dot.`);
-    }
-    if (fileName.indexOf('.') < 0) {
-        throw new Error(`Cannot upload ${fileName}: names must contain a file extension.`);
-    }
-    return extension;
-}
-
-function getMediaType(fileName) {
-    const extension = getMediaFileExtension(fileName);
-    const mediaType = FILE_EXT_WHITELIST[extension].type;
-    if (!mediaType) {
-        throw new Error(`Cannot upload ${fileName}: extension ${extension} is not supported.`);
-    }
-    return mediaType;
-}
-
-function getMediaUrl(uuid, mediaExtn) {
-    return `https://${S3_BUCKET}.s3.amazonaws.com/${uuid}.${mediaExtn.toLowerCase()}`;
-}
 
 function getInsertSql(
     uploadBatchId,
@@ -87,7 +23,7 @@ function getInsertSql(
     userEmail,
 ) {
     const uuid = uuidv4(); // generate secure, random uuid
-    const mediaUrl = getMediaUrl(uuid, mediaExtn);
+    const mediaUrl = s3Service.getS3Url(uuid, mediaExtn);
     return sql`
         INSERT INTO media (
             uuid,
@@ -153,11 +89,11 @@ async function addFilesToDb(dirPath, fileList, userEmail) {
     try {
         fileList.forEach((fileInfo) => {
             // validate and sanitize uploaded file info
-            const mediaName = getMediaName(fileInfo.name);
-            const mediaType = getMediaType(fileInfo.name);
-            const mediaFile = getFileName(fileInfo.name);
-            const mediaPath = getFilePath(dirPath, fileInfo.name);
-            const mediaExtn = getMediaFileExtension(fileInfo.name);
+            const mediaName = filesService.getFileTitle(fileInfo.name);
+            const mediaType = filesService.getFileType(fileInfo.name);
+            const mediaFile = filesService.getSanitizedFileName(fileInfo.name);
+            const mediaExtn = filesService.getFileExtension(fileInfo.name);
+            const mediaPath = filesService.getSanitizedFilePath(path.join(dirPath, mediaFile));
             const mediaSize = parseInt(fileInfo.sizeInBytes, 10);
 
             // exectute query within a transaction
@@ -211,7 +147,8 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
             media_file_name AS "name",
             media_file_name_unsafe AS "nameUnsafe",
             media_type AS "mediaType",
-            media_file_extension AS "extension"
+            media_file_extension AS "extension",
+            media_url AS "s3Url"
         FROM media
         WHERE deleted_at IS NULL
         AND upload_status = ${UPLOAD_STATUSES.PENDING}
@@ -222,11 +159,7 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
 
     // add S3 upload credentials to each item
     rows.forEach((fileObj) => {
-        const s3SignedPost = s3Service.getPresignedPost(
-            fileObj.uuid,
-            fileObj.name,
-            fileObj.extension,
-        );
+        const s3SignedPost = s3Service.getPresignedPost(fileObj.s3Url, fileObj.name);
         fileObj.s3UploadUrl = s3SignedPost.url;
         fileObj.s3UploadPolicy = s3SignedPost.fields;
     });
@@ -234,13 +167,16 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
 };
 
 /*
- * Mark an upload as successful.
+ * Update the status of an upload.
  */
-module.exports.confirm = async (fileId) => {
+module.exports.update = async (fileId, status) => {
+    if (!Object.values(UPLOAD_STATUSES).includes(status)) {
+        throw new Error(`Uploads API received invalid status for file ${fileId}: "${status}"`);
+    }
     const query = sql`
         UPDATE media
         SET
-            upload_status = ${UPLOAD_STATUSES.SUCCESS},
+            upload_status = ${status},
             upload_finished_at = NOW()
         WHERE id = ${fileId};
     `;

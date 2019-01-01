@@ -1,7 +1,11 @@
 const aws = require('aws-sdk');
 const config = require('config');
 
-const SIGNATURE_EXPIRATION_SECONDS = 60 * 60 * 6; // 6 hours
+const filesService = require('./files');
+
+const S3_PROTOCOL_PREFIX = 's3://';
+const PUT_OBJECT_EXPIRATION_SECONDS = 60 * 60 * 6; // 6 hours
+const GET_OBJECT_EXPIRATION_SECONDS = 60 * 60 * 24 * 3; // 3 days
 
 const FILE_EXT_WHITELIST = config.get('CONSTANTS.FILE_EXT_WHITELIST');
 const S3_BUCKET_NAME = config.get('S3_BUCKET_NAME');
@@ -33,24 +37,68 @@ const S3 = new aws.S3({
 
 
 /*
+ * Generate the s3 key for an object.
+ */
+function generateS3Key(uuid, extension) {
+    return `${uuid}.${extension.toLowerCase()}`;
+}
+
+/*
+ * Parse an s3 URL (one that starts with s3://) to get the bucket and key names.
+ */
+function parseS3Url(url) {
+    const [bucket, ...keyFragments] = url.replace(S3_PROTOCOL_PREFIX, '').split('/');
+    return { bucket, key: keyFragments.join('/') };
+}
+
+/*
+ * Generate a (unsigned) URL for an object on S3.
+ * Cannot be linked to directly, must be signed (see methods below).
+ */
+module.exports.getS3Url = (uuid, extension) => {
+    const s3Key = generateS3Key(uuid, extension);
+    return `${S3_PROTOCOL_PREFIX}${S3_BUCKET_NAME}/${s3Key}`;
+};
+
+/*
+ * Helper method to distinguish between S3 and HTTP URLs.
+ */
+module.exports.isS3Url = (url) => {
+    return !!url && url.startsWith('s3://');
+};
+
+/*
  * Generate the policy and form fields required by the client for direct upload to S3.
  */
-module.exports.getPresignedPost = (uuid, fileName, fileExt) => {
-    const s3Key = `${uuid}.${fileExt.toLowerCase()}`;
-    const contentType = FILE_EXT_WHITELIST[fileExt.toUpperCase()].mimeType;
+module.exports.getPresignedPost = (s3Url, filename) => {
+    const { bucket, key } = parseS3Url(s3Url);
+    const extension = filesService.getFileExtension(filename);
     const s3Params = {
-        Expires: SIGNATURE_EXPIRATION_SECONDS,
-        Bucket: S3_BUCKET_NAME,
+        Expires: PUT_OBJECT_EXPIRATION_SECONDS,
+        Bucket: bucket,
         Conditions: [
-            { key: s3Key },
+            { key },
         ],
         Fields: {
-            'key': s3Key,
-            'Content-Type': contentType,
-            'Content-Disposition': fileName,
+            'key': key,
+            'Content-Type': FILE_EXT_WHITELIST[extension].mimeType,
+            'Content-Disposition': filesService.getSanitizedFileName(filename),
             'success_action_status': '201',
             'acl': 'public-read',
         },
     };
     return S3.createPresignedPost(s3Params);
+};
+
+/*
+ * Generate a signed URL that can be used to retrieve an object from S3.
+ */
+module.exports.getPresignedUrl = (s3Url) => {
+    const { bucket, key } = parseS3Url(s3Url);
+    const params = {
+        Bucket: bucket,
+        Key: key,
+        Expires: GET_OBJECT_EXPIRATION_SECONDS,
+    };
+    return S3.getSignedUrl('getObject', params);
 };
