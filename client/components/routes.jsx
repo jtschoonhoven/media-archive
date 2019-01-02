@@ -13,6 +13,7 @@ import {
     ArchiveFilesContainer, // eslint-disable-line no-unused-vars
     ArchiveLoginContainer, // eslint-disable-line no-unused-vars
     ArchiveMissingContainer, // eslint-disable-line no-unused-vars
+    ArchiveModalContainer, // eslint-disable-line no-unused-vars
     ArchiveNavbarContainer, // eslint-disable-line no-unused-vars
     ArchivePrivacyContainer, // eslint-disable-line no-unused-vars
     ArchiveSearchContainer, // eslint-disable-line no-unused-vars
@@ -29,15 +30,37 @@ class ArchiveApp extends React.Component {
         return (
             <Provider store={this.store}>
                 <div>
-                    <ArchiveNavbarContainer store={this.store} />
+                    <ArchiveModalContainer store={ this.store } />
+                    <ArchiveNavbarContainer store={ this.store } />
                     <div id="archive-content" className="container">
                         <Switch>
-                            <RestrictedRoute path="/" exact component={ArchiveSearchContainer} store={this.store} />
-                            <RestrictedRoute path="/detail/:id" component={ArchiveDetailContainer} store={this.store} />
-                            <RestrictedRoute path="/files" component={ArchiveFilesContainer} store={this.store} />
-                            <Route path="/login" component={ArchiveLoginContainer} />
-                            <Route path="/privacy" component={ArchivePrivacyContainer} />
-                            <Route component={ArchiveMissingContainer} />
+                            <RestrictedRoute
+                                path="/"
+                                component={ ArchiveSearchContainer }
+                                store={ this.store }
+                                exact
+                            />
+                            <RestrictedRoute
+                                path="/detail/:id"
+                                component={ ArchiveDetailContainer }
+                                store={ this.store }
+                            />
+                            <RestrictedRoute
+                                path="/files"
+                                component={ ArchiveFilesContainer }
+                                store={ this.store }
+                            />
+                            <Route
+                                path="/login"
+                                component={ ArchiveLoginContainer }
+                            />
+                            <Route
+                                path="/privacy"
+                                component={ ArchivePrivacyContainer }
+                            />
+                            <Route
+                                component={ ArchiveMissingContainer }
+                            />
                         </Switch>
                     </div>
                 </div>

@@ -12,6 +12,7 @@ const SETTINGS = {
     NODE_ENV: _CONFIG.NODE_ENV,
     UPLOAD_STATUSES: _CONFIG.CONSTANTS.UPLOAD_STATUSES,
     API_URLS: _CONFIG.CONSTANTS.API_URLS,
+    REGEX: _CONFIG.CONSTANTS.REGEX,
 };
 
 // validate that all settings are actually defined

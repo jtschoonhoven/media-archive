@@ -4,10 +4,28 @@ const sql = require('sql-template-strings');
 const db = require('./database');
 const s3Service = require('./s3');
 
-const FILENAME_WHITELIST = new RegExp('[^0-9a-zA-Z_-]+', 'g');
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
 const FILE_EXT_WHITELIST = config.get('CONSTANTS.FILE_EXT_WHITELIST');
+const FILENAME_BLACKLIST = config.get('CONSTANTS.REGEX.FILENAME_BLACKLIST');
+const MEDIA_TITLE_BLACKLIST = config.get('CONSTANTS.REGEX.MEDIA_TITLE_BLACKLIST');
+const DUPLICATE_BLACKLIST = config.get('CONSTANTS.REGEX.DUPLICATE_BLACKLIST');
+const TRIM_ENDS_BLACKLIST = config.get('CONSTANTS.REGEX.TRIM_ENDS_BLACKLIST');
 
+const FILENAME_REGEX = new RegExp(FILENAME_BLACKLIST, 'g');
+const MEDIA_TITLE_REGEX = new RegExp(MEDIA_TITLE_BLACKLIST, 'g');
+const DUPLICATE_REGEX = new RegExp(DUPLICATE_BLACKLIST, 'g');
+const TRIM_ENDS_REGEX = new RegExp(TRIM_ENDS_BLACKLIST, 'g');
+
+
+/*
+ * Helper to remove leading and trailing slashes from a string.
+ */
+function trimSlashes(path) {
+    path = path.startsWith('/') ? path.slice(1) : path;
+    path = path.endsWith('/') ? path.slice(0, -1) : path;
+    return path.trim();
+}
+module.exports.trimSlashes = trimSlashes;
 
 /*
  * Parse a file name to return its upper-cased file extension (without leading dot).
@@ -25,11 +43,10 @@ module.exports.getFileExtension = getFileExtension;
  * Sanitize and normalize filenames.
  */
 function getSanitizedFileName(filename) {
-    const whitelistChars = '_-';
     const extension = getFileExtension(filename);
     filename = removeFileExtension(filename);
-    filename = toAlphaNum(filename, { sub: '-', whitelistChars });
-    return `${filename}.${extension}`.toLowerCase();
+    filename = sanitize(filename, FILENAME_REGEX, '-');
+    return `${filename}.${extension}`;
 }
 module.exports.getSanitizedFileName = getSanitizedFileName;
 
@@ -37,11 +54,11 @@ module.exports.getSanitizedFileName = getSanitizedFileName;
  * Sanitize and normalize file paths.
  */
 function getSanitizedFilePath(filepath) {
-    const whitelistChars = '/_-';
     const extension = getFileExtension(filepath);
+    filepath = trimSlashes(filepath);
     filepath = removeFileExtension(filepath);
-    filepath = toAlphaNum(filepath, { sub: '-', whitelistChars });
-    return `${filepath}.${extension}`.toLowerCase();
+    filepath.split('/').map(dir => sanitize(dir, FILENAME_REGEX, '-')).join('/');
+    return `${filepath}.${extension}`;
 }
 module.exports.getSanitizedFilePath = getSanitizedFilePath;
 
@@ -77,26 +94,23 @@ module.exports.getFileMimeType = getFileMimeType;
  */
 function getFileTitle(filename) {
     filename = removeFileExtension(filename);
-    const whitelistChars = '!&().-';
-    const sanitized = toAlphaNum(filename, { sub: ' ', whitelistChars });
+    const sanitized = sanitize(filename, MEDIA_TITLE_REGEX, ' ');
     return _toTitleCase(sanitized);
 }
 module.exports.getFileTitle = getFileTitle;
 
 /*
- * Sanitize a string by stripping non alphanumeric characters.
+ * Sanitize a string by replacting blacklisted chars.
  *
- * - Accepts additional options to whitelist special characters.
  * - Removes "duplicate" non-alphanumeric characters from string.
  * - Trims any non-alphanumeric from start and end of string.
  */
-function toAlphaNum(str, { sub = '', whitelistChars = '' } = {}) {
-    const whitelistRegex = new RegExp(`[^a-zA-Z0-9${whitelistChars}]`, 'g');
-    const duplicateRegex = new RegExp('([^a-zA-Z0-9])(?=\\1)', 'g');
-    const trimRegex = new RegExp('(^[^A-Za-z0-9]+)|[^A-Za-z0-9]+$', 'g');
-    return str.replace(whitelistRegex, sub).replace(duplicateRegex, '').replace(trimRegex, '');
+function sanitize(str, regexBlacklist, sub) {
+    return str.replace(regexBlacklist, sub)
+        .replace(DUPLICATE_REGEX, '')
+        .replace(TRIM_ENDS_REGEX, '');
 }
-module.exports.toAlphaNum = toAlphaNum;
+module.exports.toAlphaNum = sanitize;
 
 /*
  * Retrieve a list of directories and files at the given path.
@@ -164,12 +178,11 @@ function _toTitleCase(str) {
  * Generate the paramaterized SQL string used to retrieve the contents of a given directory.
  */
 function _getLoadSQL(path) {
-    path = path.startsWith('/') ? path.slice(1) : path;
-    path = path.endsWith('/') ? path.slice(0, -1) : path;
+    path = trimSlashes(path);
 
     let pathArray = [];
-    if (path.trim()) {
-        pathArray = path.split('/').map(dir => dir.replace(FILENAME_WHITELIST, '-'));
+    if (path) {
+        pathArray = path.split('/').map(dir => sanitize(dir, FILENAME_BLACKLIST, '-'));
     }
 
     const query = sql`

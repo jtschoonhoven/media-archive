@@ -4,9 +4,11 @@ const sql = require('sql-template-strings');
 const db = require('./database');
 const logger = require('./logger');
 const s3Service = require('./s3');
-const filesService = require('./files');
 
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
+const ALPHANUM_BLACKLIST = config.get('CONSTANTS.REGEX.ALPHANUM_BLACKLIST');
+
+const ALPHANUM_REGEX = new RegExp(ALPHANUM_BLACKLIST, 'g');
 const QUERY_LOGIC_CHARS = ['!', '&', '|', '(', ')'];
 const QUERY_GROUP_CHARS = ['&', '|', '(', ')'];
 const DEFAULT_LIMIT = 10;
@@ -71,15 +73,16 @@ function sanitizeSearchString(searchString) {
             return `${result} & ${word}`;
         }
         // prepend OR operator before a positive term if not otherwise specified
-        const safeWord = filesService.toAlphaNum(word);
+        const safeWord = word.replace(ALPHANUM_REGEX, '');
         return safeWord ? `${result} | ${safeWord}` : result;
     });
 }
 
 function getSearchSql(searchString, typeFilters, prevKey, nextKey, limit) {
     const safeSearchString = sanitizeSearchString(searchString);
-    const firstWord = filesService.toAlphaNum(safeSearchString);
+    const firstWord = safeSearchString.replace(ALPHANUM_REGEX, 'g');
     const isPrecise = QUERY_LOGIC_CHARS.some(char => safeSearchString.includes(char));
+
     const query = sql`
         SELECT
             id,

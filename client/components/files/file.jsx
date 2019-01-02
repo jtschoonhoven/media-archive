@@ -2,14 +2,13 @@ import React from 'react'; // eslint-disable-line no-unused-vars
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
 import Alert from '../common/alert.jsx';
-import { showConfirmModal } from '../common/modal-confirm.jsx';
 
 
-export default (fileModel) => {
+export default (fileModel, showTextModal) => {
     const confirmDeleteTitle = `Delete file "${fileModel.name}"?`;
     const confirmDeleteMsg = 'Are you sure? This cannot be undone.';
     const onConfirmDelete = fileModel.delete.bind(fileModel);
-    const onDelete = () => showConfirmModal(confirmDeleteTitle, confirmDeleteMsg, onConfirmDelete);
+    const onDelete = () => showTextModal(confirmDeleteTitle, confirmDeleteMsg, onConfirmDelete);
 
     return (
         <div className="archive-upload-result" key={ fileModel.id }>

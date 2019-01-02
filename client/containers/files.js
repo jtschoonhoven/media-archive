@@ -4,6 +4,7 @@ import { withRouter } from 'react-router';
 import { ArchiveFiles } from '../components';
 import { load } from '../actions/files';
 import { upload } from '../actions/uploads';
+import { showConfirmModal, showTextModal } from '../actions/modal';
 
 
 function mapStateToProps(state) {
@@ -22,6 +23,12 @@ function mapDispatchToProps(dispatch) {
             },
             upload: (path, fileList) => {
                 dispatch(upload(path, fileList, dispatch));
+            },
+            showConfirmModal: (title, message, onConfirm) => {
+                dispatch(showConfirmModal(title, message, onConfirm));
+            },
+            showTextModal: (title, message, placeholder, onConfirm) => {
+                dispatch(showTextModal(title, message, placeholder, onConfirm));
             },
         },
     };

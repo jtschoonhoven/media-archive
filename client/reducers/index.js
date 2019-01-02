@@ -2,11 +2,12 @@ import Joi from 'joi-browser';
 import { Map } from 'immutable';
 import { combineReducers } from 'redux';
 
-import filesReducer from './files';
 import detailReducer from './detail';
+import filesReducer from './files';
+import modalReducer from './modal';
 import searchReducer from './search';
-import userReducer from './user';
 import uploadsReducer from './uploads';
+import userReducer from './user';
 
 const ACTION_SCHEMA = Joi.object({
     type: Joi.string().required(),
@@ -17,6 +18,7 @@ const ACTION_SCHEMA = Joi.object({
     error: Joi.boolean(),
     meta: Joi.any(),
 });
+
 
 /*
  * Enforce that actions are "standard flux actions".
@@ -38,7 +40,8 @@ export default combineReducers({
     _: _validationPseudoReducer,
     detail: detailReducer,
     files: filesReducer,
+    modal: modalReducer,
     search: searchReducer,
-    user: userReducer,
     uploads: uploadsReducer,
+    user: userReducer,
 });

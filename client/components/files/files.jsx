@@ -9,7 +9,6 @@ import File from './file.jsx';
 import SETTINGS from '../../settings';
 import Upload from './upload.jsx'; // eslint-disable-line no-unused-vars
 import Alert from '../common/alert.jsx';
-import { showNewDirectoryModal } from './modal-new-directory.jsx';
 
 const VALID_EXTENSIONS = Object.keys(SETTINGS.FILE_EXT_WHITELIST);
 
@@ -33,6 +32,8 @@ export default class ArchiveFiles extends React.Component {
         const filesState = props.filesState;
         const uploadsState = props.uploadsState;
         const currentUrl = props.location.pathname;
+        const showConfirmModal = this.props.actions.showConfirmModal;
+        const showTextModal = this.props.actions.showTextModal;
         const pathArray = currentUrl.replace('/files', '').split('/');
 
         const BreadCrumbs = pathArray.map((dirname, idx) => {
@@ -57,7 +58,7 @@ export default class ArchiveFiles extends React.Component {
             if (uploadsState.uploadsById.get(fileModel.id)) {
                 return; // skip files that are also included in uploads
             }
-            Files.push(File(fileModel));
+            Files.push(File(fileModel, showConfirmModal));
         });
 
         const Uploads = [];
@@ -101,7 +102,11 @@ export default class ArchiveFiles extends React.Component {
                     <div className="col-6">
                         <button
                             className="btn btn-outline-dark w-100"
-                            onClick={ () => showNewDirectoryModal(currentUrl, this.props.history) }
+                            onClick={ () => {
+                                showTextModal('title', 'msg', 'placeholder', () => {
+                                    console.log('ON_SUBMIT');
+                                });
+                            }}
                         >
                             New folder
                         </button>
