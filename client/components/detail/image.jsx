@@ -1,10 +1,12 @@
 import React from 'react'; // eslint-disable-line no-unused-vars
+import urlJoin from 'url-join';
 
 import SETTINGS from '../../settings';
 
 const MEDIA_TYPES = SETTINGS.MEDIA_TYPES;
 const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
 const FILE_EXT_WHITELIST = SETTINGS.FILE_EXT_WHITELIST;
+const API_URLS = SETTINGS.API_URLS;
 
 
 /*
@@ -25,6 +27,9 @@ function getAudioTag(src) {
     );
 }
 
+/*
+ * Return an HTML5 VIDEO tag with controls.
+ */
 function getVideoTag(src, mimeType) {
     return (
         <video controls>
@@ -85,6 +90,6 @@ export default (detailsModel) => {
         return getEmbedTag(url);
     }
 
-    const src = `/api/v1/images/thumbnails/${extension.toLowerCase()}`;
+    const src = urlJoin(API_URLS.THUMBNAILS, extension.toLowerCase());
     return getImgTag(src, filename);
 };

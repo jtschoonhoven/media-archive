@@ -44,14 +44,14 @@ export class UploadModel extends Record({
     isDeleting: false,
     isDeleted: false,
     xhrRequest: null,
-    dispatch: null,
+    _dispatch: null,
 }) {
     cancel() {
-        return this.dispatch(uploadCancel(this, this.dispatch));
+        return this._dispatch(uploadCancel(this, this._dispatch));
     }
 
     retry() {
-        return this.dispatch(uploadFileToS3(this, this.dispatch));
+        return this._dispatch(uploadFileToS3(this, this._dispatch));
     }
 }
 

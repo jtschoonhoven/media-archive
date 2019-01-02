@@ -1,12 +1,13 @@
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 
 import { ArchiveNavbar } from '../components';
 
 
 function mapStateToProps(state) {
-    return { user: state.user || {} };
+    return { userState: state.user };
 }
 
-const ArchiveNavbarContainer = connect(mapStateToProps)(ArchiveNavbar);
+const ArchiveNavbarContainer = withRouter(connect(mapStateToProps)(ArchiveNavbar));
 
 export default ArchiveNavbarContainer;

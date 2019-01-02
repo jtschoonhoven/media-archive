@@ -9,6 +9,7 @@ import File from './file.jsx';
 import SETTINGS from '../../settings';
 import Upload from './upload.jsx'; // eslint-disable-line no-unused-vars
 import Alert from '../common/alert.jsx';
+import { showNewDirectoryModal } from './modal-new-directory.jsx';
 
 const VALID_EXTENSIONS = Object.keys(SETTINGS.FILE_EXT_WHITELIST);
 
@@ -50,6 +51,9 @@ export default class ArchiveFiles extends React.Component {
 
         const Files = [];
         filesState.filesById.forEach((fileModel) => {
+            if (fileModel.isDeleted) {
+                return;
+            }
             if (uploadsState.uploadsById.get(fileModel.id)) {
                 return; // skip files that are also included in uploads
             }
@@ -57,17 +61,13 @@ export default class ArchiveFiles extends React.Component {
         });
 
         const Uploads = [];
-        uploadsState.uploadsById.forEach((uploadModel, id) => {
-            if (uploadModel.directoryPath !== filesState.path) {
-                return; // skip uploads that are not in the current directory
+        uploadsState.uploadsById.forEach((uploadModel) => {
+            if (uploadModel.isDeleted) {
+                return;
             }
-            Uploads.push(
-                <Upload
-                    uploadModel={ uploadModel }
-                    onUploadCancel={ this.props.actions.onUploadCancel }
-                    key={ id }
-                />,
-            );
+            if (uploadModel.directoryPath === filesState.path) {
+                Uploads.push(Upload(uploadModel));
+            }
         });
 
         return (
@@ -83,19 +83,29 @@ export default class ArchiveFiles extends React.Component {
                     {Errors}
                 </div>
                 {/* uploader */}
-                <div className="custom-file">
-                    <input
-                        id="archive-files-input"
-                        type="file"
-                        className="custom-file-input"
-                        onChange={this.handleUploadClick}
-                        accept={VALID_EXTENSIONS.map(ext => `.${ext}`).join(',')}
-                        disabled={!pathArray.join('')}
-                        multiple
-                    />
-                    <label className="custom-file-label" htmlFor="archive-files-input">
-                        Upload
-                    </label>
+                <div className="row">
+                    <div className="col-6 custom-file">
+                        <input
+                            id="archive-files-input"
+                            type="file"
+                            className="custom-file-input"
+                            onChange={this.handleUploadClick}
+                            accept={VALID_EXTENSIONS.map(ext => `.${ext}`).join(',')}
+                            disabled={!pathArray.join('')}
+                            multiple
+                        />
+                        <label className="custom-file-label" htmlFor="archive-files-input">
+                            Upload files
+                        </label>
+                    </div>
+                    <div className="col-6">
+                        <button
+                            className="btn btn-outline-dark w-100"
+                            onClick={ () => showNewDirectoryModal(currentUrl, this.props.history) }
+                        >
+                            New folder
+                        </button>
+                    </div>
                 </div>
                 {/* browse */}
                 <div id="archive-upload-browse">

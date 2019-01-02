@@ -20,8 +20,8 @@ module.exports = {
 
     // s3 user
     // FIXME: use role-based permissions in production
-    'S3_USER_ACCESS_KEY_ID': 'S3_USER_ACCESS_KEY_ID',
-    'S3_USER_SECRET_ACCESS_KEY': 'S3_USER_SECRET_ACCESS_KEY',
+    'S3_DEV_USER_ACCESS_KEY_ID': 'S3_DEV_USER_ACCESS_KEY_ID',
+    'S3_DEV_USER_SECRET_ACCESS_KEY': 'S3_DEV_USER_SECRET_ACCESS_KEY',
 
     // secret
     'SESSION_SECRET': 'SESSION_SECRET',

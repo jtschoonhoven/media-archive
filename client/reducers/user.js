@@ -1,6 +1,11 @@
-const INITIAL_STATE = { isLoggedIn: false };
+import { Record } from 'immutable';
 
 
-export default function userReducer(state = INITIAL_STATE) {
+class UserState extends Record({
+    email: null,
+    isLoggedIn: false,
+}) {}
+
+export default function userReducer(state = new UserState()) {
     return state;
 }

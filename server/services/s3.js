@@ -7,32 +7,68 @@ const S3_PROTOCOL_PREFIX = 's3://';
 const PUT_OBJECT_EXPIRATION_SECONDS = 60 * 60 * 6; // 6 hours
 const GET_OBJECT_EXPIRATION_SECONDS = 60 * 60 * 24 * 3; // 3 days
 
+const NODE_ENV = config.get('NODE_ENV');
 const FILE_EXT_WHITELIST = config.get('CONSTANTS.FILE_EXT_WHITELIST');
 const S3_BUCKET_NAME = config.get('S3_BUCKET_NAME');
 const S3_BUCKET_REGION = config.get('S3_BUCKET_REGION');
-const S3_USER_ACCESS_KEY_ID = config.get('S3_USER_ACCESS_KEY_ID');
-const S3_USER_SECRET_ACCESS_KEY = config.get('S3_USER_SECRET_ACCESS_KEY');
 
-const S3 = new aws.S3({
-    region: S3_BUCKET_REGION,
-    accessKeyId: S3_USER_ACCESS_KEY_ID,
-    secretAccessKey: S3_USER_SECRET_ACCESS_KEY,
-});
+const S3_CONFIG = { region: S3_BUCKET_REGION };
 
 /*
- * Requires S3 CORS policy to allow requests from domain. Example policy:
+ * In production the credentials are automatically available through an IAM role.
+ * However, in developmment we must create a user with access to the bucket.
+ * For security reasons, there should be separate buckets for dev and prod.
+ */
+if (NODE_ENV === 'development') {
+    S3_CONFIG.accessKeyId = config.get('S3_DEV_USER_ACCESS_KEY_ID');
+    S3_CONFIG.secretAccessKey = config.get('S3_DEV_USER_SECRET_ACCESS_KEY');
+}
+const S3 = new aws.S3(S3_CONFIG);
+
+/*
+ * The bucket MUST have a CORS policy to allow requests from your domain.
+ * Example policy:
  *
  * <?xml version="1.0" encoding="UTF-8"?>
  * <CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
- *   <CORSRule>
- *     <AllowedOrigin>https://yourdomain.biz</AllowedOrigin>
- *     <AllowedMethod>HEAD</AllowedMethod>
- *     <AllowedMethod>GET</AllowedMethod>
- *     <AllowedMethod>POST</AllowedMethod>
- *     <AllowedHeader>*</AllowedHeader>
- *     <ExposeHeader>ETag</ExposeHeader>
- *   </CORSRule>
+ *     <CORSRule>
+ *         <AllowedOrigin>https://www.yourdomain.biz</AllowedOrigin>
+ *         <AllowedMethod>HEAD</AllowedMethod>
+ *         <AllowedMethod>GET</AllowedMethod>
+ *         <AllowedMethod>POST</AllowedMethod>
+ *         <AllowedHeader>*</AllowedHeader>
+ *         <ExposeHeader>ETag</ExposeHeader>
+ *     </CORSRule>
  * </CORSConfiguration>
+ */
+
+/*
+ * The EC2 instance (or user) MUST be assigned a role with proper access to the S3 bucket.
+ * Example policy:
+ *
+ * {
+ *     "Version": "2012-10-17",
+ *     "Statement": [
+ *         {
+ *             "Sid": "putObjectStatement",
+ *             "Effect": "Allow",
+ *             "Action": "s3:PutObject",
+ *             "Resource": "arn:aws:s3:::media-archive-uploads/*"
+ *         },
+ *         {
+ *             "Sid": "putObjectAclStatement",
+ *             "Effect": "Allow",
+ *             "Action": "s3:PutObjectAcl",
+ *             "Resource": "arn:aws:s3:::media-archive-uploads/*"
+ *         },
+ *         {
+ *             "Sid": "getObjectStatement",
+ *             "Effect": "Allow",
+ *             "Action": "s3:GetObject",
+ *             "Resource": "arn:aws:s3:::media-archive-uploads/*"
+ *         }
+ *     ]
+ * }
  */
 
 
@@ -84,7 +120,6 @@ module.exports.getPresignedPost = (s3Url, filename) => {
             'Content-Type': FILE_EXT_WHITELIST[extension].mimeType,
             'Content-Disposition': filesService.getSanitizedFileName(filename),
             'success_action_status': '201',
-            'acl': 'public-read',
         },
     };
     return S3.createPresignedPost(s3Params);

@@ -223,8 +223,8 @@ const IMAGE_SCHEMA = Joi.object({
             .error(() => 'Image thumbnail API requires a valid file extension'),
     }).unknown(),
 }).unknown();
-apiRouter.get('/images/thumbnails/:extension', validateReq.bind(IMAGE_SCHEMA), async (req, res) => {
-    const extension = req.params.extension;
+apiRouter.get('/thumbnails/:extension', validateReq.bind(IMAGE_SCHEMA), async (req, res) => {
+    const extension = req.params.extension.toLowerCase();
     const thumbailsPath = '../../dist/assets/thumbnails/file-extensions/';
     const extensionPath = path.join(__dirname, thumbailsPath, `${extension}.png`);
     if (fs.existsSync(extensionPath)) {

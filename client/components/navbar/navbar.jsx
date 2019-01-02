@@ -6,10 +6,20 @@ import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
 class ArchiveNavbar extends React.Component {
     isLoggedIn() {
-        return this.props.user && this.props.user.isLoggedIn;
+        return !!this.props.userState.isLoggedIn;
     }
 
     render() {
+        let logoLinkTo = '/';
+        let buttonLinkTo = '/files';
+        let buttonLinkText = 'Browse';
+
+        if (this.props.location.pathname.startsWith('/files')) {
+            logoLinkTo = '/files';
+            buttonLinkTo = '/';
+            buttonLinkText = 'Search';
+        }
+
         let NavButtons = ( // eslint-disable-line no-unused-vars
             <span>
                 {/* login */}
@@ -28,7 +38,7 @@ class ArchiveNavbar extends React.Component {
                     </div>
                     {/* upload */}
                     <div className="btn-group float-right archive-btn-nav d-none d-sm-block">
-                        <Link to="/files" className="btn btn-outline-dark">Explore</Link>
+                        <Link to={ buttonLinkTo } className="btn btn-outline-dark">{ buttonLinkText }</Link>
                     </div>
                 </span>
             );
@@ -39,9 +49,11 @@ class ArchiveNavbar extends React.Component {
                 <nav className="navbar">
                     <div className="col">
                         {/* logo */}
-                        <Link to="/" className="navbar-brand d-none d-sm-inline">Media Archive</Link>
+                        <Link to={ logoLinkTo } className="navbar-brand d-none d-sm-inline">
+                            Media Archive
+                        </Link>
                         {/* buttons */}
-                        {NavButtons}
+                        { NavButtons }
                     </div>
                 </nav>
             </div>

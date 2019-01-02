@@ -1,6 +1,6 @@
 /*
  * Access shared config constants.
- * CONFIG is a global created by config-webpack that contains shared client/server settings.
+ * _CONFIG is a global created by config-webpack that contains shared client/server settings.
  * See github.com/arthanzel/node-config-webpack.
  */
 
@@ -10,8 +10,8 @@ const SETTINGS = {
     MEDIA_TYPES: _CONFIG.CONSTANTS.MEDIA_TYPES,
     MICROSOFT_FILE_EXTENSIONS: Object.values(_CONFIG.CONSTANTS.MICROSOFT_FILE_EXTENSIONS),
     NODE_ENV: _CONFIG.NODE_ENV,
-    THUMBNAILS_PUBLIC_PATH: _CONFIG.CONSTANTS.THUMBNAILS_PUBLIC_PATH,
     UPLOAD_STATUSES: _CONFIG.CONSTANTS.UPLOAD_STATUSES,
+    API_URLS: _CONFIG.CONSTANTS.API_URLS,
 };
 
 // validate that all settings are actually defined

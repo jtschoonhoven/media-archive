@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 import SETTINGS from '../../settings';
 
 const MEDIA_TYPES = SETTINGS.MEDIA_TYPES;
-const THUMBNAILS_PUBLIC_PATH = SETTINGS.THUMBNAILS_PUBLIC_PATH;
+const API_URLS = SETTINGS.API_URLS;
 
 
 function getImgUrl(resultModel) {
@@ -15,7 +15,7 @@ function getImgUrl(resultModel) {
     if (resultModel.type === MEDIA_TYPES.IMAGE) {
         return resultModel.url;
     }
-    return urlJoin(THUMBNAILS_PUBLIC_PATH, `${resultModel.extension.toLowerCase()}.png`);
+    return urlJoin(API_URLS.THUMBNAILS, resultModel.extension);
 }
 
 export default function SearchResult(resultModel) {

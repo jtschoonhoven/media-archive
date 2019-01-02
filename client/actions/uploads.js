@@ -61,7 +61,7 @@ function _uploadBatchSavedToServer(loadResponse, fileList, dispatch) {
     }
     // populate an OrderedMap of uploadsById with dispatch and raw file object attached
     const uploadsById = OrderedMap(loadResponse.uploads.map((uploadInfo) => {
-        uploadInfo.dispatch = dispatch;
+        uploadInfo._dispatch = dispatch;
         uploadInfo.file = Array.from(fileList).find((fileItem) => {
             return fileItem.name === uploadInfo.nameUnsafe;
         });
@@ -117,11 +117,17 @@ export function uploadFileToS3(uploadModel, dispatch) {
         xhr.send(formData);
     })
         .then(() => {
+            if (xhr.readyState !== 4) {
+                throw new Error('connection was interrupted before upload completed');
+            }
+            if (parseInt(xhr.status, 10) !== 201) {
+                throw new Error(`S3 rejected upload with status "${xhr.statusText}"`);
+            }
             dispatch(_uploadFileToS3Finished(uploadModel, null, dispatch));
         })
-        .catch(() => {
-            const statusText = xhr.statusText || 'Server Error';
-            const uploadError = new Error(`Upload to S3 failed: ${statusText}`);
+        .catch((err) => {
+            const message = err.message || xhr.statusText || 'Server Error';
+            const uploadError = new Error(`Upload failed: ${message}`);
             dispatch(_uploadFileToS3Finished(uploadModel, uploadError, dispatch));
         });
 
@@ -221,7 +227,7 @@ export function uploadCancel(uploadModel, dispatch) {
 /*
  * Server confirms that file has been deleted.
  */
-export function _uploadCancelComplete(cancelResponse, uploadModel) {
+function _uploadCancelComplete(cancelResponse, uploadModel) {
     // NOTE: never returns an error action, but sets error prop on uploadModel on failure
     if (cancelResponse.error) {
         uploadModel = uploadModel.merge({

@@ -1,5 +1,5 @@
 import Joi from 'joi-browser';
-import { isRecord, Map } from 'immutable';
+import { Map } from 'immutable';
 import { combineReducers } from 'redux';
 
 import filesReducer from './files';
@@ -23,7 +23,7 @@ const ACTION_SCHEMA = Joi.object({
  * Refer to https://github.com/redux-utilities/flux-standard-action
  */
 function _validationPseudoReducer(state = null, action) {
-    if (state && !isRecord(state)) {
+    if (state && !state.isRecord()) {
         throw new Error('Invalid state: must be an instance of immutable.Record.');
     }
     const validation = Joi.validate(action, ACTION_SCHEMA);

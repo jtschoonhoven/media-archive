@@ -1,6 +1,13 @@
 import { List, Map, OrderedMap, Record } from 'immutable';
 
-import { FILES_LOAD, FILES_LOAD_COMPLETE } from '../actions/files';
+import {
+    filesDelete,
+    FILES_LOAD,
+    FILES_LOAD_COMPLETE,
+    FILES_DELETE,
+    FILES_DELETE_COMPLETE,
+} from '../actions/files';
+
 
 const FilesState = Record({
     path: null,
@@ -13,7 +20,9 @@ const FilesState = Record({
 export class DirectoryModel extends Record({
     name: null,
     path: null,
+    error: null,
     numEntries: 0,
+    _dispatch: null,
 }) {}
 
 export class FileModel extends Record({
@@ -21,10 +30,15 @@ export class FileModel extends Record({
     uuid: null,
     name: null,
     size: null,
+    error: null,
     isDeleting: false,
     isDeleted: false,
-}) {}
-
+    _dispatch: null,
+}) {
+    delete() {
+        return this._dispatch(filesDelete(this, this._dispatch));
+    }
+}
 
 export default function filesReducer(state = FilesState(), action) {
     const payload = action.payload;
@@ -54,6 +68,18 @@ export default function filesReducer(state = FilesState(), action) {
                 error: List(),
             });
             return state.merge(update, payload);
+        }
+
+        // client requests to delete file by ID
+        case FILES_DELETE: {
+            const filesById = state.filesById.merge(payload.get('filesById'));
+            return state.merge({ filesById });
+        }
+
+        // server acknowledges file has been deleted
+        case FILES_DELETE_COMPLETE: {
+            const filesById = state.filesById.merge(payload.get('filesById'));
+            return state.merge({ filesById });
         }
 
         default: {
