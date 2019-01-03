@@ -66,7 +66,11 @@ const S3 = new aws.S3(S3_CONFIG);
  */
 
 /*
- * And the bucket must have public access
+ * And the bucket must have public access:
+ *
+ * FIXME: this isn't ideal, but is needed so we can use Google Drive viewer to display
+ * certain file types. Better would be to use an internal library to display docs.
+ *
  *  {
  *   "Id": "Policy1546503344536",
  *   "Version": "2012-10-17",
@@ -119,15 +123,13 @@ module.exports.isS3Url = (url) => {
 /*
  * Generate the policy and form fields required by the client for direct upload to S3.
  */
-module.exports.getPresignedPost = (s3Url, filename) => {
+module.exports.getPresignedPost = async (s3Url, filename) => {
     const { bucket, key } = parseS3Url(s3Url);
     const extension = filesService.getFileExtension(filename);
     const s3Params = {
         Expires: PUT_OBJECT_EXPIRATION_SECONDS,
         Bucket: bucket,
-        Conditions: [
-            { key },
-        ],
+        Conditions: [{ key }],
         Fields: {
             'key': key,
             'Content-Type': FILE_EXT_WHITELIST[extension].mimeType,
@@ -135,18 +137,32 @@ module.exports.getPresignedPost = (s3Url, filename) => {
             'success_action_status': '201',
         },
     };
-    return S3.createPresignedPost(s3Params);
+    return new Promise((resolve, reject) => {
+        S3.createPresignedPost(s3Params, (err, data) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(data);
+        });
+    });
 };
 
 /*
  * Generate a signed URL that can be used to retrieve an object from S3.
  */
-module.exports.getPresignedUrl = (s3Url) => {
+module.exports.getPresignedUrl = async (s3Url) => {
     const { bucket, key } = parseS3Url(s3Url);
     const params = {
         Bucket: bucket,
         Key: key,
         Expires: GET_OBJECT_EXPIRATION_SECONDS,
     };
-    return S3.getSignedUrl('getObject', params);
+    return new Promise((resolve, reject) => {
+        S3.getSignedUrl('getObject', params, (err, data) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(data);
+        });
+    });
 };

@@ -31,6 +31,8 @@ class ArchiveSearch extends React.Component {
             }),
         };
 
+        this.searchInputRef = React.createRef();
+
         // bind event handlers
         this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
         this.handleSearchInput = this.handleSearchInput.bind(this);
@@ -40,6 +42,8 @@ class ArchiveSearch extends React.Component {
     }
 
     componentDidMount() {
+        this.searchInputRef.current.focus();
+
         // search on load if a search term is present in the initial url
         const nextKey = this.state.search.filters.nextKey;
         const prevKey = this.state.search.filters.prevKey;
@@ -84,6 +88,7 @@ class ArchiveSearch extends React.Component {
                             name="search"
                             className="form-control form-control-lg"
                             placeholder="Search"
+                            ref={ this.searchInputRef }
                             value={ localState.searchTerm }
                             onChange={ this.handleSearchInput }
                         />

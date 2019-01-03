@@ -146,12 +146,13 @@ async function detail(fileId) {
     if (!details) {
         return { error: `No file exists with id ${fileId}`, statusCode: 404 };
     }
+
     // replace an (unsigned) S3 url with a usable signed url
     if (s3Service.isS3Url(details.url)) {
-        details.url = s3Service.getPresignedUrl(details.url);
+        details.url = await s3Service.getPresignedUrl(details.url);
     }
     if (s3Service.isS3Url(details.thumbnailUrl)) {
-        details.thumbnailUrl = s3Service.getPresignedUrl(details.thumbnailUrl);
+        details.thumbnailUrl = await s3Service.getPresignedUrl(details.thumbnailUrl);
     }
     return { details };
 }

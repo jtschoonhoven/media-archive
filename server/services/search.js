@@ -228,13 +228,23 @@ module.exports.query = async (searchString, filters) => {
     }
 
     // get signed URLs if retrieving from S3
-    rows.forEach((result) => {
+    const signedS3Urls = await Promise.all(rows.map((result) => {
         if (s3Service.isS3Url(result.url)) {
-            result.url = s3Service.getPresignedUrl(result.url);
+            return s3Service.getPresignedUrl(result.url);
         }
+        return result.url;
+    }));
+
+    const signedS3ThumbnailUrls = await Promise.all(rows.map((result) => {
         if (s3Service.isS3Url(result.thumbnailUrl)) {
-            result.thumbnailUrl = s3Service.getPresignedUrl(result.thumbnailUrl);
+            return s3Service.getPresignedUrl(result.thumbnailUrl);
         }
+        return result.thumbnailUrl;
+    }));
+
+    rows.forEach((result, idx) => {
+        result.url = signedS3Urls[idx];
+        result.thumbnailUrl = signedS3ThumbnailUrls[idx];
     });
 
     return {

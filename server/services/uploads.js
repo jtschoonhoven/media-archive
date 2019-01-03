@@ -158,11 +158,11 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
     `);
 
     // add S3 upload credentials to each item
-    rows.forEach((fileObj) => {
-        const s3SignedPost = s3Service.getPresignedPost(fileObj.s3Url, fileObj.name);
+    for (const fileObj of rows) { // eslint-disable-line no-restricted-syntax
+        const s3SignedPost = await s3Service.getPresignedPost(fileObj.s3Url, fileObj.name); // eslint-disable-line no-await-in-loop, max-len
         fileObj.s3UploadUrl = s3SignedPost.url;
         fileObj.s3UploadPolicy = s3SignedPost.fields;
-    });
+    }
     return { uploads: rows };
 };
 
