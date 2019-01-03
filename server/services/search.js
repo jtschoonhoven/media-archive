@@ -230,7 +230,7 @@ module.exports.query = async (searchString, filters) => {
     // get signed URLs if retrieving from S3
     rows.forEach((result) => {
         if (s3Service.isS3Url(result.url)) {
-            result.thumbnailUrl = s3Service.getPresignedUrl(result.url);
+            result.url = s3Service.getPresignedUrl(result.url);
         }
         if (s3Service.isS3Url(result.thumbnailUrl)) {
             result.thumbnailUrl = s3Service.getPresignedUrl(result.thumbnailUrl);
