@@ -89,6 +89,7 @@ function getSearchSql(searchString, typeFilters, prevKey, nextKey, limit) {
             media_type AS "type",
             media_name AS "name",
             media_description AS "description",
+            media_url AS "url",
             media_url_thumbnail AS "thumbnailUrl",
             media_file_extension AS "extension",
             relevance
@@ -226,8 +227,11 @@ module.exports.query = async (searchString, filters) => {
         rows.reverse();
     }
 
-    // get signed URL for thumbnail if retrieving from S3
+    // get signed URLs if retrieving from S3
     rows.forEach((result) => {
+        if (s3Service.isS3Url(result.url)) {
+            result.thumbnailUrl = s3Service.getPresignedUrl(result.url);
+        }
         if (s3Service.isS3Url(result.thumbnailUrl)) {
             result.thumbnailUrl = s3Service.getPresignedUrl(result.thumbnailUrl);
         }
