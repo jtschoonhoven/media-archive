@@ -4,7 +4,7 @@ import React from 'react'; // eslint-disable-line no-unused-vars
 /*
  * Return the modal footer that contains confirm and cancel buttons.
  */
-export default function ModalFooter(onClose, onConfirm = null) {
+export default function ModalFooter(onClose, onConfirm = null, confirmIsDisabled = false) {
     if (onConfirm) {
         return (
             <div className="modal-footer">
@@ -18,6 +18,7 @@ export default function ModalFooter(onClose, onConfirm = null) {
                         onConfirm();
                         onClose();
                     }}
+                    disabled = { confirmIsDisabled }
                 >
                     OK
                 </button>

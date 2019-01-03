@@ -32,7 +32,7 @@ class ArchiveDetail extends React.Component {
 
         const Errors = [];
         detailState.errors.forEach((msg, idx) => {
-            Errors.push(Alert(msg, idx));
+            Errors.push(Alert(msg, { idx }));
         });
 
         // FIXME: better behavior while loading

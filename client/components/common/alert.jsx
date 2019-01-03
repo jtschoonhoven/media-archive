@@ -9,7 +9,7 @@ const ALERT_STYLES = {
 };
 
 
-export default (msg, idx = -1, { style = 'danger', centered = false, muted = false } = {}) => {
+export default (msg, { idx = -1, style = 'danger', centered = false, muted = false } = {}) => {
     if (!Object.values(ALERT_STYLES).includes(style)) {
         throw new Error(`Alert created with invalid style argument "${style}".`);
     }

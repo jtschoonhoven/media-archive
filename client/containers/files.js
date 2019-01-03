@@ -25,10 +25,12 @@ function mapDispatchToProps(dispatch) {
                 dispatch(upload(path, fileList, dispatch));
             },
             showConfirmModal: (title, message, onConfirm) => {
-                dispatch(showConfirmModal(title, message, onConfirm));
+                dispatch(showConfirmModal(title, message, onConfirm, dispatch));
             },
-            showTextModal: (title, message, placeholder, onConfirm) => {
-                dispatch(showTextModal(title, message, placeholder, onConfirm));
+            showTextModal: (title, message, placeholder, onConfirm, validator) => {
+                dispatch(
+                    showTextModal(title, message, placeholder, onConfirm, validator, dispatch),
+                );
             },
         },
     };

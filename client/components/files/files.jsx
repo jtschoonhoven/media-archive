@@ -1,6 +1,7 @@
 import './style.scss';
 
 import React from 'react';
+import urlJoin from 'url-join';
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
 import Breadcrumbs from '../common/breadcrumbs.jsx';
@@ -11,12 +12,16 @@ import Upload from './upload.jsx'; // eslint-disable-line no-unused-vars
 import Alert from '../common/alert.jsx';
 
 const VALID_EXTENSIONS = Object.keys(SETTINGS.FILE_EXT_WHITELIST);
+const FILENAME_BLACKLIST = new RegExp(SETTINGS.REGEX.FILENAME_BLACKLIST);
+const DUPLICATE_BLACKLIST = new RegExp(SETTINGS.REGEX.DUPLICATE_BLACKLIST);
+const TRIM_ENDS_BLACKLIST = new RegExp(SETTINGS.REGEX.TRIM_ENDS_BLACKLIST);
 
 
 export default class ArchiveFiles extends React.Component {
     constructor(props) {
         super(props);
         this.handleUploadClick = this.handleUploadClick.bind(this);
+        this.showCreateDirectoryModal = this.showCreateDirectoryModal.bind(this);
     }
 
     componentDidMount() {
@@ -33,8 +38,8 @@ export default class ArchiveFiles extends React.Component {
         const uploadsState = props.uploadsState;
         const currentUrl = props.location.pathname;
         const showConfirmModal = this.props.actions.showConfirmModal;
-        const showTextModal = this.props.actions.showTextModal;
         const pathArray = currentUrl.replace('/files', '').split('/');
+        const isRootDir = !pathArray.join('');
 
         const BreadCrumbs = pathArray.map((dirname, idx) => {
             return Breadcrumbs(pathArray, dirname, idx);
@@ -42,7 +47,7 @@ export default class ArchiveFiles extends React.Component {
 
         const Errors = [];
         filesState.errors.concat(uploadsState.errors).forEach((msg, idx) => {
-            Errors.push(Alert(msg, idx));
+            Errors.push(Alert(msg, { idx }));
         });
 
         const Directories = [];
@@ -71,6 +76,29 @@ export default class ArchiveFiles extends React.Component {
             }
         });
 
+        const Notifications = [];
+        if (filesState.isFetching) {
+            const alert = Alert(
+                'Loading...',
+                { idx: 0, style: 'secondary', centered: true, muted: true },
+            );
+            Notifications.push(alert);
+        }
+        if (isRootDir) {
+            const alert = Alert(
+                'Note: Uploads are not permitted in the root folder.',
+                { idx: 1, style: 'secondary', centered: true, muted: true },
+            );
+            Notifications.push(alert);
+        }
+        if (this.isEmpty(Directories, Files, Uploads)) {
+            const alert = Alert(
+                'Folder is empty.',
+                { idx: 2, style: 'secondary', centered: true, muted: true },
+            );
+            Notifications.push(alert);
+        }
+
         return (
             <div id="archive-files">
                 {/* breadcrumbs */}
@@ -81,46 +109,84 @@ export default class ArchiveFiles extends React.Component {
                 </nav>
                 {/* errors */}
                 <div id="archive-files-errors">
-                    {Errors}
+                    { Errors }
                 </div>
-                {/* uploader */}
+                {/* buttons */}
                 <div className="row">
-                    <div className="col-6 custom-file">
-                        <input
-                            id="archive-files-input"
-                            type="file"
-                            className="custom-file-input"
-                            onChange={this.handleUploadClick}
-                            accept={VALID_EXTENSIONS.map(ext => `.${ext}`).join(',')}
-                            disabled={!pathArray.join('')}
-                            multiple
-                        />
-                        <label className="custom-file-label" htmlFor="archive-files-input">
-                            Upload files
+                    {/* upload */}
+                    <div className="col-6">
+                        <label
+                            className={
+                                `btn btn-primary w-100 ${isRootDir ? 'disabled' : ''}`
+                            }
+                        >
+                            <strong>▲ Upload Files</strong>
+                            <input
+                                type="file"
+                                onChange={ this.handleUploadClick }
+                                accept={ VALID_EXTENSIONS.map(ext => `.${ext}`).join(',') }
+                                disabled={ isRootDir }
+                                multiple
+                                hidden
+                            />
                         </label>
                     </div>
+                    {/* new folder */}
                     <div className="col-6">
                         <button
                             className="btn btn-outline-dark w-100"
-                            onClick={ () => {
-                                showTextModal('title', 'msg', 'placeholder', () => {
-                                    console.log('ON_SUBMIT');
-                                });
-                            }}
+                            onClick={ this.showCreateDirectoryModal }
                         >
-                            New folder
+                            ➕ Create Folder
                         </button>
                     </div>
                 </div>
                 {/* browse */}
                 <div id="archive-upload-browse">
                     <hr />
+                    { Notifications }
                     { Uploads }
                     { Directories }
                     { Files }
                 </div>
             </div>
         );
+    }
+
+    /*
+     * Display a modal with an input to allow creating a new directory.
+     */
+    showCreateDirectoryModal() {
+        const showTextModal = this.props.actions.showTextModal;
+        const currentUrl = this.props.location.pathname;
+        const title = 'Create a New Folder';
+        // const message = `Add your folder to the "${currentUrl.split('/').pop()}" directory.`;
+        const message = (
+            <span className="text-muted">
+                Note: empty folders are not saved until at least one file is added.
+            </span>
+        );
+        const placeholder = 'folder-name';
+
+        const onConfirm = (value) => {
+            const history = this.props.history;
+            const newUrl = urlJoin(currentUrl, value);
+            history.push(newUrl);
+        };
+
+        const validator = (value) => {
+            if (value.match(FILENAME_BLACKLIST)) {
+                throw new Error('Folder name may only contain letters, numbers, and dashes.');
+            }
+            if (value.match(DUPLICATE_BLACKLIST)) {
+                throw new Error('Folder name cannot contain duplicate special characters.');
+            }
+            if (value.match(TRIM_ENDS_BLACKLIST)) {
+                throw new Error('Special characters not allowed at start or end of folder name.');
+            }
+        };
+
+        showTextModal(title, message, placeholder, onConfirm, validator);
     }
 
     /*
@@ -153,5 +219,29 @@ export default class ArchiveFiles extends React.Component {
         const path = this.getFilePath();
         const fileList = event.target.files;
         this.props.actions.upload(path, fileList);
+    }
+
+    /*
+     * True if successful load returned no files, dirs, or uploads for this directory.
+     * False if directory is empty to to an error or unfinished request.
+     */
+    isEmpty(directoriesList, filesList, uploadsList) {
+        const filesState = this.props.filesState;
+        if (filesState.isFetching) {
+            return false;
+        }
+        if (filesState.errors.length) {
+            return false;
+        }
+        if (directoriesList.length) {
+            return false;
+        }
+        if (filesList.length) {
+            return false;
+        }
+        if (uploadsList.length) {
+            return false;
+        }
+        return true;
     }
 }

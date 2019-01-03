@@ -61,7 +61,7 @@ class ArchiveSearch extends React.Component {
         const storeState = this.props.searchState; // global redux store state
 
         const Errors = storeState.errors.map((msg, idx) => {
-            return Alert(msg, idx);
+            return Alert(msg, { idx });
         });
 
         const Results = storeState.results.map((resultModel) => {
@@ -182,7 +182,7 @@ class ArchiveSearch extends React.Component {
                 <div className="archive-search-results-empty">
                     {
                         this.noResults()
-                            ? Alert('No results', -1, {
+                            ? Alert('No results', {
                                 style: 'secondary',
                                 centered: true,
                                 muted: true,

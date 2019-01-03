@@ -10,8 +10,13 @@ export const MODAL_HIDE = 'MODAL_HIDE';
 /*
  * Display a confirmation modal with an "OK" button.
  */
-export function showConfirmModal(title, message, onConfirm) {
-    const modal = new ModalConfirmModel({ title, message, onConfirm });
+export function showConfirmModal(title, message, onConfirm, dispatch) {
+    const modal = new ModalConfirmModel({
+        title,
+        message,
+        onConfirm,
+        onClose: () => dispatch(hideModal()),
+    });
     return {
         type: MODAL_SHOW_CONFIRM,
         payload: Map({ modal }),
@@ -21,8 +26,15 @@ export function showConfirmModal(title, message, onConfirm) {
 /*
  * Display a modal with one text input.
  */
-export function showTextModal(title, message, placeholder, onConfirm) {
-    const modal = new ModalTextModel({ title, message, placeholder, onConfirm });
+export function showTextModal(title, message, placeholder, onConfirm, validator, dispatch) {
+    const modal = new ModalTextModel({
+        title,
+        message,
+        placeholder,
+        validator,
+        onConfirm,
+        onClose: () => dispatch(hideModal()),
+    });
     return {
         type: MODAL_SHOW_TEXT,
         payload: Map({ modal }),

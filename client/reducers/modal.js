@@ -11,6 +11,7 @@ export class ModalConfirmModel extends Record({
     type: MODAL_TYPES.CONFIRM,
     title: null,
     message: null,
+    onClose: null,
     onConfirm: null,
 }) {}
 
@@ -19,7 +20,9 @@ export class ModalTextModel extends Record({
     title: null,
     message: null,
     placeholder: null,
+    onClose: null,
     onConfirm: null,
+    validator: null,
 }) {}
 
 class ModalState extends Record({

@@ -1,12 +1,18 @@
 import React from 'react'; // eslint-disable-line no-unused-vars
 
-import ModalFooter from './footer.jsx';
+import ModalFooter from './modal-footer.jsx';
 
 
 /*
  * Return a bootstrap modal that calls the passed-in function on confirm.
  */
-export default function ModalWrapper(title, bodyJSX, onClose, onConfirm = null) {
+export default function ModalWrapper(
+    title,
+    bodyJSX,
+    onClose,
+    onConfirm = null,
+    confirmIsDisabled = false,
+) {
     return (
         <div
             className="modal show"
@@ -30,7 +36,7 @@ export default function ModalWrapper(title, bodyJSX, onClose, onConfirm = null) 
                     <div className="modal-body">
                         { bodyJSX }
                     </div>
-                    { ModalFooter(onClose, onConfirm) }
+                    { ModalFooter(onClose, onConfirm, confirmIsDisabled) }
                 </div>
             </div>
         </div>

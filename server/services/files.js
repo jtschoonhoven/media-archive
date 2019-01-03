@@ -43,7 +43,7 @@ module.exports.getFileExtension = getFileExtension;
  * Sanitize and normalize filenames.
  */
 function getSanitizedFileName(filename) {
-    const extension = getFileExtension(filename);
+    const extension = getFileExtension(filename).toLowerCase();
     filename = removeFileExtension(filename);
     filename = sanitize(filename, FILENAME_REGEX, '-');
     return `${filename}.${extension}`;
@@ -54,7 +54,7 @@ module.exports.getSanitizedFileName = getSanitizedFileName;
  * Sanitize and normalize file paths.
  */
 function getSanitizedFilePath(filepath) {
-    const extension = getFileExtension(filepath);
+    const extension = getFileExtension(filepath).toLowerCase();
     filepath = trimSlashes(filepath);
     filepath = removeFileExtension(filepath);
     filepath.split('/').map(dir => sanitize(dir, FILENAME_REGEX, '-')).join('/');
@@ -200,7 +200,10 @@ function _getLoadSQL(path) {
             COUNT(1) AS "numEntries"
         FROM media
         WHERE deleted_at IS NULL
-        AND upload_status = ${UPLOAD_STATUSES.SUCCESS}
+        AND (
+            upload_status = ${UPLOAD_STATUSES.SUCCESS}
+            OR upload_status = ${UPLOAD_STATUSES.PENDING}
+        )
     `;
 
     // match only items in this directory
