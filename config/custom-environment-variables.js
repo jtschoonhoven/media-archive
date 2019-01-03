@@ -18,8 +18,7 @@ module.exports = {
     'S3_BUCKET_NAME': 'S3_BUCKET_NAME',
     'S3_BUCKET_REGION': 'S3_BUCKET_REGION',
 
-    // s3 user
-    // FIXME: use role-based permissions in production
+    // s3 user (dev-only)
     'S3_DEV_USER_ACCESS_KEY_ID': 'S3_DEV_USER_ACCESS_KEY_ID',
     'S3_DEV_USER_SECRET_ACCESS_KEY': 'S3_DEV_USER_SECRET_ACCESS_KEY',
 

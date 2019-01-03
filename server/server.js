@@ -29,10 +29,10 @@ const NODE_ENV = config.get('NODE_ENV');
 
 // bootstrap database with test data for development
 // FIXME: remove when ready
-// db.rebuild({ force: true })
-//     .then(() => db.get('SELECT COUNT(1) FROM media'))
-//     .then(res => logger.info(`loaded ${res.count} records`))
-//     .catch(logger.error);
+db.rebuild({ force: true })
+    .then(() => db.get('SELECT COUNT(1) FROM media'))
+    .then(res => logger.info(`loaded ${res.count} records`))
+    .catch(logger.error);
 
 // init server
 const app = express();

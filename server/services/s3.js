@@ -53,21 +53,34 @@ const S3 = new aws.S3(S3_CONFIG);
  *             "Sid": "putObjectStatement",
  *             "Effect": "Allow",
  *             "Action": "s3:PutObject",
- *             "Resource": "arn:aws:s3:::media-archive-uploads/*"
- *         },
- *         {
- *             "Sid": "putObjectAclStatement",
- *             "Effect": "Allow",
- *             "Action": "s3:PutObjectAcl",
- *             "Resource": "arn:aws:s3:::media-archive-uploads/*"
+ *             "Resource": "arn:aws:s3:::media-archive-uploads-development/*"
  *         },
  *         {
  *             "Sid": "getObjectStatement",
  *             "Effect": "Allow",
  *             "Action": "s3:GetObject",
- *             "Resource": "arn:aws:s3:::media-archive-uploads/*"
+ *             "Resource": "arn:aws:s3:::media-archive-uploads-development/*"
  *         }
  *     ]
+ * }
+ */
+
+/*
+ * And the bucket must have public access
+ *  {
+ *   "Id": "Policy1546503344536",
+ *   "Version": "2012-10-17",
+ *   "Statement": [
+ *     {
+ *       "Sid": "Stmt1546503337001",
+ *       "Action": [
+ *         "s3:GetObject"
+ *       ],
+ *       "Effect": "Allow",
+ *       "Resource": "arn:aws:s3:::media-archive-uploads-development/*",
+ *       "Principal": "*"
+ *     }
+ *   ]
  * }
  */
 
