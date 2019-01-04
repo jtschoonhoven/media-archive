@@ -1,3 +1,4 @@
+import PromisePool from 'es6-promise-pool';
 import urlJoin from 'url-join';
 import { Map, OrderedMap } from 'immutable';
 
@@ -16,6 +17,7 @@ export const UPLOAD_FILE_CANCEL_COMPLETE = 'UPLOAD_FILE_CANCEL_COMPLETE';
 
 const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
 const POST_HEADERS = { 'Content-Type': 'application/json' };
+const UPLOAD_CONCURRENCY = 4;
 
 
 /*
@@ -68,11 +70,20 @@ function _uploadBatchSavedToServer(loadResponse, fileList, dispatch) {
         return [uploadInfo.id, new UploadModel(uploadInfo)];
     }));
 
-    // begin uploading each file individually
-    // FIXME: this should limit the number of concurrent uploads
-    uploadsById.forEach((uploadModel) => {
-        uploadFileToS3(uploadModel, dispatch);
-    });
+    // start uploads to S3 with concurrency managed by a PromisePool
+    function getNextUploadPromiseFactory() {
+        const uploadModelsIterator = uploadsById.toKeyedSeq().values();
+        return () => {
+            const iter = uploadModelsIterator.next();
+            if (iter.done) {
+                return null;
+            }
+            const uploadModel = iter.value;
+            const action = dispatch(uploadFileToS3(uploadModel, dispatch));
+            return action.meta.uploadPromise;
+        };
+    }
+    new PromisePool(getNextUploadPromiseFactory(), UPLOAD_CONCURRENCY).start();
 
     return {
         type: UPLOAD_BATCH_SAVED_TO_SERVER,
@@ -109,12 +120,10 @@ export function uploadFileToS3(uploadModel, dispatch) {
 
     // Fetch doesn't support progress events, so fall back to XHR
     // based on github.com/github/fetch/issues/89#issuecomment-256610849
-    new Promise((resolve, reject) => {
-        xhr.open('POST', uploadUrl);
+    const uploadPromise = new Promise((resolve, reject) => {
         xhr.onload = event => resolve(event.target.responseText);
         xhr.onerror = reject;
         xhr.upload.onprogress = e => dispatch(_uploadFileToS3Progress(uploadModel, e));
-        xhr.send(formData);
     })
         .then(() => {
             if (xhr.readyState !== 4) {
@@ -131,9 +140,16 @@ export function uploadFileToS3(uploadModel, dispatch) {
             dispatch(_uploadFileToS3Finished(uploadModel, uploadError, dispatch));
         });
 
+    // use setTimeout to allow this action to complete before upload begins
+    setTimeout(() => {
+        xhr.open('POST', uploadUrl);
+        xhr.send(formData);
+    }, 0);
+
     return {
         type: UPLOAD_FILE_TO_S3_START,
         payload: Map({ uploadsById: OrderedMap([[uploadModel.id, uploadModel]]) }),
+        meta: { uploadPromise }, // used by _uploadBatchSavedToServer to manage concurrency
     };
 }
 

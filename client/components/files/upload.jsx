@@ -33,7 +33,7 @@ export default function Upload(uploadModel) {
     else if (FAILURE_STATES.includes(uploadModel.status)) {
         isAnimated = false;
         styleName = 'danger';
-        ActionLink = <a href="#" onClick={ () => uploadModel.delete() }>remove</a>;
+        ActionLink = <a href="#" onClick={ () => uploadModel.cancel() }>remove</a>;
     }
 
     return (

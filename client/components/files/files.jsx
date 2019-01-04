@@ -230,6 +230,9 @@ export default class ArchiveFiles extends React.Component {
         if (filesState.isFetching) {
             return false;
         }
+        if (!filesState.hasFetched) {
+            return false;
+        }
         if (filesState.errors.length) {
             return false;
         }

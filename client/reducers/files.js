@@ -12,6 +12,7 @@ import {
 const FilesState = Record({
     path: null,
     isFetching: false,
+    hasFetched: false,
     errors: List(),
     directoriesByName: OrderedMap(),
     filesById: OrderedMap(),
@@ -60,6 +61,7 @@ export default function filesReducer(state = FilesState(), action) {
             if (action.error) {
                 return state.merge({
                     isFetching: false,
+                    hasFetched: true,
                     errors: List([payload.message]),
                 });
             }

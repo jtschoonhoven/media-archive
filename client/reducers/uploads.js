@@ -17,11 +17,11 @@ import {
 
 const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
 
-const INITIAL_STATE = Record({
+class UploadsState extends Record({
     errors: List(),
     isRegisteringWithServer: false,
     uploadsById: OrderedMap(),
-});
+}) {}
 
 
 export class UploadModel extends Record({
@@ -55,7 +55,7 @@ export class UploadModel extends Record({
     }
 }
 
-export default function uploadsReducer(state = INITIAL_STATE(), action) {
+export default function uploadsReducer(state = new UploadsState(), action) {
     const payload = action.payload;
 
     switch (action.type) {

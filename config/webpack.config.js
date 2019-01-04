@@ -59,7 +59,7 @@ const PRODUCTION_CONFIG = {
  */
 const CLIENT_CONFIG = {
     target: 'web',
-    entry: path.join(__dirname, '../client/client-router.jsx'),
+    entry: [path.join(__dirname, '../client/client-router.jsx')],
     output: {
         path: path.join(__dirname, '../dist'),
         filename: 'bundle.client.js',
