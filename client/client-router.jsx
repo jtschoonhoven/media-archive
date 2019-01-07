@@ -14,11 +14,6 @@ class ClientRouter extends React.Component {
             if (window.__REDUX_DEVTOOLS_EXTENSION__) {
                 reduxDevTools = window.__REDUX_DEVTOOLS_EXTENSION__();
             }
-            if (module.hot) {
-                module.hot.accept('./components/routes.jsx', () => {
-                    require('./components/routes.jsx'); // eslint-disable-line global-require
-                });
-            }
         }
         return (
             <BrowserRouter>
