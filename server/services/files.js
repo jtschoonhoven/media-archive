@@ -67,7 +67,7 @@ module.exports.getSanitizedFilePath = getSanitizedFilePath;
  */
 function removeFileExtension(filename) {
     const extension = getFileExtension(filename);
-    return filename.slice(0, -extension.length -1);
+    return filename.slice(0, -extension.length - 1);
 }
 module.exports.removeFileExtension = removeFileExtension;
 
@@ -118,16 +118,7 @@ module.exports.toAlphaNum = sanitize;
 async function load(path) {
     const query = _getLoadSQL(path);
     const rows = await db.all(query);
-
-    // remove uploads from results (but keep directories containing only uploads)
-    const filteredRows = [];
-    rows.forEach((row) => {
-        if (row.entryType === 'upload') {
-            filteredRows.push(row);
-        }
-    });
-
-    return { results: filteredRows };
+    return { results: rows };
 }
 module.exports.load = load;
 
@@ -200,8 +191,6 @@ function _getLoadSQL(path) {
             CASE
                 WHEN ARRAY_LENGTH(media_file_path_array, 1) > ${pathArray.length + 1}
                     THEN 'directory'
-                WHEN upload_status = ${UPLOAD_STATUSES.PENDING}
-                    THEN 'upload'
                 ELSE 'file'
             END AS "entryType",
             ${path} AS "path",
@@ -212,10 +201,7 @@ function _getLoadSQL(path) {
             COUNT(1) AS "numEntries"
         FROM media
         WHERE deleted_at IS NULL
-        AND (
-            upload_status = ${UPLOAD_STATUSES.SUCCESS}
-            OR upload_status = ${UPLOAD_STATUSES.PENDING}
-        )
+        AND upload_status = ${UPLOAD_STATUSES.SUCCESS}
     `;
 
     // match only items in this directory

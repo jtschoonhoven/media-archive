@@ -32,6 +32,7 @@ export class UploadModel extends Record({
     size: null,
     file: null,
     path: null,
+    pathArray: List(),
     directoryPath: null,
     extension: null,
     nameUnsafe: null,

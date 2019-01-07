@@ -10,6 +10,7 @@ import File from './file.jsx';
 import SETTINGS from '../../settings';
 import Upload from './upload.jsx'; // eslint-disable-line no-unused-vars
 import Alert from '../common/alert.jsx';
+import { DirectoryModel } from '../../reducers/files';
 
 const VALID_EXTENSIONS = Object.keys(SETTINGS.FILE_EXT_WHITELIST);
 const FILENAME_BLACKLIST = new RegExp(SETTINGS.REGEX.FILENAME_BLACKLIST);
@@ -33,87 +34,30 @@ export default class ArchiveFiles extends React.Component {
     }
 
     render() {
-        const props = this.props;
-        const filesState = props.filesState;
-        const uploadsState = props.uploadsState;
-        const currentUrl = props.location.pathname;
-        const showConfirmModal = this.props.actions.showConfirmModal;
-        const pathArray = currentUrl.replace('/files', '').split('/');
-        const isRootDir = !pathArray.join('');
-
-        const BreadCrumbs = pathArray.map((dirname, idx) => {
-            return Breadcrumbs(pathArray, dirname, idx);
-        });
-
-        const Errors = [];
-        filesState.errors.concat(uploadsState.errors).forEach((msg, idx) => {
-            Errors.push(Alert(msg, { idx }));
-        });
-
-        const Directories = [];
-        filesState.directoriesByName.forEach((directoryModel) => {
-            Directories.push(Directory(directoryModel));
-        });
-
-        const Files = [];
-        filesState.filesById.forEach((fileModel) => {
-            if (fileModel.isDeleted) {
-                return;
-            }
-            if (uploadsState.uploadsById.get(fileModel.id)) {
-                return; // skip files that are also included in uploads
-            }
-            Files.push(File(fileModel, showConfirmModal));
-        });
-
-        const Uploads = [];
-        uploadsState.uploadsById.forEach((uploadModel) => {
-            if (uploadModel.isDeleted) {
-                return;
-            }
-            if (uploadModel.directoryPath === filesState.path) {
-                Uploads.push(Upload(uploadModel));
-            }
-        });
-
-        const Notifications = [];
-        if (filesState.isFetching) {
-            const alert = Alert(
-                'Loading...',
-                { idx: 0, style: 'secondary', centered: true, muted: true },
-            );
-            Notifications.push(alert);
-        }
-        if (isRootDir) {
-            const alert = Alert(
-                'Note: Uploads are not permitted in the root folder.',
-                { idx: 1, style: 'secondary', centered: true, muted: true },
-            );
-            Notifications.push(alert);
-        }
-        if (this.isEmpty(Directories, Files, Uploads)) {
-            const alert = Alert(
-                'Folder is empty.',
-                { idx: 2, style: 'secondary', centered: true, muted: true },
-            );
-            Notifications.push(alert);
-        }
+        const currentUrl = this.props.location.pathname;
+        const pathArray = currentUrl.replace('/files', '').split('/').filter(item => item);
+        const isRootDir = !pathArray.length;
 
         return (
             <div id="archive-files">
+
                 {/* breadcrumbs */}
                 <nav id="archive-upload-breadcrumbs" aria-label="breadcrumb">
                     <ol className="breadcrumb">
-                        <strong>Archive</strong> &nbsp; / &nbsp; { BreadCrumbs }
+                        <strong>
+                            { isRootDir ? 'Files' : <Link to="/files">Files</Link> }
+                        </strong> &nbsp; / &nbsp;
+                        { this.getBreadcrumbs(pathArray) }
                     </ol>
                 </nav>
+
                 {/* errors */}
                 <div id="archive-files-errors">
-                    { Errors }
+                    { this.getErrors() }
                 </div>
-                {/* buttons */}
                 <div className="row">
-                    {/* upload */}
+
+                    {/* upload button */}
                     <div className="col-6">
                         <label
                             className={
@@ -131,7 +75,8 @@ export default class ArchiveFiles extends React.Component {
                             />
                         </label>
                     </div>
-                    {/* new folder */}
+
+                    {/* new folder button */}
                     <div className="col-6">
                         <button
                             className="btn btn-outline-dark w-100"
@@ -141,16 +86,148 @@ export default class ArchiveFiles extends React.Component {
                         </button>
                     </div>
                 </div>
-                {/* browse */}
+
+                {/* file browser */}
                 <div id="archive-upload-browse">
                     <hr />
-                    { Notifications }
-                    { Uploads }
-                    { Directories }
-                    { Files }
+                    <div id="archive-upload-browse-notifications">
+                        { this.getNotifications(isRootDir) }
+                    </div>
+                    <div id="archive-upload-browse-uploads">
+                        { this.getUploads() }
+                    </div>
+                    <div id="archive-upload-browse-directories">
+                        { this.getDirectories(pathArray) }
+                    </div>
+                    <div id="archive-upload-browse-files">
+                        { this.getFiles() }
+                    </div>
                 </div>
             </div>
         );
+    }
+
+    getErrors() {
+        const filesState = this.props.filesState;
+        const uploadsState = this.props.uploadsState;
+        return filesState.errors.concat(uploadsState.errors).map((msg, idx) => {
+            return Alert(msg, { idx });
+        });
+    }
+
+    getBreadcrumbs(pathArray) {
+        return pathArray.map((dirname, idx) => Breadcrumbs(pathArray, dirname, idx));
+    }
+
+    getDirectories(pathArray) {
+        const Directories = [];
+        const uploadsListByDirname = {};
+        const filesState = this.props.filesState;
+        const uploadsState = this.props.uploadsState;
+
+        // create a Directory component for each directory in filesState
+        filesState.directoriesByName.forEach((directoryModel) => {
+            Directories.push(Directory(directoryModel));
+        });
+
+        // populate uploadsListByDirname
+        // needed in case a file is uploaded to a new directory not included in filesState
+        uploadsState.uploadsById.forEach((uploadModel) => {
+            if (!uploadModel.directoryPath.startsWith(filesState.path)) {
+                return; // check that upload model is in same path as current dir
+            }
+            if (uploadModel.pathArray.length <= pathArray.length + 1) {
+                return; // check that upload model is in child folder of the current directory
+            }
+            if (uploadModel.isDeleting || uploadModel.isDeleted) {
+                return; // check that upload model has not been deleted
+            }
+            const dirname = uploadModel.pathArray[pathArray.length];
+            if (filesState.directoriesByName.has(dirname)) {
+                return; // check that upload directory is not already included in directoriesByName
+            }
+            if (uploadsListByDirname[dirname]) {
+                uploadsListByDirname[dirname].push(uploadModel);
+            }
+            else {
+                uploadsListByDirname[dirname] = [uploadModel];
+            }
+        });
+
+        // create a directory component for each dirname in uploadsListByDirname
+        Object.keys(uploadsListByDirname).forEach((dirname) => {
+            const uploadsList = uploadsListByDirname[dirname];
+            const directoryModel = new DirectoryModel({
+                name: dirname,
+                path: filesState.path,
+                numEntries: uploadsList.length,
+            });
+            Directories.push(Directory(directoryModel));
+        });
+
+        return Directories;
+    }
+
+    getFiles() {
+        const Files = [];
+        const filesState = this.props.filesState;
+        const uploadsState = this.props.uploadsState;
+        const showConfirmModal = this.props.actions.showConfirmModal;
+
+        filesState.filesById.forEach((fileModel) => {
+            if (fileModel.isDeleted) {
+                return;
+            }
+            if (uploadsState.uploadsById.get(fileModel.id)) {
+                return; // skip files that are also included in uploads
+            }
+            Files.push(File(fileModel, showConfirmModal));
+        });
+        return Files;
+    }
+
+    getUploads() {
+        const Uploads = [];
+        const filesState = this.props.filesState;
+        const uploadsState = this.props.uploadsState;
+
+        uploadsState.uploadsById.forEach((uploadModel) => {
+            if (uploadModel.isDeleted) {
+                return;
+            }
+            if (uploadModel.directoryPath === filesState.path) {
+                Uploads.push(Upload(uploadModel));
+            }
+        });
+        return Uploads;
+    }
+
+    getNotifications(isRootDir) {
+        const Notifications = [];
+        const filesState = this.props.filesState;
+
+        if (filesState.isFetching) {
+            const alert = Alert(
+                'Loading...',
+                { idx: 0, style: 'secondary', centered: true, muted: true },
+            );
+            Notifications.push(alert);
+        }
+        if (isRootDir) {
+            const alert = Alert(
+                'Note: Uploads are not permitted in the root folder.',
+                { idx: 1, style: 'secondary', centered: true, muted: true },
+            );
+            Notifications.push(alert);
+        }
+        if (this.isEmpty()) {
+            const alert = Alert(
+                'Folder is empty.',
+                { idx: 2, style: 'secondary', centered: true, muted: true },
+            );
+            Notifications.push(alert);
+        }
+        return Notifications;
     }
 
     /*
@@ -225,8 +302,10 @@ export default class ArchiveFiles extends React.Component {
      * True if successful load returned no files, dirs, or uploads for this directory.
      * False if directory is empty to to an error or unfinished request.
      */
-    isEmpty(directoriesList, filesList, uploadsList) {
+    isEmpty() {
         const filesState = this.props.filesState;
+        const uploadsState = this.props.uploadsState;
+
         if (filesState.isFetching) {
             return false;
         }
@@ -236,13 +315,13 @@ export default class ArchiveFiles extends React.Component {
         if (filesState.errors.length) {
             return false;
         }
-        if (directoriesList.length) {
+        if (!filesState.directoriesByName.isEmpty()) {
             return false;
         }
-        if (filesList.length) {
+        if (!filesState.filesById.isEmpty()) {
             return false;
         }
-        if (uploadsList.length) {
+        if (!uploadsState.uploadsById.isEmpty()) {
             return false;
         }
         return true;

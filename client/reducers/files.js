@@ -67,6 +67,7 @@ export default function filesReducer(state = FilesState(), action) {
             }
             const update = Map({
                 isFetching: false,
+                hasFetched: true,
                 error: List(),
             });
             return state.merge(update, payload);

@@ -67,6 +67,7 @@ async function checkDuplicates(dirPath, fileList) {
         FROM media
         WHERE deleted_at IS NULL
         AND upload_status = ${UPLOAD_STATUSES.SUCCESS}
+        AND deleted_at IS NULL
         AND media_file_path LIKE ${dirPath} || '/%'
         AND (FALSE
     `;
@@ -144,6 +145,7 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
             uuid,
             ${dirPath} AS "directoryPath",
             media_file_path AS "path",
+            media_file_path_array AS "pathArray",
             media_file_name AS "name",
             media_file_name_unsafe AS "nameUnsafe",
             media_type AS "mediaType",
