@@ -10,14 +10,15 @@ class ArchiveNavbar extends React.Component {
     }
 
     render() {
-        let logoLinkTo = '/';
-        let buttonLinkTo = '/files';
-        let buttonLinkText = 'Browse';
+        let logoLinkTo = '/files';
+        let buttonLinkTo = '/';
+        let buttonLinkText = 'Search';
 
-        if (this.props.location.pathname.startsWith('/files')) {
-            logoLinkTo = '/files';
-            buttonLinkTo = '/';
-            buttonLinkText = 'Search';
+        // navbar button should link to search unless we're already on that page
+        if (this.props.location.pathname.trim() === '/') {
+            logoLinkTo = '/';
+            buttonLinkTo = '/files';
+            buttonLinkText = 'Browse';
         }
 
         let NavButtons = ( // eslint-disable-line no-unused-vars

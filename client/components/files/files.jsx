@@ -204,15 +204,6 @@ export default class ArchiveFiles extends React.Component {
 
     getNotifications(isRootDir) {
         const Notifications = [];
-        const filesState = this.props.filesState;
-
-        if (filesState.isFetching) {
-            const alert = Alert(
-                'Loading...',
-                { idx: 0, style: 'secondary', centered: true, muted: true },
-            );
-            Notifications.push(alert);
-        }
         if (isRootDir) {
             const alert = Alert(
                 'Note: Uploads are not permitted in the root folder.',

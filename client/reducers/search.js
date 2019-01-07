@@ -60,7 +60,7 @@ export default function searchReducer(state = new SearchState(), action) {
             if (action.error) {
                 return state.merge({
                     isFetching: false,
-                    errors: List([action.error]),
+                    errors: List([action.payload.message]),
                 });
             }
             const update = Map({ isFetching: false });

@@ -1,6 +1,7 @@
 import './style.scss';
 
 import React from 'react';
+import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
 import Alert from '../common/alert.jsx';
 import Breadcrumbs from '../common/breadcrumbs.jsx';
@@ -41,7 +42,10 @@ class ArchiveDetail extends React.Component {
                 {/* breadcrumbs */}
                 <nav id="archive-upload-breadcrumbs" aria-label="breadcrumb">
                     <ol className="breadcrumb">
-                        <strong>Archive</strong> &nbsp; / &nbsp; { BreadCrumbs }
+                        <strong>
+                            <Link to="/files">Files</Link>
+                        </strong> &nbsp; / &nbsp;
+                        { BreadCrumbs }
                     </ol>
                 </nav>
                 {/* errors */}
