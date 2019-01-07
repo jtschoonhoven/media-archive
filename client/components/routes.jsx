@@ -8,6 +8,7 @@ import { Route, Switch } from 'react-router-dom'; // eslint-disable-line no-unus
 
 import reducer from '../reducers';
 import RestrictedRoute from './common/restricted.jsx'; // eslint-disable-line no-unused-vars
+import SETTINGS from '../settings';
 import {
     ArchiveDetailContainer, // eslint-disable-line no-unused-vars
     ArchiveFilesContainer, // eslint-disable-line no-unused-vars
@@ -19,11 +20,19 @@ import {
     ArchiveSearchContainer, // eslint-disable-line no-unused-vars
 } from '../containers';
 
+const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
+const UPLOAD_ACTIVE_STATUSES = [UPLOAD_STATUSES.PENDING, UPLOAD_STATUSES.RUNNING];
+
 
 class ArchiveApp extends React.Component {
     constructor(props) {
         super(props);
         this.store = createStore(reducer, props.initialState, props.reduxDevTools);
+
+        // if the window global is defined (i.e. we're in a browser) handle the beforeunload event
+        if (props.window) {
+            props.window.addEventListener('beforeunload', this.handleUnload.bind(this));
+        }
     }
 
     render() {
@@ -66,6 +75,27 @@ class ArchiveApp extends React.Component {
                 </div>
             </Provider>
         );
+    }
+
+    /*
+     * Handle beforeunload event when user attempts to reload or navigate to a new page.
+     * Prompt them to confirm if there are uploads in progress that would be interrupted.
+     */
+    handleUnload(event) {
+        event.preventDefault();
+
+        const state = this.store.getState();
+        const uploadsInProgress = state.uploads.uploadsById.filter((uploadModel) => {
+            return UPLOAD_ACTIVE_STATUSES.includes(uploadModel.status);
+        });
+
+        if (uploadsInProgress.isEmpty()) {
+            return undefined;
+        }
+
+        const message = 'Are you sure you want to leave? Uploads in progress will be canceled.';
+        event.returnValue = message;
+        return message;
     }
 }
 

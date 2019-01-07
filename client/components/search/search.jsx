@@ -74,6 +74,7 @@ class ArchiveSearch extends React.Component {
 
         return (
             <div id="archive-search">
+
                 {/* searchbar */}
                 <form
                     id="archive-search-form"
@@ -103,10 +104,12 @@ class ArchiveSearch extends React.Component {
                         </button>
                     </div>
                 </form>
+
                 {/* filters */}
                 <div className="form-check form-check-inline">
                     <label className="form-check-label"><strong>Filter:</strong></label>
                 </div>
+
                 {/* documents */}
                 <div className="form-check form-check-inline">
                     <input
@@ -124,6 +127,7 @@ class ArchiveSearch extends React.Component {
                         documents
                     </label>
                 </div>
+
                 {/* images */}
                 <div className="form-check form-check-inline">
                     <input
@@ -141,6 +145,7 @@ class ArchiveSearch extends React.Component {
                         images
                     </label>
                 </div>
+
                 {/* videos */}
                 <div className="form-check form-check-inline">
                     <input
@@ -158,6 +163,7 @@ class ArchiveSearch extends React.Component {
                         videos
                     </label>
                 </div>
+
                 {/* audio */}
                 <div className="form-check form-check-inline">
                     <input
@@ -175,14 +181,17 @@ class ArchiveSearch extends React.Component {
                         audio
                     </label>
                 </div>
+
                 {/* errors */}
                 <div id="archive-search-errors">
                     { Errors }
                 </div>
+
                 {/* results */}
                 <div id="archive-search-results">
                     { Results }
                 </div>
+
                 {/* no results */}
                 <div className="archive-search-results-empty">
                     {
@@ -195,6 +204,7 @@ class ArchiveSearch extends React.Component {
                             : ''
                     }
                 </div>
+
                 {/* pagination */}
                 <nav aria-label="pagination">
                     <ul className="pagination justify-content-center">

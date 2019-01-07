@@ -3,6 +3,7 @@ import React from 'react'; // eslint-disable-line no-unused-vars
 const ALERT_STYLES = {
     DANGER: 'danger',
     INFO: 'info',
+    LIGHT: 'light',
     SECONDARY: 'secondary',
     SUCCESS: 'success',
     WARNING: 'warning',
