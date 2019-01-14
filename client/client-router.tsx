@@ -1,12 +1,14 @@
-import React from 'react'; // eslint-disable-line no-unused-vars
-import ReactDom from 'react-dom';
-import { BrowserRouter } from 'react-router-dom'; // eslint-disable-line no-unused-vars
+import * as React from 'react';
+import * as ReactDom from 'react-dom';
+import { BrowserRouter } from 'react-router-dom';
 
-import ArchiveApp from './components/routes.jsx'; // eslint-disable-line no-unused-vars
+import ArchiveApp from './components/routes.jsx';
 import SETTINGS from './settings';
 
+declare const window: any;
 
-function ClientRouter() {
+
+export default function ClientRouter() {
     // include redux devtools in development if available
     let reduxDevTools;
     if (SETTINGS.NODE_ENV === 'development') {
@@ -29,6 +31,3 @@ function ClientRouter() {
 // attach event listeners to server-rendered HTML
 const CONTENT_ROOT = document.getElementById('archive-main');
 ReactDom.hydrate(<ClientRouter />, CONTENT_ROOT);
-
-
-export default ClientRouter;

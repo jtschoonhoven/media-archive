@@ -16,21 +16,21 @@ const BASE_CONFIG = {
         // see github.com/arthanzel/node-config-webpack
         new ConfigWebpackPlugin('_CONFIG'),
     ],
+    resolve: {
+        extensions: ['.tsx', '.ts', '.js'],
+    },
     module: {
         rules: [
-            // eslint: lint JS before bundling
             {
-                loader: 'eslint-loader',
-                enforce: 'pre',
-                test: /\.jsx?$/,
-                exclude: path.join(__dirname, '../node_modules'),
-                options: { plugins: ['react'] },
+                loader: 'ts-loader',
+                test: /\.tsx?$/,
+                exclude: /node_modules/,
             },
             // babel: transpile JS and JSX for web
             {
                 loader: 'babel-loader',
                 test: /\.jsx?$/,
-                exclude: path.join(__dirname, '../node_modules'),
+                exclude: /node_modules/,
                 options: { presets: ['@babel/preset-env', '@babel/preset-react'] },
             },
         ],
@@ -59,7 +59,7 @@ const PRODUCTION_CONFIG = {
  */
 const CLIENT_CONFIG = {
     target: 'web',
-    entry: [path.join(__dirname, '../client/client-router.jsx')],
+    entry: [path.join(__dirname, '../client/client-router.tsx')],
     output: {
         path: path.join(__dirname, '../dist'),
         filename: 'bundle.client.js',
@@ -104,7 +104,7 @@ const CLIENT_CONFIG = {
  */
 const SERVER_CONFIG = {
     target: 'node',
-    entry: path.join(__dirname, '../client/server-router.jsx'),
+    entry: path.join(__dirname, '../client/server-router.tsx'),
     output: {
         path: path.join(__dirname, '../dist'),
         filename: 'bundle.server.js',

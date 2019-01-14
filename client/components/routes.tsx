@@ -1,31 +1,38 @@
 import './style.scss';
 
-import PropTypes from 'prop-types';
-import React from 'react';
+import * as React from 'react';
 import { createStore } from 'redux';
-import { Provider } from 'react-redux'; // eslint-disable-line no-unused-vars
-import { Route, Switch } from 'react-router-dom'; // eslint-disable-line no-unused-vars
+import { Provider } from 'react-redux';
+import { Route, Switch } from 'react-router-dom';
 
 import reducer from '../reducers';
-import RestrictedRoute from './common/restricted.jsx'; // eslint-disable-line no-unused-vars
+import RestrictedRoute from './common/restricted.jsx';
 import SETTINGS from '../settings';
 import {
-    ArchiveDetailContainer, // eslint-disable-line no-unused-vars
-    ArchiveFilesContainer, // eslint-disable-line no-unused-vars
-    ArchiveLoginContainer, // eslint-disable-line no-unused-vars
-    ArchiveMissingContainer, // eslint-disable-line no-unused-vars
-    ArchiveModalContainer, // eslint-disable-line no-unused-vars
-    ArchiveNavbarContainer, // eslint-disable-line no-unused-vars
-    ArchivePrivacyContainer, // eslint-disable-line no-unused-vars
-    ArchiveSearchContainer, // eslint-disable-line no-unused-vars
+    ArchiveDetailContainer,
+    ArchiveFilesContainer,
+    ArchiveLoginContainer,
+    ArchiveMissingContainer,
+    ArchiveModalContainer,
+    ArchiveNavbarContainer,
+    ArchivePrivacyContainer,
+    ArchiveSearchContainer,
 } from '../containers';
 
 const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
 const UPLOAD_ACTIVE_STATUSES = [UPLOAD_STATUSES.PENDING, UPLOAD_STATUSES.RUNNING];
 
+interface Props {
+    initialState: any; // FIXME
+    reduxDevTools?: any;
+    window?: any;
+}
 
-class ArchiveApp extends React.Component {
-    constructor(props) {
+
+export default class ArchiveApp extends React.Component<Props> {
+    store: any; // FIXME
+
+    constructor(props: Props) {
         super(props);
         this.store = createStore(reducer, props.initialState, props.reduxDevTools);
 
@@ -47,7 +54,7 @@ class ArchiveApp extends React.Component {
                                 path="/"
                                 component={ ArchiveSearchContainer }
                                 store={ this.store }
-                                exact
+                                exact={ true }
                             />
                             <RestrictedRoute
                                 path="/detail/:id"
@@ -98,10 +105,3 @@ class ArchiveApp extends React.Component {
         return message;
     }
 }
-
-ArchiveApp.propTypes = {
-    initialState: PropTypes.object.isRequired,
-};
-
-
-export default ArchiveApp;
