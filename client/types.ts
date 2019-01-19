@@ -22,9 +22,18 @@ export interface DetailsState {
     };
 }
 
+interface FilesState {
+    readonly path: string;
+    readonly isFetching: boolean;
+    readonly hasFetched: boolean;
+    readonly errors: ReadonlyArray<string>;
+    readonly directoriesByName: { [dirName: string]: string };
+    readonly filesById: { [fileId: number]: string };
+}
+
 export interface State {
     readonly detail?: DetailsState;
-    readonly files?: { [propName: string]: string };
+    readonly files?: FilesState;
     readonly modal?: { [propName: string]: string };
     readonly search?: { [propName: string]: string };
     readonly uploads?: { [propName: string]: string };

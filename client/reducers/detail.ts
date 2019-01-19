@@ -23,7 +23,7 @@ const INITIAL_STATE: DetailsState = {
 };
 
 
-export default function detailReducer(state = INITIAL_STATE, action: Action) {
+export default function detailReducer(state = INITIAL_STATE, action: Action): DetailsState {
     const payload = action.payload;
 
     switch (action.type) {
