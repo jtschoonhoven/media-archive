@@ -2,9 +2,8 @@
     "compilerOptions": {
         "outDir": "./dist/",
         "module": "ES6",
-        "target": "ES6",
+        "lib": ["ES2017", "DOM"],
         "moduleResolution": "node",
-        "noImplicitAny": true,
         "removeComments": false,
         "sourceMap": true,
         "jsx": "react",

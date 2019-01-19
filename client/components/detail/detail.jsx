@@ -3,7 +3,7 @@ import './style.scss';
 import React from 'react';
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
-import Alert from '../common/alert.jsx';
+import Alert from '../common/alert.tsx';
 import Breadcrumbs from '../common/breadcrumbs.jsx';
 import Image from './image.jsx';
 

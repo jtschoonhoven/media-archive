@@ -1,13 +1,14 @@
 import './style.scss';
 
 import * as React from 'react';
-import { createStore } from 'redux';
+import { createStore, Store, StoreEnhancerStoreCreator } from 'redux';
 import { Provider } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
 import reducer from '../reducers';
-import RestrictedRoute from './common/restricted.jsx';
+import RestrictedRoute from './common/restricted';
 import SETTINGS from '../settings';
+import { State, Window } from '../types';
 import {
     ArchiveDetailContainer,
     ArchiveFilesContainer,
@@ -23,18 +24,23 @@ const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
 const UPLOAD_ACTIVE_STATUSES = [UPLOAD_STATUSES.PENDING, UPLOAD_STATUSES.RUNNING];
 
 interface Props {
-    initialState: any; // FIXME
-    reduxDevTools?: any;
-    window?: any;
+    initialState: State;
+    reduxDevTools?: () => StoreEnhancerStoreCreator;
+    window?: Window;
 }
 
 
 export default class ArchiveApp extends React.Component<Props> {
-    store: any; // FIXME
+    store: Store;
 
     constructor(props: Props) {
         super(props);
-        this.store = createStore(reducer, props.initialState, props.reduxDevTools);
+        if (props.reduxDevTools) {
+            this.store = createStore(reducer, props.initialState, props.reduxDevTools);
+        }
+        else {
+            this.store = createStore(reducer, props.initialState);
+        }
 
         // if the window global is defined (i.e. we're in a browser) handle the beforeunload event
         if (props.window) {

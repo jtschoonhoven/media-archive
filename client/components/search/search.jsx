@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 import { Record } from 'immutable';
 import { FiltersModel } from '../../reducers/search';
 
-import Alert from '../common/alert.jsx';
+import Alert from '../common/alert.tsx';
 import SearchResult from './result.jsx';
 
 const SEARCH_INPUT_ID = 'archive-search-form-input';

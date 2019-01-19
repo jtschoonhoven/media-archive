@@ -2,11 +2,11 @@ import * as React from 'react';
 import { Link, Redirect, Route } from 'react-router-dom';
 
 interface Props {
-    readonly component: any; // FIXME
+    readonly component: React.ComponentType;
     readonly exact: boolean;
     readonly location?: string;
     readonly path: string;
-    readonly store: any; // FIXME
+    readonly store: any; // tslint:disable-line no-any (FIXME)
 }
 
 
@@ -28,7 +28,7 @@ export default class RestrictedRoute extends React.Component<Props> {
     render() {
         const { component, location, ...filteredProps } = this.props;
         return (
-            <Route {...filteredProps} render={ this.restrictedRender.bind(null, this.props) } />
+            <Route {...filteredProps} render={ this.restrictedRender.bind(this, this.props) } />
         );
     }
 }

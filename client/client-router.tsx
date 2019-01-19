@@ -2,10 +2,11 @@ import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
 
-import ArchiveApp from './components/routes.jsx';
+import ArchiveApp from './components/routes';
 import SETTINGS from './settings';
+import { Window } from './types';
 
-declare const window: any;
+declare const window: Window;
 
 
 export default function ClientRouter() {
@@ -18,11 +19,17 @@ export default function ClientRouter() {
     }
     return (
         <BrowserRouter>
-            <ArchiveApp
-                reduxDevTools={ reduxDevTools }
-                initialState={ window.INITIAL_STATE }
-                window={ window }
-            />
+            {
+                // make TS happy by only setting reduxDevTools if it's defined
+                typeof reduxDevTools === 'undefined' ?
+                    <ArchiveApp
+                        reduxDevTools={ reduxDevTools }
+                        initialState={ window.INITIAL_STATE }
+                        window={ window }
+                    />
+                // else don't set the prop
+                : <ArchiveApp initialState={ window.INITIAL_STATE } window={ window } />
+            }
         </BrowserRouter>
     );
 }

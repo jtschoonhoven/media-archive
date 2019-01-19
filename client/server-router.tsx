@@ -1,14 +1,19 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import { StaticRouter } from 'react-router-dom'; // eslint-disable-line no-unused-vars
+import * as React from 'react';
+import { StaticRouter } from 'react-router-dom';
 
-import ArchiveApp from './components/routes.jsx'; // eslint-disable-line no-unused-vars
+import { State } from './types';
+import ArchiveApp from './components/routes';
 
+interface Props {
+    readonly location: string;
+    readonly context: { [propName: string]: string };
+    readonly initialState: State;
+}
 
 /*
  * This is the main entrypoint for the *server-rendered* React frontend.
  */
-class ServerRouter extends React.Component {
+class ServerRouter extends React.Component<Props> {
     render() {
         const location = this.props.location;
         const context = this.props.context;
@@ -20,12 +25,6 @@ class ServerRouter extends React.Component {
         );
     }
 }
-
-ServerRouter.propTypes = {
-    context: PropTypes.objectOf(PropTypes.string).isRequired,
-    location: PropTypes.string.isRequired,
-    initialState: PropTypes.object.isRequired,
-};
 
 
 export default ServerRouter;

@@ -1,7 +1,7 @@
-import React from 'react'; // eslint-disable-line no-unused-vars
-import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-import Alert from '../common/alert.jsx';
+import Alert from '../common/alert.tsx';
 import SETTINGS from '../../settings';
 
 const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
@@ -13,7 +13,7 @@ export default function Upload(uploadModel) {
     let isAnimated = true;
     let isStriped = true;
     let styleName = 'info';
-    let ActionLink = <a href="#" onClick={ () => uploadModel.cancel() }>cancel</a>; // eslint-disable-line no-unused-vars
+    let ActionLink = <a href="#" onClick={ () => uploadModel.cancel() }>cancel</a>;
 
     if (uploadModel.isDeleting) {
         isAnimated = false;

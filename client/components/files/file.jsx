@@ -1,7 +1,7 @@
 import React from 'react'; // eslint-disable-line no-unused-vars
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
-import Alert from '../common/alert.jsx';
+import Alert from '../common/alert.tsx';
 
 
 export default (fileModel, showTextModal) => {

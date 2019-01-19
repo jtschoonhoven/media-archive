@@ -1,5 +1,5 @@
 import React from 'react';
-import { Redirect } from 'react-router'; // eslint-disable-line no-unused-vars
+import { Redirect } from 'react-router';
 
 
 class ArchiveLogin extends React.Component {
@@ -12,7 +12,9 @@ class ArchiveLogin extends React.Component {
             <div id="archive-login" className="jumbotron">
                 <h1 className="display-4">Please log in</h1>
                 <p className="lead">
-                    Sign in with your <a href="#">@leakeyfoundation.org</a> Google Apps account to access the Archive.
+                    Sign in with your
+                    <a href="#">@leakeyfoundation.org</a>
+                    Google Apps account to access the Archive.
                 </p>
                 <hr className="my-4" />
                 <div className="form-group">

@@ -13,6 +13,7 @@
     "scripts": {
         "analyze": "npx source-map-explorer dist/bundle.client.*",
         "clean": "find ./dist/* -type f  ! -name 'favicon.ico' ! -path './dist/assets/*' | xargs rm",
+        "lint": "npx tslint -p tsconfig.json",
         "build": "npm run clean && npx webpack --mode=production --config=config/webpack.config.js",
         "build:dev": "npm run clean && npx webpack --mode=development --config=config/webpack.config.js",
         "watch": "npm run clean && npx webpack --watch --mode=development --config=config/webpack.config.js",
@@ -66,6 +67,7 @@
         "@types/react-redux": "^6.0.12",
         "@types/react-router-dom": "^4.3.1",
         "autoprefixer": "^9.3.1",
+        "babel-eslint": "^10.0.1",
         "babel-loader": "^8.0.4",
         "config-webpack": "^1.0.4",
         "css-loader": "^1.0.1",

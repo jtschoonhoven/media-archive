@@ -1,25 +1,18 @@
-import { Action } from '../types';
+import { Action, DetailsState } from '../types';
 import { DETAILS_FETCH_COMPLETE, DETAILS_FETCH_START } from '../actions/detail';
 
 export class DetailsModel {
     constructor(
-        public readonly title?: string,
-        public readonly description?: string,
-        public readonly filename?: string,
-        public readonly path?: string,
-        public readonly type?: string,
-        public readonly url?: string,
-        public readonly tags?: string,
-        public readonly uploadStatus?: string,
-        public readonly extension?: string,
+        public readonly title: string = '',
+        public readonly description: string = '',
+        public readonly filename: string = '',
+        public readonly path: string = '',
+        public readonly type: string = '',
+        public readonly url: string = '',
+        public readonly tags: string = '',
+        public readonly uploadStatus: string = '',
+        public readonly extension: string = '',
     ) {}
-}
-
-export interface DetailsState {
-    readonly isFetching: boolean;
-    readonly fileId: number;
-    readonly details: DetailsModel;
-    readonly errors: ReadonlyArray<string>;
 }
 
 const INITIAL_STATE: DetailsState = {

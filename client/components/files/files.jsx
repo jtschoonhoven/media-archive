@@ -9,7 +9,7 @@ import Directory from './directory.jsx';
 import File from './file.jsx';
 import SETTINGS from '../../settings';
 import Upload from './upload.jsx'; // eslint-disable-line no-unused-vars
-import Alert from '../common/alert.jsx';
+import Alert from '../common/alert.tsx';
 import { DirectoryModel } from '../../reducers/files';
 
 const VALID_EXTENSIONS = Object.keys(SETTINGS.FILE_EXT_WHITELIST);

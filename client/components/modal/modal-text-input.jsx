@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react'; // eslint-disable-line no-unused-vars
 
-import Alert from '../common/alert.jsx';
+import Alert from '../common/alert.tsx';
 import ModalWrapper from './modal-wrapper.jsx';
 
 
