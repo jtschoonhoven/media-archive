@@ -3,7 +3,7 @@ import { Link, Redirect, Route } from 'react-router-dom';
 
 interface Props {
     readonly component: React.ComponentType;
-    readonly exact: boolean;
+    readonly exact?: boolean;
     readonly location?: string;
     readonly path: string;
     readonly store: any; // tslint:disable-line no-any (FIXME)

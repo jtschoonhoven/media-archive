@@ -1,8 +1,12 @@
-import React from 'react';
+import * as React from 'react';
 import { Redirect } from 'react-router';
 
 
-class ArchiveLogin extends React.Component {
+interface Props {
+    user: { isLoggedIn: boolean };
+}
+
+class ArchiveLogin extends React.Component<Props> {
     render() {
         // redirect if already logged in
         if (this.props.user.isLoggedIn) {

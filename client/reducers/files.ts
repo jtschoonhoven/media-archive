@@ -7,7 +7,7 @@ import {
     FILES_DELETE,
     FILES_DELETE_COMPLETE,
 } from '../actions/files';
-import { Action, FilesState } from '../types';
+import { Action } from '../types';
 
 export class DirectoryModel {
     constructor(
@@ -34,6 +34,15 @@ export class FileModel {
     delete() {
         return this._dispatch(filesDelete(this, this._dispatch));
     }
+}
+
+export interface FilesState {
+    readonly path: string;
+    readonly isFetching: boolean;
+    readonly hasFetched: boolean;
+    readonly errors: ReadonlyArray<string>;
+    readonly directoriesByName: { [dirName: string]: DirectoryModel };
+    readonly filesById: { [fileId: number]: string };
 }
 
 const INITIAL_STATE: FilesState = {

@@ -1,16 +1,19 @@
 import './style.scss';
 
-import React from 'react';
+import _ from 'lodash';
+import * as React from 'react';
 import urlJoin from 'url-join';
-import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
+import { Link } from 'react-router-dom';
 
 import Breadcrumbs from '../common/breadcrumbs.jsx';
 import Directory from './directory.jsx';
 import File from './file.jsx';
 import SETTINGS from '../../settings';
-import Upload from './upload.jsx'; // eslint-disable-line no-unused-vars
-import Alert from '../common/alert.tsx';
-import { DirectoryModel } from '../../reducers/files';
+import Upload from './upload.jsx';
+import Alert from '../common/alert';
+import { DirectoryModel, FilesState } from '../../reducers/files';
+import { UploadsState } from '../../reducers/uploads';
+import { FilesActions } from '../../containers/files';
 
 const VALID_EXTENSIONS = Object.keys(SETTINGS.FILE_EXT_WHITELIST);
 const FILENAME_BLACKLIST = new RegExp(SETTINGS.REGEX.FILENAME_BLACKLIST);
@@ -18,8 +21,18 @@ const DUPLICATE_BLACKLIST = new RegExp(SETTINGS.REGEX.DUPLICATE_BLACKLIST);
 const TRIM_ENDS_BLACKLIST = new RegExp(SETTINGS.REGEX.TRIM_ENDS_BLACKLIST);
 
 
-export default class ArchiveFiles extends React.Component {
-    constructor(props) {
+interface Props {
+    filesState: FilesState;
+    uploadsState: UploadsState;
+    actions: FilesActions;
+    location: {
+        pathname: string;
+    };
+}
+
+
+export default class ArchiveFiles extends React.Component<Props> {
+    constructor(props: Props) {
         super(props);
         this.handleUploadClick = this.handleUploadClick.bind(this);
         this.showCreateDirectoryModal = this.showCreateDirectoryModal.bind(this);
@@ -70,8 +83,8 @@ export default class ArchiveFiles extends React.Component {
                                 onChange={ this.handleUploadClick }
                                 accept={ VALID_EXTENSIONS.map(ext => `.${ext}`).join(',') }
                                 disabled={ isRootDir }
-                                multiple
-                                hidden
+                                multiple={ true }
+                                hidden={ true }
                             />
                         </label>
                     </div>
@@ -306,13 +319,13 @@ export default class ArchiveFiles extends React.Component {
         if (filesState.errors.length) {
             return false;
         }
-        if (!filesState.directoriesByName.isEmpty()) {
+        if (!_.isEmpty(filesState.directoriesByName)) {
             return false;
         }
-        if (!filesState.filesById.isEmpty()) {
+        if (!_.isEmpty(filesState.filesById)) {
             return false;
         }
-        if (!uploadsState.uploadsById.isEmpty()) {
+        if (!_.isEmpty(uploadsState.uploadsById)) {
             return false;
         }
         return true;

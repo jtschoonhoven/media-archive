@@ -8,7 +8,7 @@
         "jsx-curly-spacing": [true, 1],
         "jsx-no-multiline-js": false,
         "max-line-length": { "options": [100] },
-        "no-any": true,
+        "no-any": false,
         "no-consecutive-blank-lines": false,
         "quote-props": ["error", "consistent"],
         "ter-indent": ["spaces", 4],

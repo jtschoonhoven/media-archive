@@ -1,37 +1,57 @@
 import './style.scss';
 
-import React from 'react';
+import * as React from 'react';
+import _ from 'lodash';
 import queryString from 'query-string';
+import { DispatchProp } from 'react-redux';
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 import { Record } from 'immutable';
-import { FiltersModel } from '../../reducers/search';
 
-import Alert from '../common/alert.tsx';
+import Alert from '../common/alert';
 import SearchResult from './result.jsx';
+import { FiltersModel, SearchState } from '../../reducers/search';
+import { SearchActions } from '../../containers/search';
+import { Action } from '../../types';
 
 const SEARCH_INPUT_ID = 'archive-search-form-input';
 
+interface Props {
+    actions: SearchActions;
+    searchState: SearchState;
+    location: { search: string };
+    history: { search: string }[];
+    dispatch: (action: Action) => void;
+}
 
-class LocalState extends Record({
+interface State {
+    search: SearchState;
+}
+
+interface LocalState {
+    searchTerm: string;
+    filters: FiltersModel;
+    formIsDirty: boolean;
+    formIsSubmitted: boolean;
+}
+
+const INITIAL_STATE: LocalState = {
     searchTerm: '',
     filters: new FiltersModel(),
     formIsDirty: false,
     formIsSubmitted: false,
-}) {}
+};
 
 
-class ArchiveSearch extends React.Component {
-    constructor(props) {
+class ArchiveSearch extends React.Component<Props> {
+
+    state: LocalState = INITIAL_STATE;
+    searchInputRef = React.createRef<HTMLDivElement>();
+
+    constructor(props: Props) {
         super(props);
 
-        this.state = {
-            search: new LocalState({
-                searchTerm: this.getSearchTermFromQueryString(),
-                filters: this.getFiltersModelFromQueryString(),
-            }),
-        };
-
-        this.searchInputRef = React.createRef();
+        this.state.searchTerm = this.getSearchTermFromQueryString();
+        this.state.filters = this.getFiltersModelFromQueryString();
 
         // bind event handlers
         this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
@@ -45,23 +65,20 @@ class ArchiveSearch extends React.Component {
         this.searchInputRef.current.focus();
 
         // search on load if a search term is present in the initial url
-        const nextKey = this.state.search.filters.nextKey;
-        const prevKey = this.state.search.filters.prevKey;
-        if (this.state.search.searchTerm) {
+        const nextKey = this.state.filters.nextKey;
+        const prevKey = this.state.filters.prevKey;
+        if (this.state.searchTerm) {
             this.search({ nextKey, prevKey });
         }
     }
 
     componentWillUnmount() {
-        const localState = this.state.search;
         this.props.actions.reset();
-        this.setState({
-            search: localState.merge({ formIsDirty: false }),
-        });
+        this.setState({ formIsDirty: false });
     }
 
     render() {
-        const localState = this.state.search; // local component state
+        const localState = this.state; // local component state
         const storeState = this.props.searchState; // global redux store state
 
         const Errors = storeState.errors.map((msg, idx) => {
@@ -248,14 +265,14 @@ class ArchiveSearch extends React.Component {
         const query = queryString.parse(this.props.location.search);
         const { s, ...filters } = query;
 
-        return new FiltersModel({
-            document: filters.document ? 1 : 0,
-            image: filters.image ? 1 : 0,
-            video: filters.video ? 1 : 0,
-            audio: filters.audio ? 1 : 0,
-            nextKey: filters.nextKey || null,
-            prevKey: filters.prevKey || null,
-        });
+        return new FiltersModel(
+            filters.document ? 1 : 0,
+            filters.image ? 1 : 0,
+            filters.video ? 1 : 0,
+            filters.audio ? 1 : 0,
+            filters.nextKey || null,
+            filters.prevKey || null,
+        );
     }
 
     /*
@@ -263,7 +280,7 @@ class ArchiveSearch extends React.Component {
      * False if there are no results because a search is in progress, or due to an error.
      */
     noResults() {
-        const localState = this.state.search;
+        const localState = this.state;
         const storeState = this.props.searchState;
         if (!localState.formIsSubmitted) {
             return false;
@@ -271,37 +288,31 @@ class ArchiveSearch extends React.Component {
         if (storeState.isFetching) {
             return false;
         }
-        if (storeState.errors.size) {
+        if (storeState.errors.length) {
             return false;
         }
-        if (storeState.results.size) {
+        if (storeState.results.length) {
             return false;
         }
         return true;
     }
 
-    search({ nextKey, prevKey }) {
-        const localState = this.state.search;
+    search({ nextKey, prevKey }: { nextKey?: string, prevKey?: string }): void {
+        const localState = this.state;
         const searchTerm = localState.searchTerm;
-        let filtersModel = localState.filters;
+        const oldFiltersModel = localState.filters;
+        const newFiltersModel = oldFiltersModel.update({ nextKey, prevKey });
 
-        filtersModel = filtersModel.merge({
-            nextKey: nextKey || null,
-            prevKey: prevKey || null,
-        });
-
-        const filtersObj = filtersModel.toFilteredObject();
+        const filtersObj = newFiltersModel.toFilteredObject();
         const query = queryString.stringify({ s: searchTerm, ...filtersObj });
 
         this.props.history.push({ search: `?${query}` });
-        this.props.actions.search(searchTerm, filtersModel);
+        this.props.actions.search(searchTerm, newFiltersModel);
 
         this.setState({
-            search: localState.merge({
-                formIsSubmitted: true,
-                formIsDirty: false,
-                filters: filtersModel,
-            }),
+            formIsSubmitted: true,
+            formIsDirty: false,
+            filters: newFiltersModel,
         });
     }
 
@@ -310,14 +321,9 @@ class ArchiveSearch extends React.Component {
      */
     handleSearchInput(event) {
         event.preventDefault();
-        const localState = this.state.search;
+        const localState = this.state;
         const searchTerm = event.target.value;
-        this.setState({
-            search: localState.merge({
-                searchTerm,
-                formIsDirty: true,
-            }),
-        });
+        this.setState({ searchTerm, formIsDirty: true });
     }
 
     /*
@@ -325,13 +331,9 @@ class ArchiveSearch extends React.Component {
      */
     handleSearchSubmit(event) {
         event.preventDefault();
-        const localState = this.state.search;
+        const localState = this.state;
         this.search({});
-        this.setState({
-            search: localState.merge({
-                formIsDirty: false,
-            }),
-        });
+        this.setState({ formIsDirty: false });
     }
 
     /*
@@ -358,16 +360,11 @@ class ArchiveSearch extends React.Component {
      * Handle click on filter checkbox.
      */
     handleFilterCheck(event) {
-        const localState = this.state.search;
+        const localState = this.state;
         const filterName = event.target.value;
         const isChecked = event.target.checked ? 1 : 0;
-        const filters = localState.filters.set(filterName, isChecked);
-        this.setState({
-            search: localState.merge({
-                formIsDirty: true,
-                filters: new FiltersModel(filters.toFilteredObject()),
-            }),
-        });
+        const filters = localState.filters.update({ [filterName]: isChecked });
+        this.setState({ filters, formIsDirty: true });
     }
 }
 

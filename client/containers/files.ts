@@ -1,3 +1,5 @@
+import * as React from 'react';
+import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 
@@ -5,6 +7,28 @@ import { ArchiveFiles } from '../components';
 import { load } from '../actions/files';
 import { upload } from '../actions/uploads';
 import { showConfirmModal, showTextModal } from '../actions/modal';
+import { FilesState } from '../reducers/files';
+import { UploadsState } from '../reducers/uploads';
+
+type eventHandler = () => void;
+
+export interface FilesActions {
+    load: (path: string) => void;
+    upload: (path: string, fileList: File[]) => void;
+    showConfirmModal: (title: string, message: string, onConfirm: eventHandler) => void;
+    showTextModal: (
+        title: string,
+        message: React.ReactElement<any>,
+        placeholder: string,
+        onConfirm: eventHandler,
+        validator: (value: string) => void,
+    ) => void;
+}
+
+export interface StateProps {
+    filesState: FilesState;
+    uploadsState: UploadsState;
+}
 
 
 function mapStateToProps(state) {
@@ -14,7 +38,7 @@ function mapStateToProps(state) {
     };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Dispatch): { actions: FilesActions } {
     return {
         actions: {
             // load directory contents

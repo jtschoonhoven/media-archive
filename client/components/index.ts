@@ -1,5 +1,5 @@
 import ArchiveDetail from './detail/detail.jsx';
-import ArchiveFiles from './files/files.jsx';
+import ArchiveFiles from './files/files';
 import ArchiveLogin from './login/login.jsx';
 import ArchiveMissing from './missing/missing.jsx';
 import ArchiveModal from './modal/modal.jsx';

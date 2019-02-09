@@ -1,3 +1,5 @@
+import { FilesState } from './reducers/files';
+
 export interface Action {
     readonly type: string;
     readonly payload: { [key: string]: any }; // tslint:disable-line no-any (payload varies)
@@ -20,15 +22,6 @@ export interface DetailsState {
         readonly uploadStatus: string;
         readonly extension: string;
     };
-}
-
-interface FilesState {
-    readonly path: string;
-    readonly isFetching: boolean;
-    readonly hasFetched: boolean;
-    readonly errors: ReadonlyArray<string>;
-    readonly directoriesByName: { [dirName: string]: string };
-    readonly filesById: { [fileId: number]: string };
 }
 
 export interface State {
