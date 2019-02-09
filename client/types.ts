@@ -1,3 +1,4 @@
+import { DetailsState } from './reducers/detail';
 import { FilesState } from './reducers/files';
 import { SearchState } from './reducers/search';
 import { UploadsState } from './reducers/uploads';
@@ -9,23 +10,6 @@ export interface Action {
     readonly payload: { [key: string]: any }; // tslint:disable-line no-any (payload varies)
     readonly error?: boolean;
     readonly meta?: object;
-}
-
-export interface DetailsState {
-    readonly isFetching: boolean;
-    readonly fileId: number;
-    readonly errors: ReadonlyArray<string>;
-    readonly details: {
-        readonly title: string;
-        readonly description: string;
-        readonly filename: string;
-        readonly path: string;
-        readonly type: string;
-        readonly url: string;
-        readonly tags: string;
-        readonly uploadStatus: string;
-        readonly extension: string;
-    };
 }
 
 export interface State {

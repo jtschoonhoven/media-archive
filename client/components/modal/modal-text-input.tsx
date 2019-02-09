@@ -13,7 +13,7 @@ interface Props {
  */
 export default class ModalTextInput extends React.Component<Props> {
     state = { value: '', error: null };
-    inputRef = React.createRef<HTMLDivElement>();
+    inputRef = React.createRef<HTMLInputElement>();
 
     constructor(props) {
         super(props);

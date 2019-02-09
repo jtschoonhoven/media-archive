@@ -1,18 +1,34 @@
 import './style.scss';
 
-import React from 'react';
+import * as React from 'react';
+import * as History from 'history';
+import { Dispatch } from 'redux';
 import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
 
-import Alert from '../common/alert.tsx';
+import Alert from '../common/alert';
 import Breadcrumbs from '../common/breadcrumbs.jsx';
 import Image from './image.jsx';
+import { DetailsState } from '../../reducers/detail';
+import { DetailActions } from '../../containers/detail';
+
+export interface Props {
+    detailState: DetailsState;
+    actions: DetailActions;
+    location: History.Location;
+    dispatch: Dispatch;
+}
+
+export interface State {
+    isExpanded: boolean;
+}
 
 
-class ArchiveDetail extends React.Component {
-    constructor(props) {
+class ArchiveDetail extends React.Component<Props> {
+    state: State = { isExpanded: false };
+
+    constructor(props: Props) {
         super(props);
         this.handleClick = this.handleClick.bind(this);
-        this.state = { isExpanded: false };
     }
 
     componentDidMount() {

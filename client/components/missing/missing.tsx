@@ -1,8 +1,9 @@
-import React from 'react';
-import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
+import * as React from 'react';
+import { Link } from 'react-router-dom';
 
+interface Props {}
 
-class ArchiveMissing extends React.Component {
+class ArchiveMissing extends React.Component<Props> {
     render() {
         return (
             <div className="jumbotron">

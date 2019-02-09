@@ -66,6 +66,7 @@
         "@types/react": "^16.7.18",
         "@types/react-dom": "^16.0.11",
         "@types/react-redux": "^6.0.12",
+        "@types/react-router": "^4.4.3",
         "@types/react-router-dom": "^4.3.1",
         "autoprefixer": "^9.3.1",
         "babel-eslint": "^10.0.1",

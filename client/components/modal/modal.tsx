@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as History from 'history';
 
 import ModalConfirm from './modal-confirm.jsx';
 import ModalTextInput from './modal-text-input.jsx';
@@ -6,8 +7,8 @@ import { MODAL_TYPES, ModalState, ModalModel, ModalTextModel } from '../../reduc
 
 interface Props {
     modalState: ModalState;
-    location: {};
-    history: {}[];
+    location: History.Location;
+    history: History.History;
 }
 
 
