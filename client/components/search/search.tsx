@@ -45,7 +45,7 @@ const INITIAL_STATE: LocalState = {
 class ArchiveSearch extends React.Component<SearchProps> {
 
     state: LocalState = INITIAL_STATE;
-    searchInputRef = React.createRef<HTMLDivElement>();
+    searchInputRef: React.RefObject<HTMLDivElement> = React.createRef();
 
     constructor(props: SearchProps) {
         super(props);

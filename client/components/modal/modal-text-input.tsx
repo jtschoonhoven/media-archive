@@ -1,11 +1,14 @@
 import * as React from 'react';
+import * as History from 'history';
 
 import Alert from '../common/alert';
 import ModalWrapper from './modal-wrapper.jsx';
-import { ModalTextModel } from '../../reducers/modal';
+import { ModalTextConfig } from '../../reducers/modal';
 
 interface Props {
-    modalModel: ModalTextModel;
+    modalModel: ModalTextConfig;
+    location: History.Location;
+    history: History.History;
 }
 
 /*
@@ -13,7 +16,7 @@ interface Props {
  */
 export default class ModalTextInput extends React.Component<Props> {
     state = { value: '', error: null };
-    inputRef = React.createRef<HTMLInputElement>();
+    inputRef: React.RefObject<HTMLInputElement> = React.createRef();
 
     constructor(props) {
         super(props);

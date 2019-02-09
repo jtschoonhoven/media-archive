@@ -8,16 +8,16 @@ export const MODAL_TYPES = {
     TEXT: 'text',
 };
 
-export interface ModalConfirm {
-    type: string;
+export interface ModalConfirmConfig {
+    type: 'confirm';
     title: string;
     message: React.ReactElement<any>;
     onClose: () => void;
     onConfirm: (string) => void;
 }
 
-export interface ModalTextModel {
-    type: string;
+export interface ModalTextConfig {
+    type: 'text';
     title: string;
     placeholder: string;
     message: React.ReactElement<any>;
@@ -26,10 +26,10 @@ export interface ModalTextModel {
     validator: (string) => void;
 }
 
-export type ModalModel = ModalConfirm | ModalTextModel;
+export type ModalConfig = ModalConfirmConfig | ModalTextConfig;
 
 export interface ModalState {
-    modal?: ModalModel;
+    modal?: ModalConfig;
 }
 
 const INITIAL_STATE: ModalState = {

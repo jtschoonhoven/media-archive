@@ -58,30 +58,34 @@ export class FiltersModel {
     }
 }
 
-export class ResultModel {
-    constructor(
-        public readonly id: number = null,
-        public readonly name: string = null,
-        public readonly type: string = null,
-        public readonly description: string = null,
-        public readonly url: string = null,
-        public readonly thumbnailUrl: string = null,
-        public readonly extension: string = null,
-        public readonly relevance: number = 0,
-    ) {}
+export interface SearchResult {
+    readonly id: number;
+    readonly name: string;
+    readonly type: string;
+    readonly description: string;
+    readonly url: string;
+    readonly thumbnailUrl: string;
+    readonly extension: string;
+    readonly relevance: number;
 }
 
-export class SearchState {
-    constructor(
-        public readonly errors: string[] = [],
-        public readonly searchTerm: string = '',
-        public readonly filters: FiltersModel = new FiltersModel(),
-        public readonly results: ResultModel[] = [],
-        public readonly isFetching: boolean = false,
-    ) {}
+export interface SearchState {
+    readonly errors: ReadonlyArray<string>;
+    readonly searchTerm: string;
+    readonly filters: FiltersModel;
+    readonly results: ReadonlyArray<SearchResult>;
+    readonly isFetching: boolean;
 }
 
-export default function searchReducer(state = new SearchState(), action) {
+const INITIAL_STATE = {
+    errors: [],
+    searchTerm: '',
+    filters: new FiltersModel(),
+    results: [],
+    isFetching: false,
+};
+
+export default function searchReducer(state = INITIAL_STATE, action) {
     const payload = action.payload;
 
     switch (action.type) {
@@ -108,7 +112,7 @@ export default function searchReducer(state = new SearchState(), action) {
         }
 
         case SEARCH_RESET: {
-            return new SearchState();
+            return INITIAL_STATE;
         }
 
         default: {

@@ -1,6 +1,7 @@
-import { Map } from 'immutable';
+import { Dispatch } from 'redux';
 
-import { ModalConfirmModel, ModalTextModel } from '../reducers/modal';
+import { ModalConfirmConfig, ModalTextConfig } from '../reducers/modal';
+import { Action } from '../types';
 
 export const MODAL_SHOW_CONFIRM = 'MODAL_SHOW_CONFIRM';
 export const MODAL_SHOW_TEXT = 'MODAL_SHOW_TEXT';
@@ -10,43 +11,57 @@ export const MODAL_HIDE = 'MODAL_HIDE';
 /*
  * Display a confirmation modal with an "OK" button.
  */
-export function showConfirmModal(title, message, onConfirm, dispatch) {
-    const modal = new ModalConfirmModel({
+export function showConfirmModal(
+    title: string,
+    message: React.ReactElement<any>,
+    onConfirm: (string) => void,
+    dispatch: Dispatch,
+): Action {
+    const modal: ModalConfirmConfig = {
         title,
         message,
         onConfirm,
+        type: 'confirm',
         onClose: () => dispatch(hideModal()),
-    });
+    };
     return {
         type: MODAL_SHOW_CONFIRM,
-        payload: Map({ modal }),
+        payload: { modal },
     };
 }
 
 /*
  * Display a modal with one text input.
  */
-export function showTextModal(title, message, placeholder, onConfirm, validator, dispatch) {
-    const modal = new ModalTextModel({
+export function showTextModal(
+    title: string,
+    message: React.ReactElement<any>,
+    placeholder: string,
+    onConfirm: (string) => void,
+    validator: () => void,
+    dispatch: Dispatch,
+): Action {
+    const modal: ModalTextConfig = {
         title,
         message,
         placeholder,
         validator,
         onConfirm,
+        type: 'text',
         onClose: () => dispatch(hideModal()),
-    });
+    };
     return {
         type: MODAL_SHOW_TEXT,
-        payload: Map({ modal }),
+        payload: { modal },
     };
 }
 
 /*
  * Hide the current modal if exists.
  */
-export function hideModal() {
+export function hideModal(): Action {
     return {
         type: MODAL_HIDE,
-        payload: Map(),
+        payload: {},
     };
 }

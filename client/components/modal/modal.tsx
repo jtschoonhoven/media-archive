@@ -3,7 +3,7 @@ import * as History from 'history';
 
 import ModalConfirm from './modal-confirm.jsx';
 import ModalTextInput from './modal-text-input.jsx';
-import { MODAL_TYPES, ModalState, ModalModel, ModalTextModel } from '../../reducers/modal';
+import { MODAL_TYPES, ModalState, ModalConfig, ModalTextConfig } from '../../reducers/modal';
 
 interface Props {
     modalState: ModalState;
@@ -14,7 +14,7 @@ interface Props {
 
 export default class Modal extends React.Component<Props> {
     render() {
-        const modalModel: ModalModel = this.props.modalState.modal || {} as ModalModel;
+        const modalModel: ModalConfig = this.props.modalState.modal || {} as ModalConfig;
 
         if (modalModel.type === MODAL_TYPES.CONFIRM) {
             return ModalConfirm(modalModel);
@@ -22,7 +22,7 @@ export default class Modal extends React.Component<Props> {
         if (modalModel.type === MODAL_TYPES.TEXT) {
             return (
                 <ModalTextInput
-                    modalModel={ modalModel }
+                    modalModel={ (modalModel as ModalTextConfig) }
                     location={ this.props.location }
                     history={ this.props.history }
                 />
