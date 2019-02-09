@@ -1,18 +1,22 @@
-import PropTypes from 'prop-types';
-import React from 'react'; // eslint-disable-line no-unused-vars
+import * as React from 'react';
 
-import Alert from '../common/alert.tsx';
+import Alert from '../common/alert';
 import ModalWrapper from './modal-wrapper.jsx';
+import { ModalTextModel } from '../../reducers/modal';
 
+interface Props {
+    modalModel: ModalTextModel;
+}
 
 /*
  * Render a text input dialog. Callback receive the value of the input.
  */
-export default class ModalTextInput extends React.Component { // eslint-disable-line no-unused-vars
+export default class ModalTextInput extends React.Component<Props> {
+    state = { value: '', error: null };
+    inputRef = React.createRef<HTMLDivElement>();
+
     constructor(props) {
         super(props);
-        this.state = { value: '', error: null };
-        this.inputRef = React.createRef();
         this.handleInput = this.handleInput.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleKeyPress = this.handleKeyPress.bind(this);
@@ -103,9 +107,3 @@ export default class ModalTextInput extends React.Component { // eslint-disable-
         }
     }
 }
-
-ModalTextInput.propTypes = {
-    location: PropTypes.object.isRequired,
-    history: PropTypes.object.isRequired,
-    modalModel: PropTypes.object.isRequired,
-};

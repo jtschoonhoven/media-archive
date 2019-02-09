@@ -1,10 +1,14 @@
 import './style.scss';
 
-import React from 'react';
+import * as React from 'react';
 import { Link } from 'react-router-dom';
 
+interface Props {
+    userState: { isLoggedIn: boolean };
+    location: { pathname: string };
+}
 
-class ArchiveNavbar extends React.Component {
+class ArchiveNavbar extends React.Component<Props> {
     isLoggedIn() {
         return !!this.props.userState.isLoggedIn;
     }

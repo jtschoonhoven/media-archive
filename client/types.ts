@@ -1,4 +1,8 @@
 import { FilesState } from './reducers/files';
+import { SearchState } from './reducers/search';
+import { UploadsState } from './reducers/uploads';
+import { ModalState } from './reducers/modal';
+import { UserState } from './reducers/user';
 
 export interface Action {
     readonly type: string;
@@ -25,12 +29,12 @@ export interface DetailsState {
 }
 
 export interface State {
-    readonly detail?: DetailsState;
-    readonly files?: FilesState;
-    readonly modal?: { [propName: string]: string };
-    readonly search?: { [propName: string]: string };
-    readonly uploads?: { [propName: string]: string };
-    readonly user?: { [propName: string]: string };
+    readonly detail: DetailsState;
+    readonly files: FilesState;
+    readonly modal: ModalState;
+    readonly search: SearchState;
+    readonly uploads: UploadsState;
+    readonly user: UserState;
 }
 
 export interface Window {

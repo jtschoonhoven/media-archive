@@ -15,7 +15,7 @@ import { Action } from '../../types';
 
 const SEARCH_INPUT_ID = 'archive-search-form-input';
 
-interface Props {
+export interface SearchProps {
     actions: SearchActions;
     searchState: SearchState;
     location: { search: string };
@@ -42,12 +42,12 @@ const INITIAL_STATE: LocalState = {
 };
 
 
-class ArchiveSearch extends React.Component<Props> {
+class ArchiveSearch extends React.Component<SearchProps> {
 
     state: LocalState = INITIAL_STATE;
     searchInputRef = React.createRef<HTMLDivElement>();
 
-    constructor(props: Props) {
+    constructor(props: SearchProps) {
         super(props);
 
         this.state.searchTerm = this.getSearchTermFromQueryString();

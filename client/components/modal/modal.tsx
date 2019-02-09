@@ -1,13 +1,19 @@
-import React from 'react'; // eslint-disable-line no-unused-vars
+import * as React from 'react';
 
 import ModalConfirm from './modal-confirm.jsx';
-import ModalTextInput from './modal-text-input.jsx'; // eslint-disable-line no-unused-vars
-import { MODAL_TYPES } from '../../reducers/modal';
+import ModalTextInput from './modal-text-input.jsx';
+import { MODAL_TYPES, ModalState, ModalModel, ModalTextModel } from '../../reducers/modal';
+
+interface Props {
+    modalState: ModalState;
+    location: {};
+    history: {}[];
+}
 
 
-export default class Modal extends React.Component {
+export default class Modal extends React.Component<Props> {
     render() {
-        const modalModel = this.props.modalState.modal || {};
+        const modalModel: ModalModel = this.props.modalState.modal || {} as ModalModel;
 
         if (modalModel.type === MODAL_TYPES.CONFIRM) {
             return ModalConfirm(modalModel);
