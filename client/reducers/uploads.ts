@@ -13,56 +13,101 @@ import {
     UPLOAD_FILE_COMPLETE,
     UPLOAD_FILE_CANCEL,
     UPLOAD_FILE_CANCEL_COMPLETE,
+    UploadsMap,
 } from '../actions/uploads';
-import { Action } from '../types';
+import { Action, Dict } from '../types';
 
 const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
-
-export class UploadModel {
-        constructor(
-        public readonly error: string = null,
-        public readonly id: string = null,
-        public readonly uuid: string = null,
-        public readonly name: string = null,
-        public readonly size: string = null,
-        public readonly file: string = null,
-        public readonly path: string = null,
-        public readonly pathArray: string[] = [],
-        public readonly directoryPath: string = null,
-        public readonly extension: string = null,
-        public readonly nameUnsafe: string = null,
-        public readonly s3UploadPolicy: string = null,
-        public readonly s3UploadUrl: string = null,
-        public readonly status: string = UPLOAD_STATUSES.PENDING,
-        public readonly uploadPercent: number = 0,
-        public readonly isUploading: boolean = false,
-        public readonly isUploaded: boolean = false,
-        public readonly isDeleting: boolean = false,
-        public readonly isDeleted: boolean = false,
-        public readonly xhrRequest: string = null,
-        public readonly _dispatch: Dispatch = null,
-    ) {}
-    cancel() {
-        return this._dispatch(uploadCancel(this, this._dispatch));
-    }
-
-    retry() {
-        return this._dispatch(uploadFileToS3(this, this._dispatch));
-    }
-}
 
 export interface UploadsState {
     readonly errors: string[];
     readonly isRegisteringWithServer: boolean;
-    readonly uploadsById: {
-        [id: number]: UploadModel;
-    };
+    readonly uploadsById: UploadsMap;
+}
+
+export class UploadModel {
+    readonly error: string;
+    readonly id: number;
+    readonly uuid: string;
+    readonly name: string;
+    readonly size: number;
+    readonly path: string;
+    readonly pathArray: ReadonlyArray<string>;
+    readonly directoryPath: string;
+    readonly extension: string;
+    readonly nameUnsafe: string;
+    readonly s3UploadPolicy: string;
+    readonly s3UploadUrl: string;
+    readonly status: string;
+    readonly file?: File;
+    readonly _dispatch?: Dispatch;
+    readonly _xhrRequest?: XMLHttpRequest;
+    readonly uploadPercent?: number = 0;
+    readonly isUploading?: boolean = false;
+    readonly isUploaded?: boolean = false;
+    readonly isDeleting?: boolean = false;
+    readonly isDeleted?: boolean = false;
+
+    constructor(uploadInfo: UploadModel) {
+        Object.assign(self, uploadInfo);
+    }
+
+    /*
+     * Dispatch an UPLOAD_CANCEL action.
+     */
+    cancel?(): Action {
+        return this._dispatch(uploadCancel(this, this._dispatch));
+    }
+
+    /*
+     * Dispatch an UPLOAD_RETRY action.
+     */
+    retry?(): Action {
+        return this._dispatch(uploadFileToS3(this, this._dispatch));
+    }
+
+    /*
+     * Return an object-literal representation of this UploadModel
+     */
+    toObject?(): UploadModel {
+        return {
+            error: this.error,
+            id: this.id,
+            uuid: this.uuid,
+            name: this.name,
+            size: this.size,
+            path: this.path,
+            pathArray: this.pathArray,
+            directoryPath: this.directoryPath,
+            extension: this.extension,
+            nameUnsafe: this.nameUnsafe,
+            s3UploadPolicy: this.s3UploadPolicy,
+            s3UploadUrl: this.s3UploadUrl,
+            status: this.status,
+            file: this.file,
+            _dispatch: this._dispatch,
+            _xhrRequest: this._xhrRequest,
+            uploadPercent: this.uploadPercent,
+            isUploading: this.isUploading,
+            isUploaded: this.isUploaded,
+            isDeleting: this.isDeleting,
+            isDeleted: this.isDeleted,
+        };
+    }
+
+    /**
+     * Return a new UploadModel with properties merged from passed in uploadInfo.
+     */
+    update?(uploadInfo: Partial<UploadModel>): UploadModel {
+        const merged = Object.assign({}, this.toObject(), uploadInfo);
+        return new UploadModel(merged);
+    }
 }
 
 const initialState: UploadsState = {
     errors: [],
     isRegisteringWithServer: false,
-    uploadsById: {},
+    uploadsById: new Map(),
 };
 
 
@@ -89,44 +134,52 @@ export default function uploadsReducer(state = initialState, action: Action): Up
                 return Object.assign({}, state, update);
             }
             const update = { isRegisteringWithServer: false };
-            const uploadsById = Object.assign({}, state.uploadsById, payload.get('uploadsById'));
+            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
             return Object.assign({}, state, update, { uploadsById });
         }
 
         case UPLOAD_FILE_TO_S3_START: {
-            const uploadsById = Object.assign({}, state.uploadsById, payload.get('uploadsById'));
+            if (action.error) {
+                const errors = state.errors.concat(payload.message);
+                return Object.assign({}, state, errors);
+            }
+            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
             return Object.assign({}, state, { uploadsById });
         }
 
         case UPLOAD_FILE_TO_S3_PROGRESS: {
-            const uploadsById = Object.assign({}, state.uploadsById, payload.get('uploadsById'));
+            if (action.error) {
+                const errors = state.errors.concat(payload.message);
+                return Object.assign({}, state, errors);
+            }
+            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
             return Object.assign({}, state, { uploadsById });
         }
 
         case UPLOAD_FILE_TO_S3_FINISHED: {
-            const uploadsById = Object.assign({}, state.uploadsById, payload.get('uploadsById'));
+            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
             return Object.assign({}, state, { uploadsById });
         }
 
         case UPLOAD_FILE_COMPLETE: {
-            const uploadsById = Object.assign({}, state.uploadsById, payload.get('uploadsById'));
+            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
             return Object.assign({}, state, { uploadsById });
         }
 
         case UPLOAD_FILE_TO_S3_RETRY: {
-            const uploadsById = Object.assign({}, state.uploadsById, payload.get('uploadsById'));
+            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
             return Object.assign({}, state, { uploadsById });
         }
 
         // client requests to delete file by ID
         case UPLOAD_FILE_CANCEL: {
-            const uploadsById = Object.assign({}, state.uploadsById, payload.get('uploadsById'));
+            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
             return Object.assign({}, state, { uploadsById });
         }
 
         // server acknowledges file has been deleted
         case UPLOAD_FILE_CANCEL_COMPLETE: {
-            const uploadsById = Object.assign({}, state.uploadsById, payload.get('uploadsById'));
+            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
             return Object.assign({}, state, { uploadsById });
         }
 

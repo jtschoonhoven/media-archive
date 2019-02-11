@@ -5,11 +5,13 @@ import { UploadsState } from './reducers/uploads';
 import { ModalState } from './reducers/modal';
 import { UserState } from './reducers/user';
 
-export interface Action {
+export type Dict = { [key: string]: any };
+
+export interface Action<Payload = Dict, Meta = Dict> {
     readonly type: string;
-    readonly payload: { [key: string]: any }; // tslint:disable-line no-any (payload varies)
+    readonly payload: Payload | Error;
+    readonly meta?: Meta;
     readonly error?: boolean;
-    readonly meta?: object;
 }
 
 export interface State {
