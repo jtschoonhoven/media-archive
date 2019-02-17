@@ -11,7 +11,7 @@ import File from './file.jsx';
 import SETTINGS from '../../settings';
 import Upload from './upload.jsx';
 import Alert from '../common/alert';
-import { DirectoryModel, FilesState } from '../../reducers/files';
+import { DirectoryModel, FileModel, FilesState } from '../../reducers/files';
 import { UploadsState } from '../../reducers/uploads';
 import { FilesActions } from '../../containers/files';
 
@@ -20,11 +20,11 @@ const FILENAME_BLACKLIST = new RegExp(SETTINGS.REGEX.FILENAME_BLACKLIST);
 const DUPLICATE_BLACKLIST = new RegExp(SETTINGS.REGEX.DUPLICATE_BLACKLIST);
 const TRIM_ENDS_BLACKLIST = new RegExp(SETTINGS.REGEX.TRIM_ENDS_BLACKLIST);
 
-
 interface Props {
-    filesState: FilesState;
-    uploadsState: UploadsState;
     actions: FilesActions;
+    filesState: FilesState;
+    history: string[];
+    uploadsState: UploadsState;
     location: {
         pathname: string;
     };
@@ -139,7 +139,7 @@ export default class ArchiveFiles extends React.Component<Props> {
         const uploadsState = this.props.uploadsState;
 
         // create a Directory component for each directory in filesState
-        filesState.directoriesByName.forEach((directoryModel) => {
+        Object.values(filesState.directoriesByName).forEach((directoryModel) => {
             Directories.push(Directory(directoryModel));
         });
 
@@ -156,7 +156,7 @@ export default class ArchiveFiles extends React.Component<Props> {
                 return; // check that upload model has not been deleted
             }
             const dirname = uploadModel.pathArray[pathArray.length];
-            if (filesState.directoriesByName.has(dirname)) {
+            if (_.has(filesState.directoriesByName, dirname)) {
                 return; // check that upload directory is not already included in directoriesByName
             }
             if (uploadsListByDirname[dirname]) {
@@ -187,7 +187,7 @@ export default class ArchiveFiles extends React.Component<Props> {
         const uploadsState = this.props.uploadsState;
         const showConfirmModal = this.props.actions.showConfirmModal;
 
-        filesState.filesById.forEach((fileModel) => {
+        Object.values(filesState.filesById).forEach((fileModel: FileModel) => {
             if (fileModel.isDeleted) {
                 return;
             }

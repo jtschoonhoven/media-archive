@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as History from 'history';
 
 import ModalConfirm from './modal-confirm.jsx';
-import ModalTextInput from './modal-text-input.jsx';
+import ModalTextInput from './modal-text-input';
 import { MODAL_TYPES, ModalState, ModalConfig, ModalTextConfig } from '../../reducers/modal';
 
 interface Props {

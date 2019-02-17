@@ -8,7 +8,7 @@ import { Route, Switch } from 'react-router-dom';
 import reducer from '../reducers';
 import RestrictedRoute from './common/restricted';
 import SETTINGS from '../settings';
-import { State, Window } from '../types';
+import { Action, State, Window } from '../types';
 import {
     ArchiveDetailContainer,
     ArchiveFilesContainer,
@@ -36,10 +36,17 @@ export default class ArchiveApp extends React.Component<Props> {
     constructor(props: Props) {
         super(props);
         if (props.reduxDevTools) {
-            this.store = createStore(reducer, props.initialState, props.reduxDevTools);
+            this.store = createStore<State, Action, any, any>(
+                reducer,
+                props.initialState,
+                props.reduxDevTools,
+            );
         }
         else {
-            this.store = createStore(reducer, props.initialState);
+            this.store = createStore<State, Action, any, any>(
+                reducer,
+                props.initialState,
+            );
         }
 
         // if the window global is defined (i.e. we're in a browser) handle the beforeunload event

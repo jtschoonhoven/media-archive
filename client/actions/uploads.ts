@@ -4,7 +4,7 @@ import { Dispatch } from 'redux';
 
 import SETTINGS from '../settings';
 import { UploadModel } from '../reducers/uploads';
-import { Action, ActionFailure, ActionSuccess } from '../types';
+import { Action } from '../types';
 
 export const UPLOAD_BATCH_START = 'UPLOAD_BATCH_START';
 export const UPLOAD_BATCH_SAVED_TO_SERVER = 'UPLOAD_BATCH_SAVED_TO_SERVER';

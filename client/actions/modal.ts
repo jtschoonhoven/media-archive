@@ -38,7 +38,7 @@ export function showTextModal(
     message: React.ReactElement<any>,
     placeholder: string,
     onConfirm: (string) => void,
-    validator: () => void,
+    validator: (string) => void,
     dispatch: Dispatch,
 ): Action {
     const modal: ModalTextConfig = {

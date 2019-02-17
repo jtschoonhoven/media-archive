@@ -10,26 +10,30 @@ import {
 import { Action } from '../types';
 
 export class DirectoryModel {
-    constructor(
-        public readonly name: string = '',
-        public readonly path: string = '',
-        public readonly error: string = '',
-        public readonly numEntries: number = 0,
-        public readonly _dispatch: Dispatch = null,
-    ) {}
+    readonly name: string;
+    readonly path: string;
+    readonly numEntries: number;
+    readonly error?: string;
+    readonly _dispatch?: Dispatch;
+
+    constructor(directory: DirectoryModel) {
+        Object.assign(this, directory);
+    }
 }
 
 export class FileModel {
-    constructor(
-        public readonly id: string = '',
-        public readonly uuid: string = '',
-        public readonly name: string = '',
-        public readonly size: number = -1,
-        public readonly error: string = '',
-        public readonly isDeleting: boolean = false,
-        public readonly isDeleted: boolean = false,
-        public readonly _dispatch: Dispatch = null,
-    ) {}
+    readonly id: number;
+    readonly uuid: string;
+    readonly name: string;
+    readonly size: number;
+    readonly error: string;
+    readonly isDeleting: boolean;
+    readonly isDeleted: boolean;
+    readonly _dispatch: Dispatch;
+
+    constructor(file: FileModel) {
+        Object.assign(this, file);
+    }
 
     delete() {
         return this._dispatch(filesDelete(this, this._dispatch));
@@ -42,7 +46,7 @@ export interface FilesState {
     readonly hasFetched: boolean;
     readonly errors: ReadonlyArray<string>;
     readonly directoriesByName: { [dirName: string]: DirectoryModel };
-    readonly filesById: { [fileId: number]: string };
+    readonly filesById: { [fileId: number]: FileModel };
 }
 
 const INITIAL_STATE: FilesState = {

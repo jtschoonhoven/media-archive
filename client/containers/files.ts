@@ -10,21 +10,6 @@ import { showConfirmModal, showTextModal } from '../actions/modal';
 import { FilesState } from '../reducers/files';
 import { UploadsState } from '../reducers/uploads';
 
-type eventHandler = () => void;
-
-export interface FilesActions {
-    load: (path: string) => void;
-    upload: (path: string, fileList: File[]) => void;
-    showConfirmModal: (title: string, message: string, onConfirm: eventHandler) => void;
-    showTextModal: (
-        title: string,
-        message: React.ReactElement<any>,
-        placeholder: string,
-        onConfirm: eventHandler,
-        validator: (value: string) => void,
-    ) => void;
-}
-
 export interface StateProps {
     filesState: FilesState;
     uploadsState: UploadsState;
@@ -36,6 +21,27 @@ function mapStateToProps(state) {
         filesState: state.files,
         uploadsState: state.uploads,
     };
+}
+
+export interface FilesActions {
+    load: (path: string) => void;
+    upload: (path: string, fileList: File[]) => void;
+    showConfirmModal: (
+        title: string,
+        message: React.ReactElement<any>,
+        onConfirm: (value: string) => void,
+    ) => void;
+    showTextModal: (
+        title: string,
+        message: React.ReactElement<any>,
+        placeholder: string,
+        onConfirm: (value: string) => void,
+        validator: (value: string) => void,
+    ) => void;
+}
+
+export interface DispatchProps {
+    actions: FilesActions;
 }
 
 function mapDispatchToProps(dispatch: Dispatch): { actions: FilesActions } {
@@ -61,7 +67,7 @@ function mapDispatchToProps(dispatch: Dispatch): { actions: FilesActions } {
 }
 
 const ArchiveFilesContainer = withRouter(
-    connect(mapStateToProps, mapDispatchToProps)(ArchiveFiles),
+    connect<StateProps, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(ArchiveFiles),
 );
 
 
