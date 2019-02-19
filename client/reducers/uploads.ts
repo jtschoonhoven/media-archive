@@ -36,7 +36,6 @@ export class UploadModel {
     readonly directoryPath: string;
     readonly extension: string;
     readonly nameUnsafe: string;
-    readonly s3UploadPolicy: string;
     readonly s3UploadUrl: string;
     readonly status: string;
     readonly file?: File;
@@ -47,9 +46,21 @@ export class UploadModel {
     readonly isUploaded?: boolean = false;
     readonly isDeleting?: boolean = false;
     readonly isDeleted?: boolean = false;
+    readonly s3UploadPolicy: {
+        'key': string,
+        'Content-Type': string,
+        'Content-Disposition': string,
+        'success_action_status': string,
+        'bucket': string,
+        'X-Amz-Algorithm': string,
+        'X-Amz-Credential': string,
+        'X-Amz-Date': string,
+        'Policy': string;
+        'X-Amz-Signature': string;
+    };
 
     constructor(uploadInfo: UploadModel) {
-        Object.assign(self, uploadInfo);
+        Object.assign(this, uploadInfo);
     }
 
     /*

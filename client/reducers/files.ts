@@ -26,17 +26,22 @@ export class FileModel {
     readonly uuid: string;
     readonly name: string;
     readonly size: number;
-    readonly error: string;
-    readonly isDeleting: boolean;
-    readonly isDeleted: boolean;
+    readonly isDeleting?: boolean = false;
+    readonly isDeleted?: boolean = false;
+    readonly error?: string = null;
     readonly _dispatch: Dispatch;
 
     constructor(file: FileModel) {
         Object.assign(this, file);
     }
 
-    delete() {
+    delete?(): Action {
         return this._dispatch(filesDelete(this, this._dispatch));
+    }
+
+    update?(update: Partial<FileModel>): FileModel {
+        const newProps = Object.assign({}, this, update);
+        return new FileModel(newProps);
     }
 }
 
@@ -45,17 +50,17 @@ export interface FilesState {
     readonly isFetching: boolean;
     readonly hasFetched: boolean;
     readonly errors: ReadonlyArray<string>;
-    readonly directoriesByName: { [dirName: string]: DirectoryModel };
-    readonly filesById: { [fileId: number]: FileModel };
+    readonly directoriesByName: Map<string, DirectoryModel>;
+    readonly filesById: Map<number, FileModel>;
 }
 
 const INITIAL_STATE: FilesState = {
-    path: '',
+    path: null,
     isFetching: false,
     hasFetched: false,
     errors: [],
-    directoriesByName: {},
-    filesById: {},
+    directoriesByName: new Map<string, DirectoryModel>(),
+    filesById: new Map<number, FileModel>(),
 };
 
 

@@ -48,16 +48,26 @@ function mapDispatchToProps(dispatch: Dispatch): { actions: FilesActions } {
     return {
         actions: {
             // load directory contents
-            load: (path) => {
+            load: (path: string) => {
                 dispatch(load(path, dispatch));
             },
-            upload: (path, fileList) => {
+            upload: (path: string, fileList: File[]) => {
                 dispatch(upload(path, fileList, dispatch));
             },
-            showConfirmModal: (title, message, onConfirm) => {
+            showConfirmModal: (
+                title: string,
+                message: React.ReactElement<any>,
+                onConfirm: (string) => void,
+            ) => {
                 dispatch(showConfirmModal(title, message, onConfirm, dispatch));
             },
-            showTextModal: (title, message, placeholder, onConfirm, validator) => {
+            showTextModal: (
+                title: string,
+                message: React.ReactElement<any>,
+                placeholder: string,
+                onConfirm: (string) => void,
+                validator: (string) => void,
+            ) => {
                 dispatch(
                     showTextModal(title, message, placeholder, onConfirm, validator, dispatch),
                 );

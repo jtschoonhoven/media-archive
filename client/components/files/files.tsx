@@ -145,7 +145,7 @@ export default class ArchiveFiles extends React.Component<Props> {
 
         // populate uploadsListByDirname
         // needed in case a file is uploaded to a new directory not included in filesState
-        uploadsState.uploadsById.forEach((uploadModel) => {
+        Object.values(uploadsState.uploadsById).forEach((uploadModel) => {
             if (!uploadModel.directoryPath.startsWith(filesState.path)) {
                 return; // check that upload model is in same path as current dir
             }
@@ -204,7 +204,7 @@ export default class ArchiveFiles extends React.Component<Props> {
         const filesState = this.props.filesState;
         const uploadsState = this.props.uploadsState;
 
-        uploadsState.uploadsById.forEach((uploadModel) => {
+        Object.values(uploadsState.uploadsById).forEach((uploadModel) => {
             if (uploadModel.isDeleted) {
                 return;
             }

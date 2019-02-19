@@ -7,7 +7,7 @@
 interface Config {
     NODE_ENV: string;
     CONSTANTS: {
-        DIRECTORY_CONTENT_TYPES: string[];
+        DIRECTORY_CONTENT_TYPES: { [propName: string]: string};
         MICROSOFT_FILE_EXTENSIONS: string[];
         FILE_EXT_WHITELIST: { [propName: string]: { type: string, mimeType: string } };
         MEDIA_TYPES: { [propName: string]: string };
