@@ -3,10 +3,10 @@ import './style.scss';
 import * as React from 'react';
 import * as History from 'history';
 import { Dispatch } from 'redux';
-import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
+import { Link } from 'react-router-dom';
 
 import Alert from '../common/alert';
-import Breadcrumbs from '../common/breadcrumbs.jsx';
+import Breadcrumbs from '../common/breadcrumbs';
 import Image from './image.jsx';
 import { DetailsState } from '../../reducers/detail';
 import { DetailActions } from '../../containers/detail';

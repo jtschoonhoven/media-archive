@@ -1,14 +1,15 @@
-import React from 'react';
+import * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import Alert from '../common/alert.tsx';
+import Alert from '../common/alert';
 import SETTINGS from '../../settings';
+import { UploadModel } from '../../reducers/uploads';
 
 const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
 const FAILURE_STATES = [UPLOAD_STATUSES.ABORTED, UPLOAD_STATUSES.FAILURE];
 
 
-export default function Upload(uploadModel) {
+export default function Upload(uploadModel: UploadModel): React.ReactElement<HTMLDivElement> {
     // defaults apply to "pending" states (not success or failure)
     let isAnimated = true;
     let isStriped = true;
@@ -26,7 +27,7 @@ export default function Upload(uploadModel) {
         isAnimated = false;
         isStriped = false;
         styleName = 'success';
-        ActionLink = '';
+        ActionLink = <span />;
     }
 
     // progress bars are not animated on failure, show "retry" option
@@ -57,11 +58,10 @@ export default function Upload(uploadModel) {
                             `}
                             style={{ width: `${uploadModel.uploadPercent}%` }}
                             aria-valuenow={ uploadModel.uploadPercent }
-                            aria-valuemin="0"
-                            aria-valuemax="100"
+                            aria-valuemin={ 0 }
+                            aria-valuemax={ 100 }
                             role="progressbar"
-                        >
-                        </div>
+                        />
                     </div>
                 </div>
                 {/* status */}

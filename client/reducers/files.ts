@@ -72,11 +72,11 @@ export default function filesReducer(state = INITIAL_STATE, action: Action): Fil
         case FILES_LOAD: {
             const update = {
                 isFetching: true,
-                directoriesByName: {}, // clear dirs from previous state
+                directoriesByName: new Map(), // clear dirs from previous state
                 filesById: {}, // clear files from previous state
                 errors: ([] as ReadonlyArray<string>), // clear errors from previous state
             };
-            return Object.assign(state, update, payload);
+            return Object.assign({}, state, update, payload);
         }
 
         // when client has received the list of files and directories
@@ -94,19 +94,19 @@ export default function filesReducer(state = INITIAL_STATE, action: Action): Fil
                 hasFetched: true,
                 errors: ([] as ReadonlyArray<string>),
             };
-            return Object.assign(state, update);
+            return Object.assign({}, state, update, payload);
         }
 
         // client requests to delete file by ID
         case FILES_DELETE: {
             const filesById = Object.assign(state.filesById, payload['filesById']);
-            return Object.assign(state, { filesById });
+            return Object.assign({}, state, { filesById });
         }
 
         // server acknowledges file has been deleted
         case FILES_DELETE_COMPLETE: {
             const filesById = Object.assign(state.filesById, payload['filesById']);
-            return Object.assign(state, { filesById });
+            return Object.assign({}, state, { filesById });
         }
 
         default: {

@@ -4,11 +4,10 @@ import * as React from 'react';
 import _ from 'lodash';
 import queryString from 'query-string';
 import { DispatchProp } from 'react-redux';
-import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
-import { Record } from 'immutable';
+import { Link } from 'react-router-dom';
 
 import Alert from '../common/alert';
-import SearchResult from './result.jsx';
+import SearchResult from './result';
 import { FiltersModel, SearchState } from '../../reducers/search';
 import { SearchActions } from '../../containers/search';
 import { Action } from '../../types';

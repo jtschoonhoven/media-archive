@@ -5,14 +5,14 @@ import * as React from 'react';
 import urlJoin from 'url-join';
 import { Link } from 'react-router-dom';
 
-import Breadcrumbs from '../common/breadcrumbs.jsx';
-import Directory from './directory.jsx';
-import File from './file.jsx';
+import Breadcrumbs from '../common/breadcrumbs';
+import Directory from './directory';
+import File from './file';
 import SETTINGS from '../../settings';
-import Upload from './upload.jsx';
+import Upload from './upload';
 import Alert from '../common/alert';
 import { DirectoryModel, FileModel, FilesState } from '../../reducers/files';
-import { UploadsState } from '../../reducers/uploads';
+import { UploadsState, UploadModel } from '../../reducers/uploads';
 import { FilesActions } from '../../containers/files';
 
 const VALID_EXTENSIONS = Object.keys(SETTINGS.FILE_EXT_WHITELIST);
@@ -132,20 +132,20 @@ export default class ArchiveFiles extends React.Component<Props> {
         return pathArray.map((dirname, idx) => Breadcrumbs(pathArray, dirname, idx));
     }
 
-    getDirectories(pathArray) {
+    getDirectories(pathArray: ReadonlyArray<string>) {
         const Directories = [];
-        const uploadsListByDirname = {};
+        const uploadsListByDirname: {[dirname: string]: UploadModel[]} = {};
         const filesState = this.props.filesState;
         const uploadsState = this.props.uploadsState;
 
         // create a Directory component for each directory in filesState
-        Object.values(filesState.directoriesByName).forEach((directoryModel) => {
+        filesState.directoriesByName.forEach((directoryModel: DirectoryModel): void => {
             Directories.push(Directory(directoryModel));
         });
 
         // populate uploadsListByDirname
         // needed in case a file is uploaded to a new directory not included in filesState
-        Object.values(uploadsState.uploadsById).forEach((uploadModel) => {
+        uploadsState.uploadsById.forEach((uploadModel: UploadModel): void => {
             if (!uploadModel.directoryPath.startsWith(filesState.path)) {
                 return; // check that upload model is in same path as current dir
             }

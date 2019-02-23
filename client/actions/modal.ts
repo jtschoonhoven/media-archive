@@ -13,7 +13,7 @@ export const MODAL_HIDE = 'MODAL_HIDE';
  */
 export function showConfirmModal(
     title: string,
-    message: React.ReactElement<any>,
+    message: React.ReactElement<HTMLElement>,
     onConfirm: (string) => void,
     dispatch: Dispatch,
 ): Action {
@@ -35,7 +35,7 @@ export function showConfirmModal(
  */
 export function showTextModal(
     title: string,
-    message: React.ReactElement<any>,
+    message: React.ReactElement<HTMLElement>,
     placeholder: string,
     onConfirm: (string) => void,
     validator: (string) => void,

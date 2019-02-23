@@ -1,14 +1,15 @@
-import React from 'react'; // eslint-disable-line no-unused-vars
-import urlJoin from 'url-join';
-import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
+import React from 'react';
+import { Link } from 'react-router-dom';
+import * as urlJoin from 'url-join';
 
 import SETTINGS from '../../settings';
+import { SearchResult } from '../../reducers/search';
 
 const MEDIA_TYPES = SETTINGS.MEDIA_TYPES;
 const API_URLS = SETTINGS.API_URLS;
 
 
-function getImgUrl(resultModel) {
+function getImgUrl(resultModel: SearchResult): string {
     if (resultModel.thumbnailUrl) {
         return resultModel.thumbnailUrl;
     }
@@ -18,7 +19,9 @@ function getImgUrl(resultModel) {
     return urlJoin(API_URLS.THUMBNAILS, resultModel.extension);
 }
 
-export default function SearchResult(resultModel) {
+export default function SearchResult(
+    resultModel: SearchResult,
+): React.ReactElement<HTMLDivElement> {
     return (
         <div id="archive-search-result" key={resultModel.id}>
             {/* img */}

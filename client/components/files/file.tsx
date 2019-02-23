@@ -1,10 +1,14 @@
-import React from 'react'; // eslint-disable-line no-unused-vars
-import { Link } from 'react-router-dom'; // eslint-disable-line no-unused-vars
+import * as React from 'react';
+import { Link } from 'react-router-dom';
 
-import Alert from '../common/alert.tsx';
+import Alert from '../common/alert';
+import { FileModel } from '../../reducers/files';
 
 
-export default (fileModel, showTextModal) => {
+export default (
+    fileModel: FileModel,
+    showTextModal,
+): React.ReactElement<HTMLDivElement> => {
     const confirmDeleteTitle = `Delete file "${fileModel.name}"?`;
     const confirmDeleteMsg = 'Are you sure? This cannot be undone.';
     const onConfirmDelete = fileModel.delete.bind(fileModel);
