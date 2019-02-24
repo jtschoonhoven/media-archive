@@ -19,17 +19,11 @@ export default function ClientRouter() {
     }
     return (
         <BrowserRouter>
-            {
-                // make TS happy by only setting reduxDevTools if it's defined
-                typeof reduxDevTools === 'undefined' ?
-                    <ArchiveApp
-                        reduxDevTools={ reduxDevTools }
-                        initialState={ window.INITIAL_STATE }
-                        window={ window }
-                    />
-                // else don't set the prop
-                : <ArchiveApp initialState={ window.INITIAL_STATE } window={ window } />
-            }
+            <ArchiveApp
+                reduxDevTools={ reduxDevTools }
+                initialState={ window.INITIAL_STATE }
+                window={ window }
+            />
         </BrowserRouter>
     );
 }
