@@ -73,7 +73,7 @@ export default function filesReducer(state = INITIAL_STATE, action: Action): Fil
             const update = {
                 isFetching: true,
                 directoriesByName: new Map(), // clear dirs from previous state
-                filesById: {}, // clear files from previous state
+                filesById: new Map(), // clear files from previous state
                 errors: ([] as ReadonlyArray<string>), // clear errors from previous state
             };
             return Object.assign({}, state, update, payload);
@@ -87,12 +87,12 @@ export default function filesReducer(state = INITIAL_STATE, action: Action): Fil
                     hasFetched: true,
                     errors: [payload.message],
                 };
-                return Object.assign(state, update);
+                return Object.assign({}, state, update);
             }
             const update = {
                 isFetching: false,
                 hasFetched: true,
-                errors: ([] as ReadonlyArray<string>),
+                errors: ([] as ReadonlyArray<string>), // clear errors
             };
             return Object.assign({}, state, update, payload);
         }

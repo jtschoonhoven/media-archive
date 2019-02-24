@@ -2,17 +2,19 @@ import { Action } from '../types';
 import { DETAILS_FETCH_COMPLETE, DETAILS_FETCH_START } from '../actions/detail';
 
 export class DetailsModel {
-    constructor(
-        public readonly title: string = '',
-        public readonly description: string = '',
-        public readonly filename: string = '',
-        public readonly path: string = '',
-        public readonly type: string = '',
-        public readonly url: string = '',
-        public readonly tags: string = '',
-        public readonly uploadStatus: string = '',
-        public readonly extension: string = '',
-    ) {}
+    readonly title: string = '';
+    readonly description: string = '';
+    readonly filename: string = '';
+    readonly path: string = '';
+    readonly type: string = '';
+    readonly url: string = '';
+    readonly tags: string = '';
+    readonly uploadStatus: string = '';
+    readonly extension: string = '';
+
+    constructor(data: Partial<DetailsModel> = {}) {
+        Object.assign(this, data);
+    }
 }
 
 export interface DetailsState {

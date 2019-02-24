@@ -35,7 +35,7 @@ export function showConfirmModal(
  */
 export function showTextModal(
     title: string,
-    message: React.ReactElement<HTMLElement>,
+    message: React.ReactElement<HTMLElement> | string,
     placeholder: string,
     onConfirm: (string) => void,
     validator: (string) => void,

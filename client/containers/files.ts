@@ -28,12 +28,12 @@ export interface FilesActions {
     upload: (path: string, fileList: File[]) => void;
     showConfirmModal: (
         title: string,
-        message: React.ReactElement<any>,
+        message: React.ReactElement<HTMLElement> | string,
         onConfirm: (value: string) => void,
     ) => void;
     showTextModal: (
         title: string,
-        message: React.ReactElement<any>,
+        message: React.ReactElement<HTMLElement> | string,
         placeholder: string,
         onConfirm: (value: string) => void,
         validator: (value: string) => void,

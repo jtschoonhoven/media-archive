@@ -187,7 +187,7 @@ export default class ArchiveFiles extends React.Component<Props> {
         const uploadsState = this.props.uploadsState;
         const showConfirmModal = this.props.actions.showConfirmModal;
 
-        Object.values(filesState.filesById).forEach((fileModel: FileModel) => {
+        filesState.filesById.forEach((fileModel: FileModel) => {
             if (fileModel.isDeleted) {
                 return;
             }
@@ -204,7 +204,7 @@ export default class ArchiveFiles extends React.Component<Props> {
         const filesState = this.props.filesState;
         const uploadsState = this.props.uploadsState;
 
-        Object.values(uploadsState.uploadsById).forEach((uploadModel) => {
+        uploadsState.uploadsById.forEach((uploadModel) => {
             if (uploadModel.isDeleted) {
                 return;
             }

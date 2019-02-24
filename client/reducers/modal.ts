@@ -20,7 +20,7 @@ export interface ModalTextConfig {
     type: 'text';
     title: string;
     placeholder: string;
-    message: React.ReactElement<any>;
+    message: React.ReactElement<HTMLElement> | string;
     onClose: () => void;
     onConfirm: (string) => void;
     validator: (string) => void;

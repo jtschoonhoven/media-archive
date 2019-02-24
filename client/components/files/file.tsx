@@ -7,7 +7,11 @@ import { FileModel } from '../../reducers/files';
 
 export default (
     fileModel: FileModel,
-    showTextModal,
+    showTextModal: (
+        confirmDeleteTitle: string,
+        confirmDeleteMsg: React.ReactElement<HTMLElement> | string,
+        onConfirmDelete: () => void,
+    ) => void,
 ): React.ReactElement<HTMLDivElement> => {
     const confirmDeleteTitle = `Delete file "${fileModel.name}"?`;
     const confirmDeleteMsg = 'Are you sure? This cannot be undone.';
