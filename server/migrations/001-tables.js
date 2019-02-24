@@ -73,16 +73,8 @@ exports.up = async (db) => {
             media_tsvector TSVECTOR
         );
     `);
-
-    /*
-     * MEDIA_UPLOADS_PENDING: clone of MEDIA, stores files with pending uploads that might fail.
-     */
-    // await db.run(`
-    //     CREATE TABLE media_uploads_pending (INHERITS media);
-    // `);
 };
 
 exports.down = async (db) => {
-    // await db.run('DROP TABLE IF EXISTS media_uploads_pending');
     await db.run('DROP TABLE IF EXISTS media;');
 };
