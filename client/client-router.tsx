@@ -9,7 +9,7 @@ import { Window } from './types';
 declare const window: Window;
 
 
-export default function ClientRouter() {
+export default function ClientRouter(): React.ReactElement<BrowserRouter> {
     // include redux devtools in development if available
     let reduxDevTools;
     if (SETTINGS.NODE_ENV === 'development') {
