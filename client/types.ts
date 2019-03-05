@@ -5,7 +5,8 @@ import { UploadsState } from './reducers/uploads';
 import { ModalState } from './reducers/modal';
 import { UserState } from './reducers/user';
 
-export type Dict = { [key: string]: any };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface Dict { [key: string]: any }
 
 export interface Action<Payload = Dict, Meta = Dict> {
     readonly type: string;
@@ -23,8 +24,7 @@ export interface State {
     readonly user: UserState;
 }
 
-export interface Window {
+export interface ArchiveWindow extends Window {
     readonly __REDUX_DEVTOOLS_EXTENSION__?: () => void;
     readonly INITIAL_STATE: State;
-    [propName: string]: any; // tslint:disable-line no-any (window is impossible to type)
 }

@@ -9,7 +9,12 @@ interface Config {
     CONSTANTS: {
         DIRECTORY_CONTENT_TYPES: { [propName: string]: string};
         MICROSOFT_FILE_EXTENSIONS: string[];
-        FILE_EXT_WHITELIST: { [propName: string]: { type: string, mimeType: string } };
+        FILE_EXT_WHITELIST: {
+            [propName: string]: {
+                type: string;
+                mimeType: string;
+            };
+        };
         MEDIA_TYPES: { [propName: string]: string };
         UPLOAD_STATUSES: { [propName: string]: string };
         API_URLS: { [propName: string]: string };

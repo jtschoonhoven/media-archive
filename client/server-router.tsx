@@ -14,10 +14,8 @@ interface Props {
  * This is the main entrypoint for the *server-rendered* React frontend.
  */
 class ServerRouter extends React.Component<Props> {
-    render() {
-        const location = this.props.location;
-        const context = this.props.context;
-        const initialState = this.props.initialState;
+    render(): React.ReactElement<StaticRouter> {
+        const { location, context, initialState } = this.props;
         return (
             <StaticRouter location={ location } context={ context }>
                 <ArchiveApp initialState={ initialState } />
