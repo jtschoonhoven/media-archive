@@ -8,7 +8,7 @@ import { Route, Switch } from 'react-router-dom';
 import reducer from '../reducers';
 import RestrictedRoute from './common/restricted';
 import SETTINGS from '../settings';
-import { Action, State, Window } from '../types';
+import { Action, State } from '../types';
 import {
     ArchiveDetailContainer,
     ArchiveFilesContainer,

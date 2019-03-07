@@ -23,8 +23,3 @@ export interface State {
     readonly uploads: UploadsState;
     readonly user: UserState;
 }
-
-export interface ArchiveWindow extends Window {
-    readonly __REDUX_DEVTOOLS_EXTENSION__?: () => void;
-    readonly INITIAL_STATE: State;
-}

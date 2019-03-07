@@ -2,7 +2,7 @@ import * as React from 'react';
 
 
 class ArchivePrivacyPolicy extends React.Component {
-    render() {
+    render(): React.ReactElement<HTMLDivElement> {
         return (
             <div id="archive-privacy">
                 <h1>Privacy Policy</h1>
@@ -39,7 +39,8 @@ class ArchivePrivacyPolicy extends React.Component {
                     Data"). Personally identifiable information may include, but is not limited to:
                 </p>
                 <ul>
-                    <li>Email address</li><li>Cookies and Usage Data</li>
+                    <li>Email address</li>
+                    <li>Cookies and Usage Data</li>
                 </ul>
 
                 <h4>Usage Data</h4>

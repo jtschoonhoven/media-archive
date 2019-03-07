@@ -1,6 +1,5 @@
 import { Dispatch } from 'redux';
 
-import SETTINGS from '../settings';
 import {
     uploadCancel,
     uploadFileToS3,
@@ -16,8 +15,6 @@ import {
     UploadsMap,
 } from '../actions/uploads';
 import { Action, Dict } from '../types';
-
-const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
 
 export interface UploadsState {
     readonly errors: string[];
@@ -47,14 +44,14 @@ export class UploadModel {
     readonly isDeleting?: boolean = false;
     readonly isDeleted?: boolean = false;
     readonly s3UploadPolicy: {
-        'key': string,
-        'Content-Type': string,
-        'Content-Disposition': string,
-        'success_action_status': string,
-        'bucket': string,
-        'X-Amz-Algorithm': string,
-        'X-Amz-Credential': string,
-        'X-Amz-Date': string,
+        'key': string;
+        'Content-Type': string;
+        'Content-Disposition': string;
+        'success_action_status': string;
+        'bucket': string;
+        'X-Amz-Algorithm': string;
+        'X-Amz-Credential': string;
+        'X-Amz-Date': string;
         'Policy': string;
         'X-Amz-Signature': string;
     };

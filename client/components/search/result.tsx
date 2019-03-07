@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import * as urlJoin from 'url-join';
+import urlJoin from 'url-join';
 
 import SETTINGS from '../../settings';
 import { SearchResult } from '../../reducers/search';

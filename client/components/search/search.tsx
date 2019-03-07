@@ -3,8 +3,6 @@ import './style.scss';
 import * as React from 'react';
 import _ from 'lodash';
 import queryString from 'query-string';
-import { DispatchProp } from 'react-redux';
-import { Link } from 'react-router-dom';
 
 import Alert from '../common/alert';
 import SearchResult from './result';

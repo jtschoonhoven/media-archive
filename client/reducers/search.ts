@@ -85,7 +85,7 @@ const INITIAL_STATE = {
     isFetching: false,
 };
 
-export default function searchReducer(state = INITIAL_STATE, action) {
+export default function searchReducer(state = INITIAL_STATE, action): SearchState {
     const payload = action.payload;
 
     switch (action.type) {

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as urlJoin from 'url-join';
+import urlJoin from 'url-join';
 import { Link } from 'react-router-dom';
 
 const ROOT_NAME = 'root';
@@ -14,9 +14,7 @@ export default (
     const path = pathArray.slice(0, idx + 1).join('/');
     return (
         <li className={ `breadcrumb-item ${isLast ? 'active' : ''}` } key={ idx }>
-            { isLast ? dirname || ROOT_NAME : <Link to={ urlJoin('/files', path) }>
-                { dirname || ROOT_NAME }
-            </Link> }
+            { isLast ? dirname || ROOT_NAME : <Link to={ urlJoin('/files', path) }>{ dirname || ROOT_NAME }</Link> }
         </li>
     );
 };
