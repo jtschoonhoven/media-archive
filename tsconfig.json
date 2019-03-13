@@ -2,12 +2,14 @@
     "compilerOptions": {
         "outDir": "./dist/",
         "module": "ES6",
+        "target": "es2017",
         "lib": ["es2017", "dom"],
         "moduleResolution": "node",
         "removeComments": false,
         "sourceMap": true,
         "jsx": "react",
         "allowSyntheticDefaultImports": true,
+        "downlevelIteration": true,
         "allowJs": true
     },
     "include": ["src/**/*"],

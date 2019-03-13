@@ -13,7 +13,12 @@ export class DirectoryModel {
     readonly name: string;
     readonly path: string;
     readonly numEntries: number;
+    readonly id?: number;
+    readonly uuid?: string;
+    readonly size?: number;
     readonly error?: string;
+    readonly entryType?: string;
+    readonly mediaType?: string;
     readonly _dispatch?: Dispatch;
 
     constructor(directory: DirectoryModel) {

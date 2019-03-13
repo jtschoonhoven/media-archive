@@ -164,7 +164,6 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
         const s3SignedPost = await s3Service.getPresignedPost(fileObj.s3Url, fileObj.name); // eslint-disable-line no-await-in-loop, max-len
         fileObj.s3UploadUrl = s3SignedPost.url;
         fileObj.s3UploadPolicy = s3SignedPost.fields;
-        console.log(fileObj.s3UploadPolicy);
     }
     return { uploads: rows };
 };

@@ -142,7 +142,7 @@ export default function uploadsReducer(state = initialState, action: Action): Up
                 return Object.assign({}, state, update);
             }
             const update = { isRegisteringWithServer: false };
-            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
+            const uploadsById = new Map([...state.uploadsById, ...(payload as Dict).uploadsById]);
             return Object.assign({}, state, update, { uploadsById });
         }
 
@@ -151,7 +151,7 @@ export default function uploadsReducer(state = initialState, action: Action): Up
                 const errors = state.errors.concat(payload.message);
                 return Object.assign({}, state, errors);
             }
-            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
+            const uploadsById = new Map([...state.uploadsById, ...(payload as Dict).uploadsById]);
             return Object.assign({}, state, { uploadsById });
         }
 
@@ -160,34 +160,34 @@ export default function uploadsReducer(state = initialState, action: Action): Up
                 const errors = state.errors.concat(payload.message);
                 return Object.assign({}, state, errors);
             }
-            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
+            const uploadsById = new Map([...state.uploadsById, ...(payload as Dict).uploadsById]);
             return Object.assign({}, state, { uploadsById });
         }
 
         case UPLOAD_FILE_TO_S3_FINISHED: {
-            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
+            const uploadsById = new Map([...state.uploadsById, ...(payload as Dict).uploadsById]);
             return Object.assign({}, state, { uploadsById });
         }
 
         case UPLOAD_FILE_COMPLETE: {
-            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
+            const uploadsById = new Map([...state.uploadsById, ...(payload as Dict).uploadsById]);
             return Object.assign({}, state, { uploadsById });
         }
 
         case UPLOAD_FILE_TO_S3_RETRY: {
-            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
+            const uploadsById = new Map([...state.uploadsById, ...(payload as Dict).uploadsById]);
             return Object.assign({}, state, { uploadsById });
         }
 
         // client requests to delete file by ID
         case UPLOAD_FILE_CANCEL: {
-            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
+            const uploadsById = new Map([...state.uploadsById, ...(payload as Dict).uploadsById]);
             return Object.assign({}, state, { uploadsById });
         }
 
         // server acknowledges file has been deleted
         case UPLOAD_FILE_CANCEL_COMPLETE: {
-            const uploadsById = Object.assign({}, state.uploadsById, (payload as Dict).uploadsById);
+            const uploadsById = new Map([...state.uploadsById, ...(payload as Dict).uploadsById]);
             return Object.assign({}, state, { uploadsById });
         }
 

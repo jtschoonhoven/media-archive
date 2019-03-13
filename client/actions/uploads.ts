@@ -66,7 +66,6 @@ function _uploadBatchSavedToServer(
     fileList?: File[],
     dispatch?: Dispatch,
 ): Action {
-    debugger;
     if (loadResponse.error) {
         return {
             type: UPLOAD_BATCH_SAVED_TO_SERVER,
@@ -172,7 +171,7 @@ export function uploadFileToS3(
 
     return {
         type: UPLOAD_FILE_TO_S3_START,
-        payload: { uploadsById: ([[uploadModel.id, uploadModel]]) },
+        payload: { uploadsById: new Map([[uploadModel.id, uploadModel]]) },
         meta: { uploadPromise }, // used by _uploadBatchSavedToServer to manage concurrency
     };
 }

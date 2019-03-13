@@ -38,15 +38,15 @@ export default class ArchiveFiles extends React.Component<Props> {
         this.showCreateDirectoryModal = this.showCreateDirectoryModal.bind(this);
     }
 
-    componentDidMount() {
+    componentDidMount(): void {
         this.loadDir();
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(): void {
         this.loadDir();
     }
 
-    render() {
+    render(): React.ReactElement<HTMLDivElement> {
         const currentUrl = this.props.location.pathname;
         const pathArray = currentUrl.replace('/files', '').split('/').filter(item => item);
         const isRootDir = !pathArray.length;
