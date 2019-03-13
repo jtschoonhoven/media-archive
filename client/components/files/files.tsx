@@ -156,7 +156,7 @@ export default class ArchiveFiles extends React.Component<Props> {
                 return; // check that upload model has not been deleted
             }
             const dirname = uploadModel.pathArray[pathArray.length];
-            if (_.has(filesState.directoriesByName, dirname)) {
+            if (filesState.directoriesByName.get(dirname)) {
                 return; // check that upload directory is not already included in directoriesByName
             }
             if (uploadsListByDirname[dirname]) {
