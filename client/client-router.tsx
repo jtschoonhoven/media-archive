@@ -37,3 +37,19 @@ export default function ClientRouter(): React.ReactElement<BrowserRouter> {
 // attach event listeners to server-rendered HTML
 const CONTENT_ROOT = document.getElementById('archive-main');
 ReactDom.hydrate(<ClientRouter />, CONTENT_ROOT);
+
+
+/*
+ * Hack Redux DevTools to print contents of native Map object.
+ * https://github.com/zalmoxisus/redux-devtools-extension/issues/124#issuecomment-221972997
+ */
+if (SETTINGS.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-extend-native, @typescript-eslint/no-explicit-any, func-names
+    (Map.prototype as any).toJSON = function () {
+        const result = {};
+        this.forEach((value, key) => {
+            result[key] = value;
+        });
+        return result;
+    };
+}
