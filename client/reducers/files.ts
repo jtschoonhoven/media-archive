@@ -7,7 +7,7 @@ import {
     FILES_DELETE,
     FILES_DELETE_COMPLETE,
 } from '../actions/files';
-import { Action } from '../types';
+import { Action, Dict } from '../types';
 
 export class DirectoryModel {
     readonly name: string;
@@ -104,13 +104,13 @@ export default function filesReducer(state = INITIAL_STATE, action: Action): Fil
 
         // client requests to delete file by ID
         case FILES_DELETE: {
-            const filesById = Object.assign(state.filesById, payload['filesById']);
+            const filesById = new Map([...state.filesById, ...(payload as Dict).filesById]);
             return Object.assign({}, state, { filesById });
         }
 
         // server acknowledges file has been deleted
         case FILES_DELETE_COMPLETE: {
-            const filesById = Object.assign(state.filesById, payload['filesById']);
+            const filesById = new Map([...state.filesById, ...(payload as Dict).filesById]);
             return Object.assign({}, state, { filesById });
         }
 

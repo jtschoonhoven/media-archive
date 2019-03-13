@@ -106,7 +106,7 @@ export function filesDelete(fileModel: FileModel, dispatch: Dispatch): Action {
 
     return {
         type: FILES_DELETE,
-        payload: { filesById: new Map<number, FileModel>([[fileModel.id, fileModel]]) },
+        payload: { filesById: new Map([[fileModel.id, fileModel]]) },
     };
 }
 
