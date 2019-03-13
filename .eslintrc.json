@@ -19,6 +19,7 @@
         }
     ],
     "rules": {
+        "@typescript-eslint/explicit-function-return-type": 0,
         "@typescript-eslint/explicit-member-accessibility": 0,
         "@typescript-eslint/no-empty-interface": 0,
         "@typescript-eslint/no-use-before-define": 0,
@@ -29,6 +30,9 @@
         "default-case": 0,
         "import/prefer-default-export": 0,
         "indent": ["error", 4, {"SwitchCase": 1, "ignoredNodes": ["* > TemplateLiteral > *"]}],
+        "jsx-a11y/accessible-emoji": 0,
+        "jsx-a11y/label-has-associated-control": 0,
+        "jsx-a11y/label-has-for": 0,
         "lines-between-class-members": 0,
         "no-console": 1,
         "no-debugger": 1,
@@ -42,13 +46,17 @@
         "prefer-arrow-callback": 0,
         "prefer-destructuring": ["error", {"array": false, "object": false}],
         "quote-props": ["error", "consistent"],
+        "react/button-has-type": 0,
         "react/destructuring-assignment": 0,
+        "react/jsx-boolean-value": 0,
         "react/jsx-curly-spacing": [0, {"when": "always"}],
         "react/jsx-filename-extension": [2, {"extensions": [".jsx", ".tsx"]}],
         "react/jsx-indent": [2, 4, {"checkAttributes": true}],
         "react/jsx-indent-props": [2, 4],
+        "react/jsx-one-expression-per-line": 0,
         "react/no-unescaped-entities": 0,
-        "react/prefer-stateless-function": 0
+        "react/prefer-stateless-function": 0,
+        "react/sort-comp": 0
     },
     "settings": {
         "import/resolver": {
