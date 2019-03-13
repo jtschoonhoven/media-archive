@@ -1,26 +1,71 @@
 {
-    "extends": ["airbnb-base"],
-    "env": { "browser": true },
     "parser": "babel-eslint",
-    "globals": { "_CONFIG": false },
+    "extends": ["airbnb", "plugin:@typescript-eslint/recommended"],
+    "env": {"node": true},
+    "globals": {"_CONFIG": false},
+    "overrides": [
+        {
+            "env": {"browser": true},
+            "files": ["*.ts", "*.tsx"],
+            "parser": "@typescript-eslint/parser",
+            "plugins": ["@typescript-eslint"],
+            "parserOptions": {
+                "ecmaVersion": 6,
+                "ecmaFeatures": {"jsx": true},
+                "sourceType": "module",
+                "project": "./tsconfig.json",
+                "tsconfigRootDir": "."
+            }
+        }
+    ],
     "rules": {
-        "arrow-body-style": [0],
+        "@typescript-eslint/explicit-function-return-type": 0,
+        "@typescript-eslint/explicit-member-accessibility": 0,
+        "@typescript-eslint/no-empty-interface": 0,
+        "@typescript-eslint/no-use-before-define": 0,
+        "@typescript-eslint/no-var-requires": 0,
+        "arrow-body-style": 0,
         "brace-style": ["error", "stroustrup"],
-        "class-methods-use-this": [0],
-        "default-case": [0],
+        "class-methods-use-this": 0,
+        "default-case": 0,
+        "import/prefer-default-export": 0,
         "indent": ["error", 4, {"SwitchCase": 1, "ignoredNodes": ["* > TemplateLiteral > *"]}],
-        "no-console": [0],
-        "no-debugger": [1],
-        "no-new": [0],
-        "no-param-reassign": [0],
-        "no-undef": [1],
-        "no-underscore-dangle": [0],
-        "no-unused-vars": [1],
-        "no-use-before-define": [0],
-        "object-curly-newline": [0],
-        "prefer-arrow-callback": [0],
-        "import/prefer-default-export": [0],
+        "jsx-a11y/accessible-emoji": 0,
+        "jsx-a11y/label-has-associated-control": 0,
+        "jsx-a11y/label-has-for": 0,
+        "lines-between-class-members": 0,
+        "no-console": 1,
+        "no-debugger": 1,
+        "no-new": 0,
+        "no-param-reassign": 0,
+        "no-undef": 1,
+        "no-underscore-dangle": 0,
+        "no-unused-vars": 1,
+        "no-use-before-define": 0,
+        "object-curly-newline": 0,
+        "prefer-arrow-callback": 0,
         "prefer-destructuring": ["error", {"array": false, "object": false}],
-        "quote-props": ["error", "consistent"]
+        "quote-props": ["error", "consistent"],
+        "react/button-has-type": 0,
+        "react/destructuring-assignment": 0,
+        "react/jsx-boolean-value": 0,
+        "react/jsx-curly-spacing": [0, {"when": "always"}],
+        "react/jsx-filename-extension": [2, {"extensions": [".jsx", ".tsx"]}],
+        "react/jsx-indent": [2, 4, {"checkAttributes": true}],
+        "react/jsx-indent-props": [2, 4],
+        "react/jsx-one-expression-per-line": 0,
+        "react/no-unescaped-entities": 0,
+        "react/prefer-stateless-function": 0,
+        "react/sort-comp": 0
+    },
+    "settings": {
+        "import/resolver": {
+            "typescript": {
+                "extensions": [".ts", ".tsx"]
+            },
+            "node": {
+                "extensions": [".js", ".jsx"]
+            }
+        }
     }
 }
