@@ -1,6 +1,6 @@
 import React from 'react'; // eslint-disable-line no-unused-vars
 
-import ModalWrapper from './modal-wrapper.jsx';
+import ModalWrapper from './modal-wrapper';
 
 /*
  * Render a confirmation dialog with the given title and message.

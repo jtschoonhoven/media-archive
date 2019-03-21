@@ -1,6 +1,6 @@
-import React from 'react'; // eslint-disable-line no-unused-vars
+import * as React from 'react';
 
-import ModalFooter from './modal-footer.jsx';
+import ModalFooter from './modal-footer';
 
 
 /*
@@ -16,7 +16,7 @@ export default function ModalWrapper(
     return (
         <div
             className="modal show"
-            tabIndex="-1"
+            tabIndex={ -1 }
             role="dialog"
             style={{
                 display: 'block',

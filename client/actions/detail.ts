@@ -10,9 +10,9 @@ export const DETAILS_FETCH_COMPLETE = 'DETAILS_FETCH_COMPLETE';
 interface DetailsResponse {
     readonly error?: string;
     readonly details?: {
-        readonly description:string;
-        readonly extension:string;
-        readonly filename:string;
+        readonly description: string;
+        readonly extension: string;
+        readonly filename: string;
         readonly id: number;
         readonly path: string;
         readonly tags: string;

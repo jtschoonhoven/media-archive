@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as History from 'history';
 
-import ModalConfirm from './modal-confirm.jsx';
+import ModalConfirm from './modal-confirm';
 import ModalTextInput from './modal-text-input';
 import { MODAL_TYPES, ModalState, ModalConfig, ModalTextConfig } from '../../reducers/modal';
 

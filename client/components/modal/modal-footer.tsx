@@ -1,4 +1,4 @@
-import React from 'react'; // eslint-disable-line no-unused-vars
+import React from 'react';
 
 
 /*
@@ -18,7 +18,7 @@ export default function ModalFooter(onClose, onConfirm = null, confirmIsDisabled
                         onConfirm();
                         onClose();
                     }}
-                    disabled = { confirmIsDisabled }
+                    disabled={ confirmIsDisabled }
                 >
                     OK
                 </button>

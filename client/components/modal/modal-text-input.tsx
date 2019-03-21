@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as History from 'history';
 
 import Alert from '../common/alert';
-import ModalWrapper from './modal-wrapper.jsx';
+import ModalWrapper from './modal-wrapper';
 import { ModalTextConfig } from '../../reducers/modal';
 
 interface Props {
