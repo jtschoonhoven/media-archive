@@ -23,7 +23,8 @@ export default (
             <div className="row">
                 {/* filename */}
                 <span className="col-10 col-md-11">
-                    📄 <Link to={`/detail/${fileModel.id}`}>
+                    📄
+                    <Link to={`/detail/${fileModel.id}`}>
                         { fileModel.name }
                     </Link>
                 </span>
@@ -32,7 +33,7 @@ export default (
                     {
                         fileModel.isDeleting
                             ? <span className="text-muted">deleting</span>
-                            : <a href="#" onClick={ onDelete }>delete</a>
+                            : <button onClick={ onDelete }>delete</button>
                     }
                 </div>
             </div>

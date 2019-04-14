@@ -1,4 +1,4 @@
-import React from 'react'; // eslint-disable-line no-unused-vars
+import * as React from 'react';
 import urlJoin from 'url-join';
 
 import SETTINGS from '../../settings';
@@ -63,7 +63,7 @@ function getEmbedTag(url) {
 
 export default (detailsModel) => {
     const extension = detailsModel.extension ? detailsModel.extension.toUpperCase() : 'OTHER';
-    const extensionInfo = FILE_EXT_WHITELIST[extension] || {};
+    const extensionInfo = FILE_EXT_WHITELIST[extension];
     const filename = detailsModel.filename;
     const url = detailsModel.url;
     const type = detailsModel.type;

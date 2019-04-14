@@ -14,7 +14,7 @@ export default function Upload(uploadModel: UploadModel): React.ReactElement<HTM
     let isAnimated = true;
     let isStriped = true;
     let styleName = 'info';
-    let ActionLink = <a href="#" onClick={ () => uploadModel.cancel() }>cancel</a>;
+    let ActionLink = <button onClick={ () => uploadModel.cancel() }>cancel</button>;
 
     if (uploadModel.isDeleting) {
         isAnimated = false;
@@ -34,7 +34,7 @@ export default function Upload(uploadModel: UploadModel): React.ReactElement<HTM
     else if (FAILURE_STATES.includes(uploadModel.status)) {
         isAnimated = false;
         styleName = 'danger';
-        ActionLink = <a href="#" onClick={ () => uploadModel.cancel() }>remove</a>;
+        ActionLink = <button onClick={ () => uploadModel.cancel() }>remove</button>;
     }
 
     return (
@@ -42,7 +42,8 @@ export default function Upload(uploadModel: UploadModel): React.ReactElement<HTM
             <div className="row">
                 {/* filename */}
                 <span className="col-6 col-md-4">
-                    📄 <Link to={ `/detail/${uploadModel.id}` }>
+                    📄
+                    <Link to={ `/detail/${uploadModel.id}` }>
                         { uploadModel.name }
                     </Link>
                 </span>

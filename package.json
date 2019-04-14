@@ -37,6 +37,7 @@
         "express": "^4.16.4",
         "express-session": "^1.15.6",
         "express-winston": "^3.0.1",
+        "formik": "^1.5.2",
         "helmet": "^3.15.0",
         "history": "^4.7.2",
         "joi": "^14.3.1",

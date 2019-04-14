@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom';
 import urlJoin from 'url-join';
 
 import SETTINGS from '../../settings';
-import { SearchResult } from '../../reducers/search';
+import { SearchResult as SearchResultModel } from '../../reducers/search';
 
 const MEDIA_TYPES = SETTINGS.MEDIA_TYPES;
 const API_URLS = SETTINGS.API_URLS;
 
 
-function getImgUrl(resultModel: SearchResult): string {
+function getImgUrl(resultModel: SearchResultModel): string {
     if (resultModel.thumbnailUrl) {
         return resultModel.thumbnailUrl;
     }
@@ -20,7 +20,7 @@ function getImgUrl(resultModel: SearchResult): string {
 }
 
 export default function SearchResult(
-    resultModel: SearchResult,
+    resultModel: SearchResultModel,
 ): React.ReactElement<HTMLDivElement> {
     return (
         <div id="archive-search-result" key={resultModel.id}>

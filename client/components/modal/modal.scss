@@ -1,0 +1,8 @@
+// make modals scrollable on overflow: https://stackoverflow.com/a/25874635/3076390
+.modal-dialog {
+    overflow-y: initial !important
+}
+.modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}

@@ -241,7 +241,6 @@ export default class ArchiveFiles extends React.Component<Props> {
         const showTextModal = this.props.actions.showTextModal;
         const currentUrl = this.props.location.pathname;
         const title = 'Create a New Folder';
-        // const message = `Add your folder to the "${currentUrl.split('/').pop()}" directory.`;
         const message = (
             <span className="text-muted">
                 Note: empty folders are not saved until at least one file is added.

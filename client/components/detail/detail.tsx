@@ -3,11 +3,13 @@ import './style.scss';
 import * as React from 'react';
 import * as History from 'history';
 import { Dispatch } from 'redux';
+import { Form, Field, ErrorMessage } from 'formik';
 import { Link } from 'react-router-dom';
 
 import Alert from '../common/alert';
 import Breadcrumbs from '../common/breadcrumbs';
-import Image from './image.jsx';
+import DetailEditor from './editor';
+import Image from './image';
 import { DetailsState } from '../../reducers/detail';
 import { DetailActions } from '../../containers/detail';
 
@@ -29,6 +31,7 @@ class ArchiveDetail extends React.Component<Props> {
     constructor(props: Props) {
         super(props);
         this.handleClick = this.handleClick.bind(this);
+        this.showEditableModal = this.showEditableModal.bind(this);
     }
 
     componentDidMount() {
@@ -55,6 +58,7 @@ class ArchiveDetail extends React.Component<Props> {
         // FIXME: better behavior while loading
         return (
             <div id="archive-detail">
+
                 {/* breadcrumbs */}
                 <nav id="archive-upload-breadcrumbs" aria-label="breadcrumb">
                     <ol className="breadcrumb">
@@ -64,11 +68,13 @@ class ArchiveDetail extends React.Component<Props> {
                         { BreadCrumbs }
                     </ol>
                 </nav>
+
                 {/* errors */}
                 <div id="archive-detail-errors" className="row">
                     { Errors }
                 </div>
                 <div className="row">
+
                     {/* content */}
                     <div className={ `col-12 ${isExpanded || 'col-lg-6 order-lg-last'}` }>
                         <h2>{ isFetching ? 'loading...' : title }</h2>
@@ -78,20 +84,26 @@ class ArchiveDetail extends React.Component<Props> {
                         }
                         { tags ? <p><strong>Tags: </strong>{ tags }</p> : '' }
                     </div>
+
                     {/* img */}
                     <div className={ `col-12 ${isExpanded || 'col-lg-6'}` }>
                         <div className="archive-detail-image">
                             { Image(detailsModel) }
                         </div>
+
+                        {/* options */}
                         <p>
-                            <a href={ url } download={ filename } target="_blank">
+                            <a href={ url } download={ filename } target="_blank" rel="noopener noreferrer" className="btn btn-link">
                                 Download
                             </a>
-                            {/* options */}
-                            <span className="text-muted d-none d-lg-inline"> • </span>
-                            <a href="#" onClick={ this.handleClick } className="d-none d-lg-inline">
+                            <span className="text-muted d-none d-lg-inline">•</span>
+                            <button onClick={ this.handleClick } className="d-none d-lg-inline btn btn-link">
                                 { isExpanded ? 'View smaller' : 'View larger' }
-                            </a>
+                            </button>
+                            <span className="text-muted d-none d-lg-inline">•</span>
+                            <button onClick={ this.showEditableModal } className="d-none d-lg-inline btn btn-link">
+                                Edit
+                            </button>
                         </p>
                     </div>
                 </div>
@@ -111,6 +123,23 @@ class ArchiveDetail extends React.Component<Props> {
 
     handleClick() {
         this.setState({ isExpanded: !this.state.isExpanded });
+    }
+
+    showEditableModal() {
+        const detailsModel = this.props.detailState.details;
+        const modalTitle = `Editing "${detailsModel.title}"`;
+
+        const getFormikJsx = () => {
+            return <DetailEditor />;
+        };
+
+        this.props.actions.showEditableModal(
+            modalTitle,
+            getFormikJsx,
+            detailsModel,
+            () => ({}),
+            () => null,
+        );
     }
 }
 

@@ -12,7 +12,7 @@ export default function ModalWrapper(
     onClose,
     onConfirm = null,
     confirmIsDisabled = false,
-) {
+): React.ReactElement<HTMLDivElement> {
     return (
         <div
             className="modal show"
