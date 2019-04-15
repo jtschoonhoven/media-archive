@@ -3,7 +3,6 @@ import './style.scss';
 import * as React from 'react';
 import * as History from 'history';
 import { Dispatch } from 'redux';
-import { Form, Field, ErrorMessage } from 'formik';
 import { Link } from 'react-router-dom';
 
 import Alert from '../common/alert';
@@ -136,9 +135,17 @@ class ArchiveDetail extends React.Component<Props> {
         this.props.actions.showEditableModal(
             modalTitle,
             getFormikJsx,
-            detailsModel,
-            () => ({}),
-            () => null,
+            detailsModel, // get initial values from detailsModel
+            () => {
+                // FIXME: add real validation
+                if (Math.random() > 0.5) {
+                    return { tags: 'bad thing!', title: 'nope!', description: 'wtf?!' };
+                }
+                return {};
+            }, // validator
+            () => {
+                console.log('POST TO SERVER HERE');
+            }, // onConfirm
         );
     }
 }

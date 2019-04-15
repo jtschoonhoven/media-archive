@@ -3,6 +3,8 @@ import React from 'react';
 
 /*
  * Return the modal footer that contains confirm and cancel buttons.
+ *
+ * Return `false` from onConfirm to skip onClose handler.
  */
 export default function ModalFooter(onClose, onConfirm = null, confirmIsDisabled = false) {
     if (onConfirm) {
@@ -15,8 +17,11 @@ export default function ModalFooter(onClose, onConfirm = null, confirmIsDisabled
                     type="button"
                     className="btn btn-primary"
                     onClick={ () => {
-                        onConfirm();
-                        onClose();
+                        // return false from onConfirm to skip onClose handler
+                        const success = onConfirm();
+                        if (success !== false) {
+                            onClose();
+                        }
                     }}
                     disabled={ confirmIsDisabled }
                 >
@@ -25,6 +30,7 @@ export default function ModalFooter(onClose, onConfirm = null, confirmIsDisabled
             </div>
         );
     }
+
     return (
         <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={ onClose }>

@@ -17,9 +17,7 @@ export interface DetailActions {
     getFileDetail: (id: number) => void;
     showEditableModal: (
         title: string,
-        formikFormJsx: (
-            { isSubmitting }: { isSubmitting: boolean }
-        ) => React.ReactElement<HTMLFormElement>,
+        formikFormJsx: () => React.ReactElement<HTMLFormElement>,
         initialValues: FormikValues,
         validator: (values: FormikValues) => { [fieldName: string]: string },
         onConfirm: (FormikValues) => void,

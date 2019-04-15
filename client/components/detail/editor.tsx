@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { Form, Field, ErrorMessage } from 'formik';
+import { Field, ErrorMessage } from 'formik';
 
 
 export default () => {
     return (
-        <Form>
+        <div>
             {/* title */}
             <div className="form-group">
                 <label htmlFor="detail-editor-title"><strong>Title:</strong></label>
@@ -32,6 +32,6 @@ export default () => {
                     { errorMessage => <div className="alert alert-danger" role="alert">{ errorMessage }</div> }
                 </ErrorMessage>
             </div>
-        </Form>
+        </div>
     );
 };

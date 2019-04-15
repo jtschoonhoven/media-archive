@@ -33,7 +33,7 @@ export default (
                     {
                         fileModel.isDeleting
                             ? <span className="text-muted">deleting</span>
-                            : <button onClick={ onDelete }>delete</button>
+                            : <a href="#" onClick={ onDelete }>delete</a>
                     }
                 </div>
             </div>

@@ -36,9 +36,7 @@ export interface ModalTextConfig {
 export interface ModalEditableConfig {
     type: 'editable';
     title: string;
-    getFormikJsx: (
-        { isSubmitting }: { isSubmitting: boolean }
-    ) => React.ReactElement<HTMLFormElement>;
+    getFormikJsx: () => React.ReactElement<HTMLFormElement>;
     initialValues: FormikValues;
     validator: (values: FormikValues) => { [fieldName: string]: string };
     onConfirm: (FormikValues) => void;
