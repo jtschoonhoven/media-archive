@@ -1,3 +1,4 @@
+import urlJoin from 'url-join';
 import { Dispatch } from 'redux';
 
 import { DetailsModel } from '../reducers/detail';
@@ -5,7 +6,10 @@ import { Action } from '../types';
 
 export const DETAILS_FETCH_START = 'DETAILS_FETCH_START';
 export const DETAILS_FETCH_COMPLETE = 'DETAILS_FETCH_COMPLETE';
+export const DETAILS_UPDATE_START = 'DETAILS_UPDATE_START';
+export const DETAILS_UPDATE_COMPLETE = 'DETAILS_UPDATE_COMPLETE';
 
+const POST_HEADERS = { 'Content-Type': 'application/json' };
 
 interface DetailsResponse {
     readonly error?: string;
@@ -23,6 +27,11 @@ interface DetailsResponse {
         readonly url: string;
         readonly uuid?: string;
     };
+}
+
+interface DetailsUpdateResponse {
+    readonly error?: string;
+    readonly details?: DetailsModel;
 }
 
 /*
@@ -53,5 +62,66 @@ export function getFileDetailComplete(response: DetailsResponse): Action {
     return {
         type: DETAILS_FETCH_COMPLETE,
         payload: { details: new DetailsModel(response.details) },
+    };
+}
+
+/**
+ * Update file detail metadata in the DB.
+ */
+export function updateFileDetail(
+    fileId: number,
+    detailsModel: DetailsModel,
+    dispatch: Dispatch,
+): Action {
+    const fileMetadata = {
+        title: detailsModel.title,
+        description: detailsModel.description,
+        tags: detailsModel.tags,
+    };
+
+    const body = JSON.stringify(fileMetadata);
+    const path = urlJoin('/api/v1/detail/', fileId.toString());
+
+    fetch(path, { body, method: 'POST', headers: POST_HEADERS })
+        .then(response => response.json())
+        .then((data) => {
+            dispatch(_updateFileDetailComplete(data, detailsModel, fileId, dispatch));
+        })
+        .catch((err) => {
+            const error = err.message;
+            dispatch(_updateFileDetailComplete({ error }, detailsModel, fileId, dispatch));
+        });
+
+    return {
+        type: DETAILS_UPDATE_START,
+        payload: {},
+    };
+}
+
+/**
+ * Receive the JSON of the updated details model.
+ */
+function _updateFileDetailComplete(
+    response: DetailsUpdateResponse,
+    detailsModel: DetailsModel,
+    fileId: number,
+    dispatch: Dispatch,
+): Action {
+    if (response.error) {
+        return {
+            type: DETAILS_UPDATE_COMPLETE,
+            payload: new Error(response.error),
+            error: true,
+        };
+    }
+
+    // fetch updated details from server
+    getFileDetail(fileId, dispatch);
+
+    return {
+        type: DETAILS_UPDATE_COMPLETE,
+        payload: {
+            details: new DetailsModel(), // clear the old detailsModel as we're re-fetching
+        },
     };
 }

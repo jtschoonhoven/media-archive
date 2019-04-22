@@ -8,6 +8,7 @@ const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
 const FILE_EXT_WHITELIST = config.get('CONSTANTS.FILE_EXT_WHITELIST');
 const FILENAME_BLACKLIST = config.get('CONSTANTS.REGEX.FILENAME_BLACKLIST');
 const MEDIA_TITLE_BLACKLIST = config.get('CONSTANTS.REGEX.MEDIA_TITLE_BLACKLIST');
+const MEDIA_TABLE_COLUMN_ALIASES = config.get('CONSTANTS.MEDIA_TABLE_COLUMN_ALIASES');
 const DUPLICATE_BLACKLIST = config.get('CONSTANTS.REGEX.DUPLICATE_BLACKLIST');
 const TRIM_ENDS_BLACKLIST = config.get('CONSTANTS.REGEX.TRIM_ENDS_BLACKLIST');
 
@@ -157,6 +158,31 @@ async function detail(fileId) {
     return { details };
 }
 module.exports.detail = detail;
+
+/**
+ * Update metadata for some media given an ID.
+ */
+async function update(fileId, metadata) {
+    const query = sql`UPDATE media SET `;
+
+    // update query for each column-value pair in metadata
+    Object.entries(metadata).forEach(([key, value], index) => {
+        if (index) {
+            query.append(sql`, `);
+        }
+        // allow frontend to use whitelisted aliases for column names
+        if (MEDIA_TABLE_COLUMN_ALIASES[key]) {
+            key = MEDIA_TABLE_COLUMN_ALIASES[key];
+        }
+        query.append(key); // column names are NOT escaped with sql-template-strings
+        query.append(sql` = ${value}`); // values *are* automatically escaped
+    });
+    query.append(sql` WHERE id = ${fileId};`);
+
+    await db.run(query);
+    return { test: 'ok' };
+}
+module.exports.update = update;
 
 /*
  * Mark a file in the DB as deleted. Sets "deleted_at", does not *truly* delete anything.

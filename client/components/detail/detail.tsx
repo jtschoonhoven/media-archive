@@ -3,13 +3,14 @@ import './style.scss';
 import * as React from 'react';
 import * as History from 'history';
 import { Dispatch } from 'redux';
+import { FormikValues } from 'formik';
 import { Link } from 'react-router-dom';
 
 import Alert from '../common/alert';
 import Breadcrumbs from '../common/breadcrumbs';
 import DetailEditor from './editor';
 import Image from './image';
-import { DetailsState } from '../../reducers/detail';
+import { DetailsModel, DetailsState } from '../../reducers/detail';
 import { DetailActions } from '../../containers/detail';
 
 export interface Props {
@@ -95,13 +96,13 @@ class ArchiveDetail extends React.Component<Props> {
                             <a href={ url } download={ filename } target="_blank" rel="noopener noreferrer" className="btn btn-link">
                                 Download
                             </a>
+                            <span className="text-muted">•</span>
+                            <button onClick={ this.showEditableModal } className="btn btn-link">
+                                Edit
+                            </button>
                             <span className="text-muted d-none d-lg-inline">•</span>
                             <button onClick={ this.handleClick } className="d-none d-lg-inline btn btn-link">
                                 { isExpanded ? 'View smaller' : 'View larger' }
-                            </button>
-                            <span className="text-muted d-none d-lg-inline">•</span>
-                            <button onClick={ this.showEditableModal } className="d-none d-lg-inline btn btn-link">
-                                Edit
                             </button>
                         </p>
                     </div>
@@ -135,17 +136,19 @@ class ArchiveDetail extends React.Component<Props> {
         this.props.actions.showEditableModal(
             modalTitle,
             getFormikJsx,
-            detailsModel, // get initial values from detailsModel
-            () => {
-                // FIXME: add real validation
-                if (Math.random() > 0.5) {
-                    return { tags: 'bad thing!', title: 'nope!', description: 'wtf?!' };
+            detailsModel,
+            // validator
+            (formValues: FormikValues) => {
+                if (!formValues.title.trim()) {
+                    return { title: 'Title cannot be empty.' };
                 }
                 return {};
-            }, // validator
-            () => {
-                console.log('POST TO SERVER HERE');
-            }, // onConfirm
+            },
+            // onConfirm
+            (updatedDetailsModel: DetailsModel) => {
+                const fileId = this.getFileId();
+                this.props.actions.updateFileDetail(fileId, updatedDetailsModel);
+            },
         );
     }
 }

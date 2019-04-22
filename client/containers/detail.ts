@@ -4,8 +4,8 @@ import { withRouter } from 'react-router';
 import { FormikValues } from 'formik';
 
 import { ArchiveDetail } from '../components';
-import { getFileDetail } from '../actions/detail';
-import { DetailsState } from '../reducers/detail';
+import { getFileDetail, updateFileDetail } from '../actions/detail';
+import { DetailsState, DetailsModel } from '../reducers/detail';
 import { State } from '../types';
 import { showEditableModal } from '../actions/modal';
 
@@ -22,6 +22,7 @@ export interface DetailActions {
         validator: (values: FormikValues) => { [fieldName: string]: string },
         onConfirm: (FormikValues) => void,
     ) => void;
+    updateFileDetail: (id: number, detailsModel: DetailsModel) => void;
 }
 
 export interface DispatchProps {
@@ -50,6 +51,9 @@ function mapDispatchToProps(dispatch: Dispatch): DispatchProps {
                         dispatch,
                     ),
                 );
+            },
+            updateFileDetail: (id: number, detailsModel: DetailsModel) => {
+                dispatch(updateFileDetail(id, detailsModel, dispatch));
             },
         },
     };

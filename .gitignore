@@ -11,8 +11,12 @@ dist/*
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 
+# whitelist public config files
 config/*
 !config/custom-environment-variables.js
 !config/development.js
 !config/production.js
 !webpack.config.js
+
+# IDE
+.vscode/

@@ -116,6 +116,30 @@ apiRouter.get('/detail/:fileId', validateReq.bind(null, FILE_VIEW_SCHEMA), async
     return sendResponse(200, req, res, filesService.detail, fileId);
 });
 
+/**
+ * File Detail Update API
+ * Update the metadata for a media item in the DB.
+ */
+const FILE_UPDATE_SCHEMA = Joi.object({
+    params: Joi.object({
+        fileId: Joi.number().integer().min(1).required()
+            .error(() => 'File Detail Update API requires a valid file ID.'),
+    }).unknown(),
+    body: Joi.object({
+        title: Joi.string().min(1)
+            .error(() => 'Media title cannot be blank.'),
+        description: Joi.string().allow([null])
+            .error(() => 'Description must be a string.'),
+        // FIXME: validate tags with regex
+        tags: Joi.string().allow(null)
+            .error(() => 'Tags must be a string.'),
+    }),
+}).unknown();
+apiRouter.post('/detail/:fileId', validateReq.bind(null, FILE_UPDATE_SCHEMA), async (req, res) => {
+    const fileId = parseInt(req.params.fileId, 10);
+    return sendResponse(204, req, res, filesService.update, fileId, req.body);
+});
+
 /*
  * File List API.
  * Query the database for a list of files and directories at a given path.

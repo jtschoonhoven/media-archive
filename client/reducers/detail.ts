@@ -1,5 +1,10 @@
 import { Action } from '../types';
-import { DETAILS_FETCH_COMPLETE, DETAILS_FETCH_START } from '../actions/detail';
+import {
+    DETAILS_FETCH_COMPLETE,
+    DETAILS_FETCH_START,
+    DETAILS_UPDATE_START,
+    DETAILS_UPDATE_COMPLETE,
+} from '../actions/detail';
 
 export class DetailsModel {
     readonly title: string = '';
@@ -15,19 +20,46 @@ export class DetailsModel {
     constructor(data: Partial<DetailsModel> = {}) {
         Object.assign(this, data);
     }
+
+    /*
+     * Return an object-literal representation of this UploadModel
+     */
+    toObject?(): DetailsModel {
+        return {
+            title: this.title,
+            description: this.description,
+            filename: this.filename,
+            path: this.path,
+            type: this.type,
+            url: this.url,
+            tags: this.tags,
+            uploadStatus: this.uploadStatus,
+            extension: this.extension,
+        };
+    }
+
+    /**
+     * Return a new DetailsModel with properties merged from passed in detailsInfo.
+     */
+    update?(detailsInfo: Partial<DetailsModel>): DetailsModel {
+        const merged = Object.assign({}, this.toObject(), detailsInfo);
+        return new DetailsModel(merged);
+    }
 }
 
 export interface DetailsState {
-    readonly isFetching: boolean;
     readonly fileId: number;
-    readonly errors: ReadonlyArray<string>;
     readonly details: DetailsModel;
+    readonly isFetching: boolean;
+    readonly isUpdating: boolean;
+    readonly errors: ReadonlyArray<string>;
 }
 
 const INITIAL_STATE: DetailsState = {
-    isFetching: false,
     fileId: null,
     details: new DetailsModel(),
+    isFetching: false,
+    isUpdating: false,
     errors: [],
 };
 
@@ -54,6 +86,29 @@ export default function detailReducer(
                 return { ...state, ...update };
             }
             const update = { isFetching: false };
+            return { ...state, ...update, ...payload };
+        }
+
+        case DETAILS_UPDATE_START: {
+            const update = {
+                isUpdating: true,
+                errors: [], // clear any errors from previous state
+            };
+            return { ...state, ...update, ...payload };
+        }
+
+        case DETAILS_UPDATE_COMPLETE: {
+            if (action.error) {
+                const update = {
+                    errors: [payload.message],
+                    isUpdating: false,
+                };
+                return { ...state, ...update };
+            }
+            const update = {
+                errors: [],
+                isUpdating: false,
+            };
             return { ...state, ...update, ...payload };
         }
 
