@@ -173,6 +173,7 @@ export default class ArchiveFiles extends React.Component<Props> {
             const directoryModel = new DirectoryModel({
                 name: dirname,
                 path: filesState.path,
+                title: dirname,
                 numEntries: uploadsList.length,
             });
             Directories.push(Directory(directoryModel));

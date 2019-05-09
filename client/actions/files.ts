@@ -22,6 +22,7 @@ interface LoadResponse {
         readonly uuid: string;
         readonly path: string;
         readonly name: string;
+        readonly title: string;
         readonly size: number;
         readonly entryType: string;
         readonly mediaType: string;

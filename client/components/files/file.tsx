@@ -25,7 +25,7 @@ export default (
                 <span className="col-10 col-md-11">
                     📄
                     <Link to={`/detail/${fileModel.id}`}>
-                        { fileModel.name }
+                        { fileModel.title }
                     </Link>
                 </span>
                 {/* button */}

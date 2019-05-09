@@ -11,6 +11,7 @@ import { Action, Dict } from '../types';
 
 export class DirectoryModel {
     readonly name: string;
+    readonly title: string;
     readonly path: string;
     readonly numEntries: number;
     readonly id?: number;
@@ -30,6 +31,7 @@ export class FileModel {
     readonly id: number;
     readonly uuid: string;
     readonly name: string;
+    readonly title: string;
     readonly size: number;
     readonly isDeleting?: boolean = false;
     readonly isDeleted?: boolean = false;
