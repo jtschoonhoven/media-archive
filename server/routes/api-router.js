@@ -137,7 +137,7 @@ const FILE_UPDATE_SCHEMA = Joi.object({
 }).unknown();
 apiRouter.post('/detail/:fileId', validateReq.bind(null, FILE_UPDATE_SCHEMA), async (req, res) => {
     const fileId = parseInt(req.params.fileId, 10);
-    return sendResponse(204, req, res, filesService.update, fileId, req.body);
+    return sendResponse(200, req, res, filesService.update, fileId, req.body);
 });
 
 /*
