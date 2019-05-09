@@ -14,6 +14,7 @@ dist/*
 # whitelist public config files
 config/*
 !config/custom-environment-variables.js
+!config/default.js
 !config/development.js
 !config/production.js
 !webpack.config.js
