@@ -9,7 +9,9 @@ dist/*
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
+.elasticbeanstalk/saved_configs/*
+!.elasticbeanstalk/saved_configs/
+!.elasticbeanstalk/saved_configs/example-config.yml
 
 # whitelist public config files
 config/*

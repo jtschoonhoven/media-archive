@@ -1,0 +1,54 @@
+Platform:
+  PlatformArn: arn:aws:elasticbeanstalk:us-west-2::platform/Node.js running on 64bit Amazon Linux/4.7.0
+OptionSettings:
+  aws:elasticbeanstalk:application:environment:
+    OAUTH2_CLIENT_ID: 1234-abcd.apps.googleusercontent.com
+    OAUTH2_CLIENT_SECRET: abc123
+    SESSION_SECRET: abc123
+    NODE_ENV: production
+    S3_BUCKET_REGION: us-west-2
+    BASE_URL: https://www.example.com
+    S3_BUCKET_NAME: my-s3-bucket
+  AWSEBAutoScalingLaunchConfiguration.aws:ec2:vpc:
+    AssociatePublicIpAddress: true
+  aws:elbv2:listener:443:
+    ListenerEnabled: true
+    SSLCertificateArns: arn:aws:acm:us-west-2:abc123:certificate/abc-123-xyz-789
+    DefaultProcess: default
+    Protocol: HTTPS
+    Rules: ''
+  aws:ec2:vpc:
+    Subnets: subnet-abc123,subnet-abc123
+    ELBSubnets: subnet-abc123,subnet-abc123
+  AWSEBV2LoadBalancerTargetGroup.aws:elasticbeanstalk:environment:process:default:
+    MatcherHTTPCode: '200'
+    HealthCheckPath: /healthcheck
+  aws:rds:dbinstance:
+    DBPassword: yourpassword
+    DBEngine: postgres
+    DBUser: postgres
+    DBDeletionPolicy: Snapshot
+  AWSEBAutoScalingLaunchConfiguration.aws:autoscaling:launchconfiguration:
+    EC2KeyName: yourkeyname
+  aws:elasticbeanstalk:container:nodejs:
+    NodeCommand: npm start
+  AWSEBAutoScalingGroup.aws:autoscaling:asg:
+    MaxSize: '1'
+  aws:elasticbeanstalk:environment:
+    ServiceRole: your-service-role-name
+    LoadBalancerType: application
+  aws:elasticbeanstalk:healthreporting:system:
+    SystemType: enhanced
+  AWSEBLoadBalancerSecurityGroup.aws:ec2:vpc:
+    VPCId: vpc-abc123
+  aws:autoscaling:launchconfiguration:
+    SecurityGroups: sg-abc123
+    IamInstanceProfile: aws-elasticbeanstalk-ec2-role
+EnvironmentTier:
+  Type: Standard
+  Name: WebServer
+Extensions:
+  RDS.EBConsoleSnippet:
+    Order: null
+    SourceLocation: https://s3.us-west-2.amazonaws.com/elasticbeanstalk-env-resources-us-west-2/eb_snippets/rds/rds.json
+AWSConfigurationTemplateVersion: 1.1.0.0
