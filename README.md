@@ -35,6 +35,16 @@ Now you should be able to deploy the app by following the instructions in the **
 
 App is configured to be deployed to Elastic Beanstalk on AWS. First ensure the EB client has been installed and configured with `brew install awsebcli` and `eb use your-environment-name`.
 
+The first time you deploy you will need to initialize a new EBS project with `eb init`. You *MUST* additionally append some additional configuration to the generated `config.yml` file:
+
+```bash
+echo '' >> .elasticbeanstalk/config.yml
+echo 'deploy:' >> .elasticbeanstalk/config.yml
+echo '  artifact: dist/archive.zip' >> .elasticbeanstalk/config.yml
 ```
+
+Now you can deploy with the npm script:
+
+```bash
 npm run deploy
 ```
