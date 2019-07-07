@@ -234,7 +234,7 @@ export default class ArchiveFiles extends React.Component<Props> {
         const Notifications = [];
         if (isRootDir) {
             const alert = Alert(
-                'Note: Uploads are not permitted in the root folder.',
+                'Uploads and downloads are not allowed in the root folder.',
                 { idx: 1, style: 'secondary', centered: true, muted: true },
             );
             Notifications.push(alert);
