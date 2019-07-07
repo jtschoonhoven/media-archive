@@ -36,6 +36,7 @@ export default class ArchiveFiles extends React.Component<Props> {
         super(props);
         this.handleUploadClick = this.handleUploadClick.bind(this);
         this.showCreateDirectoryModal = this.showCreateDirectoryModal.bind(this);
+        this.downloadCSV = this.downloadCSV.bind(this);
     }
 
     componentDidMount(): void {
@@ -71,13 +72,13 @@ export default class ArchiveFiles extends React.Component<Props> {
                 <div className="row">
 
                     {/* upload button */}
-                    <div className="col-6">
+                    <div className="col-xs-12 col-sm-4 mb-1">
                         <label
                             className={
-                                `btn btn-primary w-100 ${isRootDir ? 'disabled' : ''}`
+                                `btn btn-primary w-100 mb-0 ${isRootDir ? 'disabled' : ''}`
                             }
                         >
-                            <strong>▲ Upload Files</strong>
+                            <strong>▲ Upload</strong>
                             <input
                                 type="file"
                                 onChange={ this.handleUploadClick }
@@ -90,12 +91,22 @@ export default class ArchiveFiles extends React.Component<Props> {
                     </div>
 
                     {/* new folder button */}
-                    <div className="col-6">
+                    <div className="col-xs-12 col-sm-4 mb-1">
                         <button
                             className="btn btn-outline-dark w-100"
                             onClick={ this.showCreateDirectoryModal }
                         >
-                            ➕ Create Folder
+                            ➕ Folder
+                        </button>
+                    </div>
+
+                    {/* download CSV button */}
+                    <div className="col-xs-12 col-sm-4 mb-1">
+                        <button
+                            className="btn btn-secondary w-100"
+                            onClick={ this.downloadCSV }
+                        >
+                            ▼ CSV
                         </button>
                     </div>
                 </div>
@@ -268,6 +279,17 @@ export default class ArchiveFiles extends React.Component<Props> {
         };
 
         showTextModal(title, message, placeholder, onConfirm, validator);
+    }
+
+    /**
+     * Download metadata for all files under the current directory as a CSV.
+     */
+    downloadCSV() {
+        const path = this.getFilePath();
+        console.log(`Downloading files at ${path}`);
+        fetch(urlJoin('/csv/', path))
+        .then(() => { console.log('success!')})
+        .catch(err => { console.log('error!')});
     }
 
     /*
