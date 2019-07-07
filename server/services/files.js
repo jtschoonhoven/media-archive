@@ -123,31 +123,25 @@ async function load(path) {
 }
 module.exports.load = load;
 
+/**
+ * Return all metadata for all files under the given path in CSV-friendly format.
+ */
+async function listFilesMetadata(path) {
+    const query = _getMetadataSQL(path);
+    const rows = await db.all(query);
+    return rows;
+}
+module.exports.listFilesMetadata = listFilesMetadata;
+
 /*
  * Get metadata for a file with the given id for display.
  */
 async function detail(fileId) {
-    const details = await db.get(sql`
-        SELECT
-            id AS "id",
-            uuid AS "uuid",
-            media_name AS "title",
-            media_type AS "type",
-            media_description AS "description",
-            media_tags AS "tags",
-            media_url AS "url",
-            media_url_thumbnail AS "thumbnailUrl",
-            media_file_name AS "filename",
-            media_file_path AS "path",
-            media_file_extension AS "extension",
-            upload_status AS "uploadStatus"
-        FROM media
-        WHERE id = ${fileId};
-    `);
+    const query = _getFileDetailSQL(fileId);
+    const details = await db.get(query);
     if (!details) {
         return { error: `No file exists with id ${fileId}`, statusCode: 404 };
     }
-
     // replace an (unsigned) S3 url with a usable signed url
     if (s3Service.isS3Url(details.url)) {
         details.url = await s3Service.getPresignedUrl(details.url);
@@ -240,5 +234,102 @@ function _getLoadSQL(path) {
         GROUP BY "name", "title", "path", "entryType"
         ORDER BY "entryType" ASC, "numEntries" DESC, "title" ASC, "name" ASC;
     `);
+    return query;
+}
+
+/**
+ * Generate the parameterized SQL string used to list the details for a single file.
+ */
+function _getFileDetailSQL(fileId) {
+    return sql`
+    SELECT
+        id AS "id",
+        uuid AS "uuid",
+        media_name AS "title",
+        media_type AS "type",
+        media_description AS "description",
+        media_tags AS "tags",
+        media_url AS "url",
+        media_url_thumbnail AS "thumbnailUrl",
+        media_file_name AS "filename",
+        media_file_path AS "path",
+        media_file_extension AS "extension",
+        upload_status AS "uploadStatus"
+    FROM media
+    WHERE id = ${fileId};
+    `;
+}
+
+/**
+ * Generate the parameterized SQL string used to list metadata for files under the given path.
+ */
+function _getMetadataSQL(path) {
+    path = trimSlashes(path);
+
+    let pathArray = [];
+    if (path) {
+        pathArray = path.split('/').map(dir => sanitize(dir, FILENAME_BLACKLIST, '-'));
+    }
+
+    const query = sql`
+        SELECT
+            id,
+            -- group info
+            box_id,
+            box_name,
+            box_or_cabinet,
+            folder_id,
+            folder_name,
+            series_name,
+            series_description,
+            series_index_id,
+            -- media info
+            media_name,
+            media_description,
+            media_authors,
+            media_notes,
+            media_transcript,
+            media_date,
+            media_tags,
+            media_type,
+            -- media file info
+            media_file_name,
+            media_file_name_unsafe,
+            media_file_path,
+            media_file_extension,
+            media_file_size_bytes,
+            -- media source info
+            media_url,
+            media_url_thumbnail,
+            -- media origin info
+            origin_location,
+            origin_medium,
+            origin_medium_notes,
+            -- type-specific info
+            audio_lecturers,
+            audio_video_length_seconds,
+            image_photographer,
+            image_color,
+            image_location_or_people_unknown,
+            image_professional_or_personal,
+            -- legal info
+            legal_is_confidential,
+            legal_can_license,
+            -- upload workflow
+            upload_status,
+            upload_email,
+            upload_batch_id,
+            -- metadata
+            created_at,
+            updated_at
+        FROM media
+        WHERE deleted_at IS NULL
+        AND upload_status = ${UPLOAD_STATUSES.SUCCESS}
+    `;
+
+    // match only items in this directory
+    pathArray.forEach((dir, idx) => {
+        query.append(sql`\nAND media_file_path_array[${idx + 1}] = ${dir}`);
+    });
     return query;
 }

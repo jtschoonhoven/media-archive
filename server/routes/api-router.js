@@ -3,8 +3,8 @@ const express = require('express');
 const fs = require('fs');
 const Joi = require('joi');
 const path = require('path');
+const stringify = require('csv-stringify');
 
-const csvService = require('../services/csv');
 const filesService = require('../services/files');
 const logger = require('../services/logger');
 const searchService = require('../services/search');
@@ -270,7 +270,33 @@ const CSV_DOWNLOAD_SCHEMA = Joi.object({
 }).unknown();
 apiRouter.get('/csv/:path(*)', validateReq.bind(null, CSV_DOWNLOAD_SCHEMA), async (req, res) => {
     const filePath = req.params.path;
-    return sendResponse(200, req, res, csvService.download, filePath);
+    const baseName = path.basename(filePath);
+    const date = new Date().toISOString().slice(0, 10);
+    const fileName = `archive-${baseName}-${date}.csv`;
+    // unlike other API routes, we skip `sendResponse` and pipe the content directly to the client
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment;filename=${fileName}`);
+    const filesMeta = await filesService.listFilesMetadata(filePath);
+
+    // csv-stringify doesn't automatically escape backslashes, so we do it ourselves
+    filesMeta.forEach((row, rowIdx) => {
+        Object.entries(row).forEach(([key, value]) => {
+            if (typeof value === 'string') {
+                filesMeta[rowIdx][key] = value.replace(/\\/g, '\\\\');
+            }
+        });
+    });
+
+    return stringify(
+        filesMeta,
+        // CSV options documented here: https://csv.js.org/stringify/options/
+        {
+            header: true,
+            cast: {
+                date: d => d.toISOString().replace('T', ' ').replace('Z', ' '),
+            },
+        },
+    ).pipe(res);
 });
 
 
