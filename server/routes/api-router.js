@@ -4,6 +4,7 @@ const fs = require('fs');
 const Joi = require('joi');
 const path = require('path');
 
+const csvService = require('../services/csv');
 const filesService = require('../services/files');
 const logger = require('../services/logger');
 const searchService = require('../services/search');
@@ -150,7 +151,7 @@ const FILE_LIST_SCHEMA = Joi.object({
             .error(() => 'Files API requires a valid directory path.'),
     }).unknown(),
 }).unknown();
-apiRouter.get('/files/:path(*)', validateReq.bind(null, FILE_LIST_SCHEMA), async (req, res) => {
+apiRouter.get('/files/:path(*)', validateReq.bind(null, FILE_LIST_SCHEMA), async (req, res, next) => {
     const filePath = req.params.path;
     return sendResponse(200, req, res, filesService.load, filePath);
 });
@@ -255,6 +256,21 @@ apiRouter.get('/thumbnails/:extension', validateReq.bind(IMAGE_SCHEMA), async (r
         return res.sendFile(extensionPath);
     }
     return res.sendFile(path.join(__dirname, thumbailsPath, 'other.png'));
+});
+
+/*
+ * CSV Download API.
+ * Download a CSV of metadata for all files in a given directory.
+ */
+const CSV_DOWNLOAD_SCHEMA = Joi.object({
+    params: Joi.object({
+        path: Joi.string().uri({ allowRelative: true }).required()
+            .error(() => 'Files API requires a valid directory path.'),
+    }).unknown(),
+}).unknown();
+apiRouter.get('/csv/:path(*)', validateReq.bind(null, CSV_DOWNLOAD_SCHEMA), async (req, res) => {
+    const filePath = req.params.path;
+    return sendResponse(200, req, res, csvService.download, filePath);
 });
 
 
