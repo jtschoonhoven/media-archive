@@ -48,6 +48,7 @@ export default class ArchiveFiles extends React.Component<Props> {
 
     render(): React.ReactElement<HTMLDivElement> {
         const currentUrl = this.props.location.pathname;
+        const filePath = this.getFilePath();
         const pathArray = currentUrl.replace('/files', '').split('/').filter(item => item);
         const isRootDir = !pathArray.length;
 
@@ -71,13 +72,13 @@ export default class ArchiveFiles extends React.Component<Props> {
                 <div className="row">
 
                     {/* upload button */}
-                    <div className="col-6">
+                    <div className="col-xs-12 col-sm-4 mb-1">
                         <label
                             className={
-                                `btn btn-primary w-100 ${isRootDir ? 'disabled' : ''}`
+                                `btn btn-primary w-100 mb-0 ${isRootDir ? 'disabled' : ''}`
                             }
                         >
-                            <strong>▲ Upload Files</strong>
+                            <strong>▲ Upload</strong>
                             <input
                                 type="file"
                                 onChange={ this.handleUploadClick }
@@ -90,13 +91,26 @@ export default class ArchiveFiles extends React.Component<Props> {
                     </div>
 
                     {/* new folder button */}
-                    <div className="col-6">
+                    <div className="col-xs-12 col-sm-4 mb-1">
                         <button
                             className="btn btn-outline-dark w-100"
                             onClick={ this.showCreateDirectoryModal }
                         >
-                            ➕ Create Folder
+                            ➕ Folder
                         </button>
+                    </div>
+
+                    {/* download CSV button */}
+                    <div className="col-xs-12 col-sm-4 mb-1">
+                        <Link
+                            to={ urlJoin('/api/v1/csv/', filePath) }
+                            className={
+                                `btn btn-secondary w-100 mb-0 ${isRootDir ? 'disabled' : ''}`
+                            }
+                            target="_BLANK"
+                        >
+                            ▼ CSV
+                        </Link>
                     </div>
                 </div>
 
