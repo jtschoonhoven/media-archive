@@ -42,7 +42,7 @@ class ArchiveNavbar extends React.Component<Props> {
                         <a href="/auth/logout" className="btn btn-outline-dark">Logout</a>
                     </div>
                     {/* upload */}
-                    <div className="btn-group float-right archive-btn-nav d-none d-sm-block">
+                    <div className="btn-group float-right archive-btn-nav">
                         <Link to={ buttonLinkTo } className="btn btn-outline-dark">
                             { buttonLinkText }
                         </Link>
