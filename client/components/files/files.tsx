@@ -3,7 +3,9 @@ import './style.scss';
 import _ from 'lodash';
 import * as React from 'react';
 import urlJoin from 'url-join';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 
 import Breadcrumbs from '../common/breadcrumbs';
 import Directory from './directory';
@@ -72,13 +74,13 @@ export default class ArchiveFiles extends React.Component<Props> {
                 <div className="row">
 
                     {/* upload button */}
-                    <div className="col-xs-12 col-sm-4 mb-1">
+                    <div className="col-xs-12 col-sm-6 mb-1">
                         <label
                             className={
                                 `btn btn-primary w-100 mb-0 ${isRootDir ? 'disabled' : ''}`
                             }
                         >
-                            <strong>▲ Upload</strong>
+                            <strong>▲ Upload Files</strong>
                             <input
                                 type="file"
                                 onChange={ this.handleUploadClick }
@@ -90,28 +92,25 @@ export default class ArchiveFiles extends React.Component<Props> {
                         </label>
                     </div>
 
-                    {/* new folder button */}
-                    <div className="col-xs-12 col-sm-4 mb-1">
-                        <button
-                            className="btn btn-outline-dark w-100"
-                            onClick={ this.showCreateDirectoryModal }
-                        >
-                            ➕ Folder
-                        </button>
-                    </div>
-
-                    {/* download CSV button */}
-                    <div className="col-xs-12 col-sm-4 mb-1">
-                        <Link
-                            to={ urlJoin('/api/v1/csv/', filePath) }
-                            className={
-                                `btn btn-secondary w-100 mb-0 ${isRootDir ? 'disabled' : ''}`
-                            }
-                            target="_BLANK"
-                        >
-                            ▼ CSV
-                        </Link>
-                    </div>
+                    <Dropdown className="col-xs-12 col-sm-6 mb-1">
+                        <Dropdown.Toggle variant="outline-dark" className="w-100" id="archive-files-more-options">
+                            More Options
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            {/* new folder button */}
+                            <Dropdown.Item href="#" onClick={ this.showCreateDirectoryModal }>
+                                ➕ New Folder
+                            </Dropdown.Item>
+                            {/* download CSV button */}
+                            <Dropdown.Item
+                                href={ urlJoin('/api/v1/csv/', filePath) }
+                                className={{ disabled: isRootDir }}
+                                target="_BLANK"
+                            >
+                                ▼ Download CSV
+                            </Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
                 </div>
 
                 {/* file browser */}
