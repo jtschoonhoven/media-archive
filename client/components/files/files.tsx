@@ -97,11 +97,24 @@ export default class ArchiveFiles extends React.Component<Props> {
                             More Options
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
-                            {/* new folder button */}
+                            {/* new folder */}
                             <Dropdown.Item href="#" onClick={ this.showCreateDirectoryModal }>
                                 ➕ New Folder
                             </Dropdown.Item>
-                            {/* download CSV button */}
+                            <Dropdown.Divider />
+                            {/* upload CSV */}
+                            <Dropdown.Item as="label" className={ `mb-0 ${isRootDir && 'disabled'}` }>
+                                ▲ Upload CSV
+                                <input
+                                    type="file"
+                                    onChange={ this.handleUploadClick }
+                                    accept=".csv"
+                                    disabled={ isRootDir }
+                                    hidden={ true }
+                                />
+                            </Dropdown.Item>
+                            <Dropdown.Divider />
+                            {/* download CSV */}
                             <Dropdown.Item
                                 href={ urlJoin('/api/v1/csv/', filePath) }
                                 className={{ disabled: isRootDir }}
