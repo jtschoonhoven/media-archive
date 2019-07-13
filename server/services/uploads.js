@@ -11,12 +11,14 @@ const filesService = require('./files');
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
 
 
-/*
- * Add pending upload to media_uploads_pending table and return direct upload auth for S3.
+/**
+ * Add pending uploads to table and return direct upload auth for S3.
+ * @param {string} dirpath - path to file location in virtual file system
+ * @param {FileList} fileList - see https://developer.mozilla.org/en-US/docs/Web/API/FileList
+ * @param {string} userEmail - email of user who initiated upload
  */
 module.exports.upload = async (dirPath, fileList, userEmail) => {
-    dirPath = dirPath.startsWith('/') ? path.slice(1) : dirPath;
-    dirPath = dirPath.endsWith('/') ? path.slice(0, -1) : dirPath;
+    dirPath = filesService.trimSlashes(dirPath);
 
     // throw an error if any uploaded file contains a filename already in the directory
     try {
@@ -93,6 +95,12 @@ module.exports.cancel = async (fileId, userEmail) => {
     return {};
 };
 
+/**
+ * Save each file in the fileList to the DB in a "pending" state.
+ * @param {string} dirpath - path to file location in virtual file system
+ * @param {FileList} fileList - see https://developer.mozilla.org/en-US/docs/Web/API/FileList
+ * @param {string} userEmail - email of user who initiated upload
+ */
 async function addFilesToDb(dirPath, fileList, userEmail) {
     const uploadBatchId = uuidv4();
     const transaction = new db.Transaction();
@@ -100,12 +108,18 @@ async function addFilesToDb(dirPath, fileList, userEmail) {
     try {
         fileList.forEach((fileInfo) => {
             // validate and sanitize uploaded file info
-            const mediaName = filesService.getFileTitle(fileInfo.name);
             const mediaType = filesService.getFileType(fileInfo.name);
             const mediaFile = filesService.getSanitizedFileName(fileInfo.name);
             const mediaExtn = filesService.getFileExtension(fileInfo.name);
-            const mediaPath = filesService.getSanitizedFilePath(path.join(dirPath, mediaFile));
             const mediaSize = parseInt(fileInfo.sizeInBytes, 10);
+            let mediaName = filesService.getFileTitle(fileInfo.name);
+            let mediaPath = filesService.getSanitizedFilePath(path.join(dirPath, mediaFile));
+
+            // special-case CSV uploads: redirect them to the special CSV folder
+            if (mediaExtn === 'CSV') {
+                mediaPath = filesService.getSanitizedCsvFilePath(mediaPath);
+                mediaName = mediaFile; // use raw filename as title
+            }
 
             // exectute query within a transaction
             const query = _getInsertSql(
@@ -141,7 +155,10 @@ async function checkDuplicates(dirPath, fileList) {
         WHERE deleted_at IS NULL
         AND upload_status = ${UPLOAD_STATUSES.SUCCESS}
         AND deleted_at IS NULL
-        AND media_file_path LIKE ${dirPath} || '/%'
+        AND (
+            media_file_path LIKE ${dirPath} || '/%'
+            OR media_file_path = '~csv'
+        )
         AND (FALSE
     `;
     fileList.forEach((fileInfo) => {
