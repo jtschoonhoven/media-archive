@@ -190,6 +190,34 @@ apiRouter.post('/uploads/:path(*)', validateReq.bind(null, UPLOADS_SCHEMA), asyn
 });
 
 /*
+ * CSV Uploads API.
+ * Identical to the Uploads API above, but allows uploading to root directory.
+ * Initiate a file upload to the given directory and save it as "pending" in the db.
+ * Does not receive the file directly. Instead returns signed tokens for upload to S3.
+ */
+const CSV_UPLOADS_SCHEMA = Joi.object({
+    body: Joi.object({
+        files: Joi.array().items(
+            Joi.object({
+                name: Joi.string().required()
+                    .error(() => 'File name must be alphanumeric or have dashes and spaces.'),
+                sizeInBytes: Joi.number().integer().min(0)
+                    .error(() => 'File size must be a positive integer.'),
+            }),
+        ),
+    }),
+}).unknown();
+apiRouter.post('/uploads', validateReq.bind(null, CSV_UPLOADS_SCHEMA), async (req, res) => {
+    const dirPath = '~csv';
+    const fileList = req.body.files;
+    const isCSV = fileList.every(file => file.name.toLowerCase().endsWith('.csv'));
+    if (!isCSV) {
+        return res.status(400).json({ error: 'only CSV files may be uploaded to the root directory' });
+    }
+    return sendResponse(201, req, res, uploadsService.upload, dirPath, fileList, req.user.email);
+});
+
+/*
  * Upload Status API.
  * Register a successful or failed upload.
  */
