@@ -103,13 +103,12 @@ export default class ArchiveFiles extends React.Component<Props> {
                             </Dropdown.Item>
                             <Dropdown.Divider />
                             {/* upload CSV */}
-                            <Dropdown.Item as="label" className={ `mb-0 ${isRootDir && 'disabled'}` }>
+                            <Dropdown.Item as="label" className="mb-0">
                                 ▲ Upload CSV
                                 <input
                                     type="file"
                                     onChange={ this.handleUploadClick }
                                     accept=".csv"
-                                    disabled={ isRootDir }
                                     hidden={ true }
                                 />
                             </Dropdown.Item>
