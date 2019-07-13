@@ -135,10 +135,8 @@ export default function uploadsReducer(state = initialState, action: Action): Up
         // server acknowledges receipt of file descriptors and returns upload tokens
         case UPLOAD_BATCH_SAVED_TO_SERVER: {
             if (action.error) {
-                const update = {
-                    errors: state.errors.push(payload.message),
-                    isRegisteringWithServer: false,
-                };
+                const errors = [...state.errors, payload.message];
+                const update = { errors, isRegisteringWithServer: false };
                 return Object.assign({}, state, update);
             }
             const update = { isRegisteringWithServer: false };
