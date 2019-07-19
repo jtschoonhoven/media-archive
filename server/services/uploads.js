@@ -18,15 +18,32 @@ const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
  * @param {string} userEmail - email of user who initiated upload
  */
 module.exports.upload = async (dirPath, fileList, userEmail) => {
+    const fileListUploads = [];
+    const fileListCSV = [];
     dirPath = filesService.trimSlashes(dirPath);
+
+    // separate CSVs and regular uploads into separate arrays
+    fileList.forEach((fileInfo) => {
+        const mediaExtn = filesService.getFileExtension(fileInfo.name);
+        if (mediaExtn === 'CSV') {
+            return fileListCSV.push(fileInfo);
+        }
+        return fileListUploads.push(fileInfo);
+    });
 
     // throw an error if any uploaded file contains a filename already in the directory
     try {
-        await checkDuplicates(dirPath, fileList);
+        if (fileListUploads.length) {
+            await checkDuplicates(dirPath, fileListUploads);
+        }
+        if (fileListCSV.length) {
+            await checkDuplicates(dirPath, fileListCSV);
+        }
     }
     catch (err) {
         return { error: err.message, statusCode: 400 };
     }
+
     // add all files to the DB in "pending" state
     const uploadBatchId = await addFilesToDb(dirPath, fileList, userEmail);
 
