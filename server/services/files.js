@@ -18,6 +18,8 @@ const MEDIA_TITLE_REGEX = new RegExp(MEDIA_TITLE_BLACKLIST, 'g');
 const DUPLICATE_REGEX = new RegExp(DUPLICATE_BLACKLIST, 'g');
 const TRIM_ENDS_REGEX = new RegExp(TRIM_ENDS_BLACKLIST, 'g');
 
+const CSV_DIRPATH = '~csv/';
+
 
 /*
  * Helper to remove leading and trailing slashes from a string.
@@ -68,8 +70,11 @@ module.exports.getSanitizedFilePath = getSanitizedFilePath;
  * Return a sanitized file path hardcoded to the special CSV directory.
  */
 function getSanitizedCsvFilePath(filepath) {
+    if (!filepath) {
+        return getSanitizedFilePath(CSV_DIRPATH);
+    }
     filepath = getSanitizedFilePath(filepath);
-    const csvFilepath = path.join('~csv/', path.basename(filepath));
+    const csvFilepath = path.join(CSV_DIRPATH, path.basename(filepath));
     return csvFilepath;
 }
 module.exports.getSanitizedCsvFilePath = getSanitizedCsvFilePath;
