@@ -5,6 +5,7 @@ const uuidv4 = require('uuid/v4');
 
 const db = require('./database');
 const logger = require('./logger');
+const csvService = require('./csv');
 const s3Service = require('./s3');
 const filesService = require('./files');
 
@@ -83,6 +84,21 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
 module.exports.update = async (fileId, status) => {
     if (!Object.values(UPLOAD_STATUSES).includes(status)) {
         throw new Error(`Uploads API received invalid status for file ${fileId}: "${status}"`);
+    }
+
+    // detect successful CSV uploads and pass them off to the CSV service before update
+    if (status === UPLOAD_STATUSES.SUCCESS) {
+        const checkCsvQuery = sql`
+        SELECT
+            media_file_extension AS extension,
+            media_url AS s3url
+            FROM media
+            WHERE id = ${fileId};
+        `;
+        const mediaInfo = await db.get(checkCsvQuery);
+        if (mediaInfo.extension === 'CSV') {
+            await csvService.handleUpload(mediaInfo.s3url);
+        }
     }
     const query = sql`
         UPDATE media

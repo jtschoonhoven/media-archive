@@ -166,3 +166,24 @@ module.exports.getPresignedUrl = async (s3Url) => {
         });
     });
 };
+
+/**
+ * Return a ReadableStream for the given S3 object.
+ */
+module.exports.streamObject = (s3Url) => {
+    const { bucket, key } = parseS3Url(s3Url);
+    const params = { Bucket: bucket, Key: key };
+    return S3.getObject(params).createReadStream();
+    // Note: alternatively we could have returned the file contents like this:
+    // return new Promise((resolve, reject) => {
+    //     stream.on('data', (chunk) => {
+    //         fileContent += chunk;
+    //     });
+    //     stream.on('end', () => {
+    //         resolve(fileContent);
+    //     });
+    //     stream.on('error', (err) => {
+    //         reject(err.message);
+    //     });
+    // });
+};
