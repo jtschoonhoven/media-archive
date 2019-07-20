@@ -59,6 +59,7 @@
         "react-router-dom": "^4.3.1",
         "redux": "^4.0.1",
         "sql-template-strings": "^2.2.2",
+        "stream-transform": "^2.0.1",
         "url-join": "^4.0.0",
         "uuid": "^3.3.2",
         "winston": "^3.1.0"
