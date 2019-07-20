@@ -231,7 +231,7 @@ function _getLoadSQL(filepath) {
             END AS "entryType",
             ${filepath} AS "path",
             media_file_path_array[${pathArray.length + 1}] AS "name",
-            media_name AS "title",
+            MAX(media_name) AS "title",
             MAX(media_type) AS "mediaType",
             MAX(id) AS "id",
             MAX(uuid) AS "uuid",
@@ -247,7 +247,7 @@ function _getLoadSQL(filepath) {
     });
 
     query.append(`
-        GROUP BY "name", "title", "path", "entryType"
+        GROUP BY "name", "path", "entryType"
         ORDER BY "entryType" ASC, "numEntries" DESC, "title" ASC, "name" ASC;
     `);
     return query;
