@@ -289,6 +289,7 @@ function _getMetadataSQL(filepath) {
 
     const query = sql`
         SELECT
+            uuid,
             id,
             -- group info
             box_id,

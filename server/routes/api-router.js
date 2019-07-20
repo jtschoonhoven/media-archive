@@ -10,6 +10,7 @@ const logger = require('../services/logger');
 const searchService = require('../services/search');
 const uploadsService = require('../services/uploads');
 
+const CSV_EDITABLE_COLUMN_WHITELIST = config.get('CONSTANTS.CSV_EDITABLE_COLUMN_WHITELIST');
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
 
 
@@ -151,7 +152,7 @@ const FILE_LIST_SCHEMA = Joi.object({
             .error(() => 'Files API requires a valid directory path.'),
     }).unknown(),
 }).unknown();
-apiRouter.get('/files/:path(*)', validateReq.bind(null, FILE_LIST_SCHEMA), async (req, res, next) => {
+apiRouter.get('/files/:path(*)', validateReq.bind(null, FILE_LIST_SCHEMA), async (req, res) => {
     const filePath = req.params.path;
     return sendResponse(200, req, res, filesService.load, filePath);
 });
@@ -308,9 +309,14 @@ apiRouter.get('/csv/:path(*)', validateReq.bind(null, CSV_DOWNLOAD_SCHEMA), asyn
 
     // csv-stringify doesn't automatically escape backslashes, so we do it ourselves
     filesMeta.forEach((row, rowIdx) => {
-        Object.entries(row).forEach(([key, value]) => {
-            if (typeof value === 'string') {
-                filesMeta[rowIdx][key] = value.replace(/\\/g, '\\\\');
+        Object.entries(row).forEach(([colname, value]) => {
+            if (CSV_EDITABLE_COLUMN_WHITELIST.indexOf(colname) === -1) {
+                if (['uuid', 'id'].indexOf(colname) === -1) {
+                    delete filesMeta[rowIdx][colname];
+                }
+            }
+            else if (typeof value === 'string') {
+                filesMeta[rowIdx][colname] = value.replace(/\\/g, '\\\\');
             }
         });
     });
