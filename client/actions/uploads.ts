@@ -15,6 +15,7 @@ export const UPLOAD_FILE_TO_S3_RETRY = 'UPLOAD_FILE_TO_S3_RETRY';
 export const UPLOAD_FILE_COMPLETE = 'UPLOAD_FILE_COMPLETE';
 export const UPLOAD_FILE_CANCEL = 'UPLOAD_FILE_CANCEL';
 export const UPLOAD_FILE_CANCEL_COMPLETE = 'UPLOAD_FILE_CANCEL_COMPLETE';
+export const UPLOAD_RESET = 'UPLOAD_RESET';
 
 const UPLOAD_STATUSES = SETTINGS.UPLOAD_STATUSES;
 const POST_HEADERS = { 'Content-Type': 'application/json' };
@@ -81,7 +82,12 @@ function _uploadBatchSavedToServer(
         const file = Array.from(fileList).find((fileItem: File): boolean => {
             return fileItem.name === uploadInfo.nameUnsafe;
         });
-        const uploadModel = new UploadModel({ file, _dispatch: dispatch, ...uploadInfo });
+        const uploadModel = new UploadModel({
+            file,
+            _dispatch: dispatch,
+            status: UPLOAD_STATUSES.RUNNING,
+            ...uploadInfo,
+        });
         uploadsById.set(uploadInfo.id, uploadModel);
     });
 
@@ -292,5 +298,15 @@ function _uploadCancelComplete(cancelResponse: UploadResponse, uploadModel: Uplo
     return {
         type: UPLOAD_FILE_CANCEL_COMPLETE,
         payload: { uploadsById: new Map([[uploadModel.id, uploadModel]]) },
+    };
+}
+
+/**
+ * Empty uploadsById. Called when all uploads are completed.
+ */
+export function uploadsReset(): Action {
+    return {
+        type: UPLOAD_RESET,
+        payload: {},
     };
 }

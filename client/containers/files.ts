@@ -5,7 +5,7 @@ import { withRouter } from 'react-router';
 
 import { ArchiveFiles } from '../components';
 import { load } from '../actions/files';
-import { upload } from '../actions/uploads';
+import { upload, uploadsReset } from '../actions/uploads';
 import { showConfirmModal, showTextModal } from '../actions/modal';
 import { FilesState } from '../reducers/files';
 import { UploadsState } from '../reducers/uploads';
@@ -26,6 +26,7 @@ function mapStateToProps(state) {
 export interface FilesActions {
     load: (path: string) => void;
     upload: (path: string, fileList: File[]) => void;
+    uploadsReset: () => void;
     showConfirmModal: (
         title: string,
         message: React.ReactElement<HTMLElement> | string,
@@ -53,6 +54,9 @@ function mapDispatchToProps(dispatch: Dispatch): { actions: FilesActions } {
             },
             upload: (path: string, fileList: File[]) => {
                 dispatch(upload(path, fileList, dispatch));
+            },
+            uploadsReset: () => {
+                dispatch(uploadsReset());
             },
             showConfirmModal: (
                 title: string,
