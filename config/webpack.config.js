@@ -105,6 +105,10 @@ const CLIENT_CONFIG = {
 const SERVER_CONFIG = {
     target: 'node',
     entry: path.join(__dirname, '../client/server-router.tsx'),
+    externals: {
+        'react': 'react',
+        'react-dom': 'react-dom',
+    },
     output: {
         path: path.join(__dirname, '../dist'),
         filename: 'bundle.server.js',

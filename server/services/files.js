@@ -1,4 +1,5 @@
 const config = require('config');
+const path = require('path');
 const sql = require('sql-template-strings');
 
 const db = require('./database');
@@ -17,14 +18,16 @@ const MEDIA_TITLE_REGEX = new RegExp(MEDIA_TITLE_BLACKLIST, 'g');
 const DUPLICATE_REGEX = new RegExp(DUPLICATE_BLACKLIST, 'g');
 const TRIM_ENDS_REGEX = new RegExp(TRIM_ENDS_BLACKLIST, 'g');
 
+const CSV_DIRPATH = '~csv/';
+
 
 /*
  * Helper to remove leading and trailing slashes from a string.
  */
-function trimSlashes(path) {
-    path = path.startsWith('/') ? path.slice(1) : path;
-    path = path.endsWith('/') ? path.slice(0, -1) : path;
-    return path.trim();
+function trimSlashes(filepath) {
+    filepath = filepath.startsWith('/') ? filepath.slice(1) : filepath;
+    filepath = filepath.endsWith('/') ? filepath.slice(0, -1) : filepath;
+    return filepath.trim();
 }
 module.exports.trimSlashes = trimSlashes;
 
@@ -62,6 +65,19 @@ function getSanitizedFilePath(filepath) {
     return `${filepath}.${extension}`;
 }
 module.exports.getSanitizedFilePath = getSanitizedFilePath;
+
+/**
+ * Return a sanitized file path hardcoded to the special CSV directory.
+ */
+function getSanitizedCsvFilePath(filepath) {
+    if (!filepath) {
+        return getSanitizedFilePath(CSV_DIRPATH);
+    }
+    filepath = getSanitizedFilePath(filepath);
+    const csvFilepath = path.join(CSV_DIRPATH, path.basename(filepath));
+    return csvFilepath;
+}
+module.exports.getSanitizedCsvFilePath = getSanitizedCsvFilePath;
 
 /*
  * Return a copy of `filename` with its file extension removed.
@@ -116,8 +132,8 @@ module.exports.toAlphaNum = sanitize;
 /*
  * Retrieve a list of directories and files at the given path.
  */
-async function load(path) {
-    const query = _getLoadSQL(path);
+async function load(filepath) {
+    const query = _getLoadSQL(filepath);
     const rows = await db.all(query);
     return { results: rows };
 }
@@ -126,8 +142,8 @@ module.exports.load = load;
 /**
  * Return all metadata for all files under the given path in CSV-friendly format.
  */
-async function listFilesMetadata(path) {
-    const query = _getMetadataSQL(path);
+async function listFilesMetadata(filepath) {
+    const query = _getMetadataSQL(filepath);
     const rows = await db.all(query);
     return rows;
 }
@@ -198,12 +214,12 @@ function _toTitleCase(str) {
 /*
  * Generate the paramaterized SQL string used to retrieve the contents of a given directory.
  */
-function _getLoadSQL(path) {
-    path = trimSlashes(path);
+function _getLoadSQL(filepath) {
+    filepath = trimSlashes(filepath);
 
     let pathArray = [];
-    if (path) {
-        pathArray = path.split('/').map(dir => sanitize(dir, FILENAME_BLACKLIST, '-'));
+    if (filepath) {
+        pathArray = filepath.split('/').map(dir => sanitize(dir, FILENAME_BLACKLIST, '-'));
     }
 
     const query = sql`
@@ -213,9 +229,9 @@ function _getLoadSQL(path) {
                     THEN 'directory'
                 ELSE 'file'
             END AS "entryType",
-            ${path} AS "path",
+            ${filepath} AS "path",
             media_file_path_array[${pathArray.length + 1}] AS "name",
-            media_name AS "title",
+            MAX(media_name) AS "title",
             MAX(media_type) AS "mediaType",
             MAX(id) AS "id",
             MAX(uuid) AS "uuid",
@@ -231,7 +247,7 @@ function _getLoadSQL(path) {
     });
 
     query.append(`
-        GROUP BY "name", "title", "path", "entryType"
+        GROUP BY "name", "path", "entryType"
         ORDER BY "entryType" ASC, "numEntries" DESC, "title" ASC, "name" ASC;
     `);
     return query;
@@ -263,16 +279,17 @@ function _getFileDetailSQL(fileId) {
 /**
  * Generate the parameterized SQL string used to list metadata for files under the given path.
  */
-function _getMetadataSQL(path) {
-    path = trimSlashes(path);
+function _getMetadataSQL(filepath) {
+    filepath = trimSlashes(filepath);
 
     let pathArray = [];
-    if (path) {
-        pathArray = path.split('/').map(dir => sanitize(dir, FILENAME_BLACKLIST, '-'));
+    if (filepath) {
+        pathArray = filepath.split('/').map(dir => sanitize(dir, FILENAME_BLACKLIST, '-'));
     }
 
     const query = sql`
         SELECT
+            uuid,
             id,
             -- group info
             box_id,

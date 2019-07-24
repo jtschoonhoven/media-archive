@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Alert from 'react-bootstrap/Alert'
 
 const ALERT_STYLES = {
     DANGER: 'danger',
@@ -18,19 +19,14 @@ export default (
         throw new Error(`Alert created with invalid style argument "${style}".`);
     }
     return (
-        <div
+        <Alert
             id="archive-alert"
-            className={`\
-                w-100\
-                alert\
-                alert-${style}\
-                ${centered ? 'text-center' : ''}\
-                ${muted ? 'text-muted' : ''}\
-            `}
-            role="alert"
-            key={idx}
+            // @ts-ignore: we independently validate the style above
+            variant={ style }
+            className={ `w-100 ${centered && 'text-center'} ${muted && 'text-muted'}` }
+            key={ idx }
         >
             { msg }
-        </div>
+        </Alert>
     );
 };

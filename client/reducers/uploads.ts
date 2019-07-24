@@ -12,6 +12,7 @@ import {
     UPLOAD_FILE_COMPLETE,
     UPLOAD_FILE_CANCEL,
     UPLOAD_FILE_CANCEL_COMPLETE,
+    UPLOAD_RESET,
     UploadsMap,
 } from '../actions/uploads';
 import { Action, Dict } from '../types';
@@ -135,10 +136,8 @@ export default function uploadsReducer(state = initialState, action: Action): Up
         // server acknowledges receipt of file descriptors and returns upload tokens
         case UPLOAD_BATCH_SAVED_TO_SERVER: {
             if (action.error) {
-                const update = {
-                    errors: state.errors.push(payload.message),
-                    isRegisteringWithServer: false,
-                };
+                const errors = [...state.errors, payload.message];
+                const update = { errors, isRegisteringWithServer: false };
                 return Object.assign({}, state, update);
             }
             const update = { isRegisteringWithServer: false };
@@ -188,6 +187,12 @@ export default function uploadsReducer(state = initialState, action: Action): Up
         // server acknowledges file has been deleted
         case UPLOAD_FILE_CANCEL_COMPLETE: {
             const uploadsById = new Map([...state.uploadsById, ...(payload as Dict).uploadsById]);
+            return Object.assign({}, state, { uploadsById });
+        }
+
+        // all uploads are complete: reset uploads state
+        case UPLOAD_RESET: {
+            const uploadsById = new Map(); // clear uploadsById
             return Object.assign({}, state, { uploadsById });
         }
 

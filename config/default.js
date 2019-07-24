@@ -11,10 +11,10 @@ module.exports = {
         // regex for consistent string validation between server/client
         REGEX: {
             ALPHANUM_BLACKLIST: '[^a-zA-Z0-9]', // match any non-alphanumeric char
-            FILENAME_BLACKLIST: '[^a-zA-Z0-9_-]', // match any char not allowed in file names
+            FILENAME_BLACKLIST: '[^a-zA-Z0-9_-~]', // match any char not allowed in file names
             MEDIA_TITLE_BLACKLIST: '[^a-zA-Z0-9 !&().-]', // match any char not allowed in title
             DUPLICATE_BLACKLIST: '([^a-zA-Z0-9])(?=\\1)', // match redundant non-alphanum chars
-            TRIM_ENDS_BLACKLIST: '(^[^A-Za-z0-9]+)|[^A-Za-z0-9]+$', // match bad chars at start/end
+            TRIM_ENDS_BLACKLIST: '(^[^A-Za-z0-9~]+)|[^A-Za-z0-9]+$', // match bad chars at start/end
         },
         // backend API urls
         API_URLS: {
@@ -59,6 +59,8 @@ module.exports = {
             PPTX: { type: 'document', mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' },
             XLS: { type: 'document', mimeType: 'application/vnd.ms-excel' },
             XLSX: { type: 'document', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
+            // special
+            CSV: { type: 'document', mimeType: 'text/csv' },
         },
         // states of the upload lifecycle
         UPLOAD_STATUSES: {
@@ -74,5 +76,36 @@ module.exports = {
             description: 'media_description',
             tags: 'media_tags',
         },
+        // these columns may be directly edited via CSV uploads
+        CSV_EDITABLE_COLUMN_WHITELIST: [
+            'box_id',
+            'box_name',
+            'box_or_cabinet',
+            'folder_id',
+            'folder_name',
+            'series_name',
+            'series_description',
+            'series_index_id',
+            'media_name',
+            'media_description',
+            'media_authors',
+            'media_notes',
+            'media_transcript',
+            'media_date',
+            'media_tags',
+            'media_file_path',
+            'origin_location',
+            'origin_medium',
+            'origin_medium_notes',
+            'audio_lecturers',
+            'audio_video_length_seconds',
+            'image_photographer',
+            'image_color',
+            'image_location_or_people_unknown',
+            'image_professional_or_personal',
+            'legal_is_confidential',
+            'legal_can_license',
+        ],
     },
+    CSV_UPLOAD_REQUIRED_FIELDS: ['id', 'uuid'],
 };

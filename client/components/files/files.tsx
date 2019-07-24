@@ -3,6 +3,7 @@ import './style.scss';
 import _ from 'lodash';
 import * as React from 'react';
 import urlJoin from 'url-join';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 import Breadcrumbs from '../common/breadcrumbs';
@@ -19,6 +20,10 @@ const VALID_EXTENSIONS = Object.keys(SETTINGS.FILE_EXT_WHITELIST);
 const FILENAME_BLACKLIST = new RegExp(SETTINGS.REGEX.FILENAME_BLACKLIST);
 const DUPLICATE_BLACKLIST = new RegExp(SETTINGS.REGEX.DUPLICATE_BLACKLIST);
 const TRIM_ENDS_BLACKLIST = new RegExp(SETTINGS.REGEX.TRIM_ENDS_BLACKLIST);
+
+const UPLOAD_STATUS_PENDING = SETTINGS.UPLOAD_STATUSES.PENDING;
+const UPLOAD_STATUS_RUNNING = SETTINGS.UPLOAD_STATUSES.RUNNING;
+const UPLOAD_STATUS_INCOMPLETE = [UPLOAD_STATUS_PENDING, UPLOAD_STATUS_RUNNING];
 
 interface Props {
     actions: FilesActions;
@@ -72,13 +77,13 @@ export default class ArchiveFiles extends React.Component<Props> {
                 <div className="row">
 
                     {/* upload button */}
-                    <div className="col-xs-12 col-sm-4 mb-1">
+                    <div className="col-xs-12 col-sm-6 mb-1">
                         <label
                             className={
                                 `btn btn-primary w-100 mb-0 ${isRootDir ? 'disabled' : ''}`
                             }
                         >
-                            <strong>▲ Upload</strong>
+                            <strong>▲ Upload Files</strong>
                             <input
                                 type="file"
                                 onChange={ this.handleUploadClick }
@@ -90,28 +95,37 @@ export default class ArchiveFiles extends React.Component<Props> {
                         </label>
                     </div>
 
-                    {/* new folder button */}
-                    <div className="col-xs-12 col-sm-4 mb-1">
-                        <button
-                            className="btn btn-outline-dark w-100"
-                            onClick={ this.showCreateDirectoryModal }
-                        >
-                            ➕ Folder
-                        </button>
-                    </div>
-
-                    {/* download CSV button */}
-                    <div className="col-xs-12 col-sm-4 mb-1">
-                        <Link
-                            to={ urlJoin('/api/v1/csv/', filePath) }
-                            className={
-                                `btn btn-secondary w-100 mb-0 ${isRootDir ? 'disabled' : ''}`
-                            }
-                            target="_BLANK"
-                        >
-                            ▼ CSV
-                        </Link>
-                    </div>
+                    <Dropdown className="col-xs-12 col-sm-6 mb-1">
+                        <Dropdown.Toggle variant="outline-dark" className="w-100" id="archive-files-more-options">
+                            More Options
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            {/* new folder */}
+                            <Dropdown.Item href="#" onClick={ this.showCreateDirectoryModal }>
+                                ➕ New Folder
+                            </Dropdown.Item>
+                            <Dropdown.Divider />
+                            {/* upload CSV */}
+                            <Dropdown.Item as="label" className="mb-0">
+                                ▲ Upload CSV
+                                <input
+                                    type="file"
+                                    onChange={ this.handleUploadClick }
+                                    accept=".csv"
+                                    hidden={ true }
+                                />
+                            </Dropdown.Item>
+                            <Dropdown.Divider />
+                            {/* download CSV */}
+                            <Dropdown.Item
+                                href={ urlJoin('/api/v1/csv/', filePath) }
+                                className={{ disabled: isRootDir }}
+                                target="_BLANK"
+                            >
+                                ▼ Download CSV
+                            </Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
                 </div>
 
                 {/* file browser */}
@@ -206,7 +220,7 @@ export default class ArchiveFiles extends React.Component<Props> {
             if (fileModel.isDeleted) {
                 return;
             }
-            if (uploadsState.uploadsById.get(fileModel.id)) {
+            if (uploadsState.uploadsById.has(fileModel.id)) {
                 return; // skip files that are also included in uploads
             }
             Files.push(File(fileModel, showConfirmModal));
@@ -218,6 +232,7 @@ export default class ArchiveFiles extends React.Component<Props> {
         const Uploads = [];
         const filesState = this.props.filesState;
         const uploadsState = this.props.uploadsState;
+        const resetUploads = this.props.actions.uploadsReset;
 
         uploadsState.uploadsById.forEach((uploadModel) => {
             if (uploadModel.isDeleted) {
@@ -227,6 +242,18 @@ export default class ArchiveFiles extends React.Component<Props> {
                 Uploads.push(Upload(uploadModel));
             }
         });
+
+        const uploadModels = Array.from(uploadsState.uploadsById.values());
+        const isComplete = uploadModels.length && uploadModels.every((uploadModel) => {
+            return UPLOAD_STATUS_INCOMPLETE.indexOf(uploadModel.status) < 0;
+        });
+        if (isComplete) {
+            setTimeout(() => {
+                resetUploads();
+                this.loadDir({ force: true });
+            }, 0);
+        }
+
         return Uploads;
     }
 
@@ -298,10 +325,10 @@ export default class ArchiveFiles extends React.Component<Props> {
     /*
      * Reload the directory contents when the URL changes.
      */
-    loadDir() {
+    loadDir({ force = false } = {}) {
         const filesState = this.props.filesState;
         const path = this.getFilePath();
-        if (path !== filesState.path) {
+        if (force || path !== filesState.path) {
             this.props.actions.load(path);
         }
     }

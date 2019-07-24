@@ -10,6 +10,7 @@ const logger = require('../services/logger');
 const searchService = require('../services/search');
 const uploadsService = require('../services/uploads');
 
+const CSV_EDITABLE_COLUMN_WHITELIST = config.get('CONSTANTS.CSV_EDITABLE_COLUMN_WHITELIST');
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
 
 
@@ -151,7 +152,7 @@ const FILE_LIST_SCHEMA = Joi.object({
             .error(() => 'Files API requires a valid directory path.'),
     }).unknown(),
 }).unknown();
-apiRouter.get('/files/:path(*)', validateReq.bind(null, FILE_LIST_SCHEMA), async (req, res, next) => {
+apiRouter.get('/files/:path(*)', validateReq.bind(null, FILE_LIST_SCHEMA), async (req, res) => {
     const filePath = req.params.path;
     return sendResponse(200, req, res, filesService.load, filePath);
 });
@@ -186,6 +187,34 @@ const UPLOADS_SCHEMA = Joi.object({
 apiRouter.post('/uploads/:path(*)', validateReq.bind(null, UPLOADS_SCHEMA), async (req, res) => {
     const dirPath = req.params.path;
     const fileList = req.body.files;
+    return sendResponse(201, req, res, uploadsService.upload, dirPath, fileList, req.user.email);
+});
+
+/*
+ * CSV Uploads API.
+ * Identical to the Uploads API above, but allows uploading to root directory.
+ * Initiate a file upload to the given directory and save it as "pending" in the db.
+ * Does not receive the file directly. Instead returns signed tokens for upload to S3.
+ */
+const CSV_UPLOADS_SCHEMA = Joi.object({
+    body: Joi.object({
+        files: Joi.array().items(
+            Joi.object({
+                name: Joi.string().required()
+                    .error(() => 'File name must be alphanumeric or have dashes and spaces.'),
+                sizeInBytes: Joi.number().integer().min(0)
+                    .error(() => 'File size must be a positive integer.'),
+            }),
+        ),
+    }),
+}).unknown();
+apiRouter.post('/uploads', validateReq.bind(null, CSV_UPLOADS_SCHEMA), async (req, res) => {
+    const dirPath = '~csv';
+    const fileList = req.body.files;
+    const isCSV = fileList.every(file => file.name.toLowerCase().endsWith('.csv'));
+    if (!isCSV) {
+        return res.status(400).json({ error: 'only CSV files may be uploaded to the root directory' });
+    }
     return sendResponse(201, req, res, uploadsService.upload, dirPath, fileList, req.user.email);
 });
 
@@ -280,9 +309,14 @@ apiRouter.get('/csv/:path(*)', validateReq.bind(null, CSV_DOWNLOAD_SCHEMA), asyn
 
     // csv-stringify doesn't automatically escape backslashes, so we do it ourselves
     filesMeta.forEach((row, rowIdx) => {
-        Object.entries(row).forEach(([key, value]) => {
-            if (typeof value === 'string') {
-                filesMeta[rowIdx][key] = value.replace(/\\/g, '\\\\');
+        Object.entries(row).forEach(([colname, value]) => {
+            if (CSV_EDITABLE_COLUMN_WHITELIST.indexOf(colname) === -1) {
+                if (['uuid', 'id'].indexOf(colname) === -1) {
+                    delete filesMeta[rowIdx][colname];
+                }
+            }
+            else if (typeof value === 'string') {
+                filesMeta[rowIdx][colname] = value.replace(/\\/g, '\\\\');
             }
         });
     });

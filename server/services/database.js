@@ -27,8 +27,22 @@ class Database {
      */
     async get(sql) {
         return this.all(sql).then((rows) => { // eslint-disable-line arrow-body-style
-            return rows.length ? rows[0] : undefined;
+            if (rows && rows.length) {
+                return rows[0];
+            }
+            return undefined;
         });
+    }
+
+    /*
+     * Fetch a single value from a single row, or return undefined if no rows/cols were returned.
+     */
+    async getValue(sql) {
+        const row = await this.get(sql);
+        if (row && row.length) {
+            return Object.values(row)[0];
+        }
+        return undefined;
     }
 
     /*
