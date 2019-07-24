@@ -10,6 +10,7 @@ const s3Service = require('./s3');
 const filesService = require('./files');
 
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
+const CSV_UPLOAD_DIR = '~csv';
 
 
 /**
@@ -38,7 +39,7 @@ module.exports.upload = async (dirPath, fileList, userEmail) => {
             await checkDuplicates(dirPath, fileListUploads);
         }
         if (fileListCSV.length) {
-            await checkDuplicates(dirPath, fileListCSV);
+            await checkDuplicates(CSV_UPLOAD_DIR, fileListCSV);
         }
     }
     catch (err) {
@@ -188,10 +189,7 @@ async function checkDuplicates(dirPath, fileList) {
         WHERE deleted_at IS NULL
         AND upload_status = ${UPLOAD_STATUSES.SUCCESS}
         AND deleted_at IS NULL
-        AND (
-            media_file_path LIKE ${dirPath} || '/%'
-            OR media_file_path = '~csv'
-        )
+        AND media_file_path LIKE ${dirPath} || '/%'
         AND (FALSE
     `;
     fileList.forEach((fileInfo) => {
