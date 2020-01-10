@@ -1,12 +1,12 @@
 import React from 'react'; // eslint-disable-line no-unused-vars
 
 import ModalWrapper from './modal-wrapper';
-import { ModalConfirmConfig } from '../../reducers/modal';
+import { ModalInfoConfig } from '../../reducers/modal';
 
 /*
- * Render a confirmation dialog with the given title and message.
+ * Render some info in a modal.
  */
-export default function ModalConfirm(modalModel: ModalConfirmConfig) {
+export default function ModalInfo(modalModel: ModalInfoConfig) {
     let bodyJSX;
     if (typeof modalModel.message === 'string') {
         bodyJSX = <p>{ modalModel.message }</p>;
@@ -14,5 +14,5 @@ export default function ModalConfirm(modalModel: ModalConfirmConfig) {
     else {
         bodyJSX = modalModel.message;
     }
-    return ModalWrapper(modalModel.title, bodyJSX, modalModel.onClose, modalModel.onConfirm);
+    return ModalWrapper(modalModel.title, bodyJSX, modalModel.onClose);
 }

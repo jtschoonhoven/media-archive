@@ -2,14 +2,35 @@ import * as React from 'react';
 import { FormikValues } from 'formik';
 import { Dispatch } from 'redux';
 
-import { ModalConfirmConfig, ModalEditableConfig, ModalTextConfig } from '../reducers/modal';
+import { ModalConfirmConfig, ModalEditableConfig, ModalTextConfig, ModalInfoConfig } from '../reducers/modal';
 import { Action } from '../types';
 
+export const MODAL_SHOW_INFO = 'MODAL_SHOW_INFO';
 export const MODAL_SHOW_CONFIRM = 'MODAL_SHOW_CONFIRM';
 export const MODAL_SHOW_EDITABLE = 'MODAL_SHOW_EDITABLE';
 export const MODAL_SHOW_TEXT = 'MODAL_SHOW_TEXT';
 export const MODAL_HIDE = 'MODAL_HIDE';
 
+
+/*
+ * Display an informational modal with only a "close" button.
+ */
+export function showInfoModal(
+    title: string,
+    message: React.ReactElement<HTMLElement>,
+    dispatch: Dispatch,
+): Action {
+    const modal: ModalInfoConfig = {
+        title,
+        message,
+        type: 'info',
+        onClose: () => dispatch(hideModal()),
+    };
+    return {
+        type: MODAL_SHOW_INFO,
+        payload: { modal },
+    };
+}
 
 /*
  * Display a confirmation modal with an "OK" button.

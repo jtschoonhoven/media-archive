@@ -2,6 +2,7 @@ import * as React from 'react';
 import { FormikValues } from 'formik';
 
 import {
+    MODAL_SHOW_INFO,
     MODAL_SHOW_CONFIRM,
     MODAL_SHOW_EDITABLE,
     MODAL_SHOW_TEXT,
@@ -13,12 +14,20 @@ export const MODAL_TYPES = {
     CONFIRM: 'confirm',
     TEXT: 'text',
     EDITABLE: 'editable',
-};
+    INFO: 'info',
+} as const;
+
+export interface ModalInfoConfig {
+    type: 'info';
+    title: string;
+    message: React.ReactElement<HTMLElement> | string;
+    onClose: () => void;
+}
 
 export interface ModalConfirmConfig {
     type: 'confirm';
     title: string;
-    message: React.ReactElement<HTMLElement>;
+    message: React.ReactElement<HTMLElement> | string;
     onClose: () => void;
     onConfirm: (string) => void;
 }
@@ -43,7 +52,7 @@ export interface ModalEditableConfig {
     onClose: () => void;
 }
 
-export type ModalConfig = ModalConfirmConfig | ModalTextConfig | ModalEditableConfig;
+export type ModalConfig = ModalInfoConfig | ModalConfirmConfig | ModalTextConfig | ModalEditableConfig;
 
 export interface ModalState {
     modal?: ModalConfig;
@@ -58,6 +67,10 @@ export default function modalReducer(state = INITIAL_STATE, action: Action): Mod
     const payload = action.payload;
 
     switch (action.type) {
+        case MODAL_SHOW_INFO: {
+            return Object.assign({}, state, payload);
+        }
+
         case MODAL_SHOW_CONFIRM: {
             return Object.assign({}, state, payload);
         }

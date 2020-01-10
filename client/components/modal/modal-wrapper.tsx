@@ -25,7 +25,7 @@ export default function ModalWrapper(
             }}
             onClick={ onClose }
         >
-            <div className="modal-dialog" role="document" onClick={ e => e.stopPropagation() }>
+            <div className="modal-dialog modal-lg" role="document" onClick={ e => e.stopPropagation() }>
                 <div className="modal-content">
                     <div className="modal-header">
                         <h5 className="modal-title">{ title }</h5>
