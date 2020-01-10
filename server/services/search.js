@@ -11,6 +11,8 @@ const ALPHANUM_BLACKLIST = config.get('CONSTANTS.REGEX.ALPHANUM_BLACKLIST');
 const ALPHANUM_REGEX = new RegExp(ALPHANUM_BLACKLIST, 'g');
 const QUERY_LOGIC_CHARS = ['!', '&', '|', '(', ')'];
 const QUERY_GROUP_CHARS = ['&', '|', '(', ')'];
+const QUERY_PAREN_CHARS = ['(', ')'];
+const QUERY_BOOL_CHARS = ['|', '&'];
 const DEFAULT_LIMIT = 10;
 
 /*
@@ -53,7 +55,7 @@ function deserializePageKey(key) {
  * Enforces use of logical operators.
  */
 function sanitizeSearchString(searchString) {
-    return searchString.split(' ').reduce((result, word) => {
+    const sanitized = searchString.split(' ').reduce((result, word) => {
         // skip empty strings
         if (!word) {
             return result;
@@ -62,13 +64,19 @@ function sanitizeSearchString(searchString) {
         if (QUERY_GROUP_CHARS.includes(word)) {
             return `${result} ${word}`;
         }
-        // append terms following any boolean operator
         const lastChar = result.slice(-1);
+        const firstChar = word[0];
+        // if word follows parens, ensure next word is ampersand
+        if (QUERY_PAREN_CHARS.includes(lastChar)) {
+            if (!QUERY_BOOL_CHARS.includes(firstChar)) {
+                return `${result} & ${word}`;
+            }
+        }
+        // append terms following any boolean operator
         if (QUERY_LOGIC_CHARS.includes(lastChar)) {
             return `${result} ${word}`;
         }
         // prepend AND operator before a negated term if not otherwise specified
-        const firstChar = word[0];
         if ([word, firstChar].includes('!')) {
             return `${result} & ${word}`;
         }
@@ -76,6 +84,8 @@ function sanitizeSearchString(searchString) {
         const safeWord = word.replace(ALPHANUM_REGEX, '');
         return safeWord ? `${result} | ${safeWord}` : result;
     });
+    logger.info(`search string: ${sanitized}`);
+    return sanitized;
 }
 
 function getSearchSql(searchString, typeFilters, prevKey, nextKey, limit) {

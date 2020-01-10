@@ -117,7 +117,7 @@ class Database {
     /*
      * Revert all migration files in MIGRATIONS_PATH and re-apply them in order.
      */
-    async rebuild({ force }) {
+    async rebuild({ force } = {}) {
         // FIXME: migrations should be tracked in a database
         logger.warn('reverting and re-applying all migrations');
         const filenames = await fs.readdir(MIGRATIONS_PATH);
