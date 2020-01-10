@@ -3,6 +3,9 @@ import './style.scss';
 import * as React from 'react';
 import _ from 'lodash';
 import queryString from 'query-string';
+import Accordion from 'react-bootstrap/Accordion';
+import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
 
 import Alert from '../common/alert';
 import SearchResult from './result';
@@ -51,6 +54,7 @@ class ArchiveSearch extends React.Component<SearchProps> {
         this.state.filters = this.getFiltersModelFromQueryString();
 
         // bind event handlers
+        this.showAdvancedSearchModal = this.showAdvancedSearchModal.bind(this);
         this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
         this.handleSearchInput = this.handleSearchInput.bind(this);
         this.handleNextPage = this.handleNextPage.bind(this);
@@ -88,7 +92,6 @@ class ArchiveSearch extends React.Component<SearchProps> {
 
         return (
             <div id="archive-search">
-
                 {/* searchbar */}
                 <form
                     id="archive-search-form"
@@ -120,128 +123,141 @@ class ArchiveSearch extends React.Component<SearchProps> {
                 </form>
 
                 {/* filters */}
-                <div className="form-check form-check-inline">
-                    <label className="form-check-label"><strong>Filter:</strong></label>
-                </div>
+                <form className="form-inline form-row">
+                    <div className="form-check form-check-inline">
+                        <label className="form-check-label">
+                            <strong>Filter:</strong>
+                        </label>
+                    </div>
 
-                {/* documents */}
-                <div className="form-check form-check-inline">
-                    <input
-                        id="archive-search-filter-documents"
-                        className="form-check-input"
-                        type="checkbox"
-                        value="document"
-                        onChange={ this.handleFilterCheck }
-                        checked={ !!localState.filters.document }
-                    />
-                    <label
-                        className="form-check-label"
-                        htmlFor="archive-search-filter-documents"
-                    >
-                        documents
-                    </label>
-                </div>
+                    {/* documents */}
+                    <div className="form-check form-check-inline">
+                        <input
+                            id="archive-search-filter-documents"
+                            className="form-check-input"
+                            type="checkbox"
+                            value="document"
+                            onChange={ this.handleFilterCheck }
+                            checked={ !!localState.filters.document }
+                        />
+                        <label
+                            className="form-check-label"
+                            htmlFor="archive-search-filter-documents"
+                        >
+                            documents
+                        </label>
+                    </div>
 
-                {/* images */}
-                <div className="form-check form-check-inline">
-                    <input
-                        id="archive-search-filter-images"
-                        className="form-check-input"
-                        type="checkbox"
-                        value="image"
-                        onChange={ this.handleFilterCheck }
-                        checked={ !!localState.filters.image }
-                    />
-                    <label
-                        className="form-check-label"
-                        htmlFor="archive-search-filter-images"
-                    >
-                        images
-                    </label>
-                </div>
+                    {/* images */}
+                    <div className="form-check form-check-inline">
+                        <input
+                            id="archive-search-filter-images"
+                            className="form-check-input"
+                            type="checkbox"
+                            value="image"
+                            onChange={ this.handleFilterCheck }
+                            checked={ !!localState.filters.image }
+                        />
+                        <label
+                            className="form-check-label"
+                            htmlFor="archive-search-filter-images"
+                        >
+                            images
+                        </label>
+                    </div>
 
-                {/* videos */}
-                <div className="form-check form-check-inline">
-                    <input
-                        id="archive-search-filter-videos"
-                        className="form-check-input"
-                        type="checkbox"
-                        value="video"
-                        onChange={ this.handleFilterCheck }
-                        checked={ !!localState.filters.video }
-                    />
-                    <label
-                        className="form-check-label"
-                        htmlFor="archive-search-filter-videos"
-                    >
-                        videos
-                    </label>
-                </div>
+                    {/* videos */}
+                    <div className="form-check form-check-inline">
+                        <input
+                            id="archive-search-filter-videos"
+                            className="form-check-input"
+                            type="checkbox"
+                            value="video"
+                            onChange={ this.handleFilterCheck }
+                            checked={ !!localState.filters.video }
+                        />
+                        <label
+                            className="form-check-label"
+                            htmlFor="archive-search-filter-videos"
+                        >
+                            videos
+                        </label>
+                    </div>
 
-                {/* audio */}
-                <div className="form-check form-check-inline">
-                    <input
-                        id="archive-search-filter-audio"
-                        className="form-check-input"
-                        type="checkbox"
-                        value="audio"
-                        onChange={ this.handleFilterCheck }
-                        checked={ !!localState.filters.audio }
-                    />
-                    <label
-                        className="form-check-label"
-                        htmlFor="archive-search-filter-audio"
-                    >
-                        audio
-                    </label>
-                </div>
+                    {/* audio */}
+                    <div className="form-check form-check-inline">
+                        <input
+                            id="archive-search-filter-audio"
+                            className="form-check-input"
+                            type="checkbox"
+                            value="audio"
+                            onChange={ this.handleFilterCheck }
+                            checked={ !!localState.filters.audio }
+                        />
+                        <label
+                            className="form-check-label"
+                            htmlFor="archive-search-filter-audio"
+                        >
+                            audio
+                        </label>
+                    </div>
 
-                {/* errors */}
-                <div id="archive-search-errors">
-                    { Errors }
-                </div>
+                    {/* advanced search */}
+                    <div className="ml-auto">
+                        <Button variant="link" size="lg" onClick={ this.showAdvancedSearchModal }>
+                            <small>advanced search</small>&nbsp;
+                        </Button>
+                    </div>
+                </form>
 
-                {/* results */}
-                <div id="archive-search-results">
-                    { Results }
-                </div>
+                <div>
+                    {/* errors */}
+                    <div id="archive-search-errors">
+                        { Errors }
+                    </div>
 
-                {/* no results */}
-                <div className="archive-search-results-empty">
-                    {
-                        this.noResults()
-                            ? Alert('No results', {
-                                style: 'secondary',
-                                centered: true,
-                                muted: true,
-                            })
-                            : ''
-                    }
-                </div>
+                    {/* results */}
+                    <div id="archive-search-results">
+                        { Results }
+                    </div>
 
-                {/* pagination */}
-                <nav aria-label="pagination">
-                    <ul className="pagination justify-content-center">
-                        <li className="page-item">
-                            <button
-                                className="page-link btn btn-link btn-lg"
-                                onClick={ this.handlePrevPage }
-                                disabled={ !storeState.filters.prevKey || localState.formIsDirty }
-                            >
-                                Previous
-                            </button>
-                        </li>
-                        <li className="page-item">
-                            <button
-                                className="page-link btn btn-link btn-lg"
-                                onClick={this.handleNextPage}
-                                disabled={ !storeState.filters.nextKey || localState.formIsDirty }
-                            >
-                                Next
-                            </button>
-                        </li>
-                    </ul>
-                </nav>
+                    {/* no results */}
+                    <div className="archive-search-results-empty">
+                        {
+                            this.noResults()
+                                ? Alert('No results', {
+                                    style: 'secondary',
+                                    centered: true,
+                                    muted: true,
+                                })
+                                : ''
+                        }
+                    </div>
+
+                    {/* pagination */}
+                    <nav aria-label="pagination">
+                        <ul className="pagination justify-content-center">
+                            <li className="page-item">
+                                <button
+                                    className="page-link btn btn-link btn-lg"
+                                    onClick={ this.handlePrevPage }
+                                    disabled={ !storeState.filters.prevKey || localState.formIsDirty }
+                                >
+                                    Previous
+                                </button>
+                            </li>
+                            <li className="page-item">
+                                <button
+                                    className="page-link btn btn-link btn-lg"
+                                    onClick={this.handleNextPage}
+                                    disabled={ !storeState.filters.nextKey || localState.formIsDirty }
+                                >
+                                    Next
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         );
     }
@@ -311,6 +327,82 @@ class ArchiveSearch extends React.Component<SearchProps> {
             formIsDirty: false,
             filters: newFiltersModel,
         });
+    }
+
+    /*
+     * Display an info modal to explain advanced search features.
+     */
+    showAdvancedSearchModal(): void {
+        const showInfoModal = this.props.actions.showInfoModal;
+        const title = 'Advanced Search Operators';
+        const message = (
+            <div>
+                <Accordion>
+                    {/* AND */}
+                    <Card>
+                        <Accordion.Toggle as={Card.Header} variant="link" eventKey="0">
+                            <p className="lead mb-0">
+                                <span className="badge badge-success mr-1 pl-2 pr-2 font-weight-bold">& ampersand</span>
+                                <small>Search for media that have ALL words.</small>
+                            </p>
+                        </Accordion.Toggle>
+                        <Accordion.Collapse eventKey="0">
+                            <Card.Body>
+                                <pre className="small mb-0 d-inline bg-light text-dark p-1 mr-2">(monkey & ape)</pre>
+                                <p className="small d-inline">Search for media that include both "monkey" and "ape"</p>
+                            </Card.Body>
+                        </Accordion.Collapse>
+                    </Card>
+                    {/* OR */}
+                    <Card>
+                        <Accordion.Toggle as={Card.Header} variant="link" eventKey="1">
+                            <p className="lead mb-0">
+                                <span className="badge badge-warning mr-1 pl-2 pr-2 font-weight-bold">| vertical pipe</span>
+                                <small>Search for media that have ANY words.</small>
+                            </p>
+                        </Accordion.Toggle>
+                        <Accordion.Collapse eventKey="1">
+                            <Card.Body>
+                                <pre className="small mb-0 d-inline bg-light text-dark p-1 mr-2">(monkey | ape)</pre>
+                                <p className="small d-inline">Search for media that include "monkey" or "ape"</p>
+                            </Card.Body>
+                        </Accordion.Collapse>
+                    </Card>
+                    {/* NOT */}
+                    <Card>
+                        <Accordion.Toggle as={Card.Header} variant="link" eventKey="2">
+                            <p className="lead mb-0">
+                                <span className="badge badge-danger mr-1 pl-2 pr-2 font-weight-bold">! exclamation</span>
+                                <small>Search for media that do NOT have a word.</small>
+                            </p>
+                        </Accordion.Toggle>
+                        <Accordion.Collapse eventKey="2">
+                            <Card.Body>
+                                <pre className="small mb-0 d-inline bg-light text-dark p-1 mr-2">(monkey !ape)</pre>
+                                <p className="small d-inline">Search for media that include "monkey" but not "ape"</p>
+                            </Card.Body>
+                        </Accordion.Collapse>
+                    </Card>
+                    {/* GROUP */}
+                    <Card>
+                        <Accordion.Toggle as={Card.Header} variant="link" eventKey="3">
+                            <p className="lead mb-0">
+                                <span className="badge badge-info mr-1 pl-2 pr-2 font-weight-bold">(...) parens</span>
+                                <small>Group words to COMBINE search operators.</small>
+                            </p>
+                        </Accordion.Toggle>
+                        <Accordion.Collapse eventKey="3">
+                            <Card.Body>
+                                <pre className="small mb-0 d-inline bg-light text-dark p-1 mr-2">(monkey & ape) !(bonobo | rhesus)</pre>
+                                <p className="small d-inline">Search for media that include "monkey" and "ape" but neither "bonobo" nor "rhesus"</p>
+                            </Card.Body>
+                        </Accordion.Collapse>
+                    </Card>
+                </Accordion>
+                <p className="text-muted mt-3 mb-0">Click above for example usage.</p>
+            </div>
+        );
+        showInfoModal(title, message);
     }
 
     /*

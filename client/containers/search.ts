@@ -5,11 +5,13 @@ import { withRouter } from 'react-router';
 import { ArchiveSearch } from '../components';
 import { search, searchReset } from '../actions/search';
 import { SearchState } from '../reducers/search';
+import { showInfoModal } from '../actions/modal';
 import { State } from '../types';
 
 export interface SearchActions {
     search: (searchString: string, filters) => void;
     reset: () => void;
+    showInfoModal: (title: string, message: React.ReactElement<HTMLElement> | string) => void;
 }
 
 export interface SearchStateProps {
@@ -33,6 +35,12 @@ function mapDispatchToProps(dispatch: Dispatch): { actions: SearchActions } {
             },
             reset: () => {
                 dispatch(searchReset());
+            },
+            showInfoModal: (
+                title: string,
+                message: React.ReactElement<any>,
+            ) => {
+                dispatch(showInfoModal(title, message, dispatch));
             },
         },
     };
