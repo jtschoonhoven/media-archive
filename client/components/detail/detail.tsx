@@ -43,7 +43,7 @@ class ArchiveDetail extends React.Component<Props> {
         const isExpanded = this.state.isExpanded;
         const isFetching = detailState.isFetching;
         const detailsModel = detailState.details;
-        const { tags, title, description, filename, url, path } = detailsModel;
+        const { tags, title, description, filename, url, path, isConfidential, canLicense } = detailsModel;
 
         const pathArray = path ? path.split('/') : [];
         const BreadCrumbs = pathArray.map((dirname, idx) => {
@@ -83,6 +83,8 @@ class ArchiveDetail extends React.Component<Props> {
                             : <p className="text-muted"><em>No description.</em></p>
                         }
                         { tags ? <p><strong>Tags: </strong>{ tags }</p> : '' }
+                        { typeof isConfidential === 'boolean' ? <p><strong>Confidential: </strong> { isConfidential ? 'yes' : 'no' }</p> : '' }
+                        { typeof canLicense === 'boolean' ? <p><strong>Licensable: </strong> { canLicense ? 'yes' : 'no' }</p> : '' }
                     </div>
 
                     {/* img */}
@@ -145,7 +147,7 @@ class ArchiveDetail extends React.Component<Props> {
                 return {};
             },
             // onConfirm
-            (updatedDetailsModel: DetailsModel) => {
+            (updatedDetailsModel) => {
                 const fileId = this.getFileId();
                 this.props.actions.updateFileDetail(fileId, updatedDetailsModel);
             },

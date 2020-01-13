@@ -205,7 +205,7 @@ class ArchiveSearch extends React.Component<SearchProps> {
                     {/* advanced search */}
                     <div className="ml-auto">
                         <Button variant="link" size="lg" onClick={ this.showAdvancedSearchModal }>
-                            <small>advanced search</small>&nbsp;
+                            <small>advanced search</small>
                         </Button>
                     </div>
                 </form>
@@ -340,10 +340,11 @@ class ArchiveSearch extends React.Component<SearchProps> {
                 <Accordion>
                     {/* AND */}
                     <Card>
-                        <Accordion.Toggle as={Card.Header} variant="link" eventKey="0">
-                            <p className="lead mb-0">
+                        <Accordion.Toggle as={Card.Header} variant="link" eventKey="0" style={{ cursor: 'pointer ' }}>
+                            <p className="lead mb-0 d-flex">
                                 <span className="badge badge-success mr-1 pl-2 pr-2 font-weight-bold">& ampersand</span>
                                 <small>Search for media that have ALL words.</small>
+                                <span className="ml-auto lead font-weight-bold">+</span>
                             </p>
                         </Accordion.Toggle>
                         <Accordion.Collapse eventKey="0">
@@ -356,9 +357,10 @@ class ArchiveSearch extends React.Component<SearchProps> {
                     {/* OR */}
                     <Card>
                         <Accordion.Toggle as={Card.Header} variant="link" eventKey="1">
-                            <p className="lead mb-0">
+                            <p className="lead mb-0 d-flex">
                                 <span className="badge badge-warning mr-1 pl-2 pr-2 font-weight-bold">| vertical pipe</span>
                                 <small>Search for media that have ANY words.</small>
+                                <span className="ml-auto lead font-weight-bold">+</span>
                             </p>
                         </Accordion.Toggle>
                         <Accordion.Collapse eventKey="1">
@@ -371,9 +373,10 @@ class ArchiveSearch extends React.Component<SearchProps> {
                     {/* NOT */}
                     <Card>
                         <Accordion.Toggle as={Card.Header} variant="link" eventKey="2">
-                            <p className="lead mb-0">
+                            <p className="lead mb-0 d-flex">
                                 <span className="badge badge-danger mr-1 pl-2 pr-2 font-weight-bold">! exclamation</span>
                                 <small>Search for media that do NOT have a word.</small>
+                                <span className="ml-auto lead font-weight-bold">+</span>
                             </p>
                         </Accordion.Toggle>
                         <Accordion.Collapse eventKey="2">
@@ -386,9 +389,10 @@ class ArchiveSearch extends React.Component<SearchProps> {
                     {/* GROUP */}
                     <Card>
                         <Accordion.Toggle as={Card.Header} variant="link" eventKey="3">
-                            <p className="lead mb-0">
+                            <p className="lead mb-0 d-flex">
                                 <span className="badge badge-info mr-1 pl-2 pr-2 font-weight-bold">(...) parens</span>
                                 <small>Group words to COMBINE search operators.</small>
+                                <span className="ml-auto lead font-weight-bold">+</span>
                             </p>
                         </Accordion.Toggle>
                         <Accordion.Collapse eventKey="3">

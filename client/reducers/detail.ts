@@ -16,6 +16,8 @@ export class DetailsModel {
     readonly tags: string = '';
     readonly uploadStatus: string = '';
     readonly extension: string = '';
+    readonly isConfidential?: boolean = null;
+    readonly canLicense?: boolean = null;
 
     constructor(data: Partial<DetailsModel> = {}) {
         Object.assign(this, data);
@@ -35,6 +37,8 @@ export class DetailsModel {
             tags: this.tags,
             uploadStatus: this.uploadStatus,
             extension: this.extension,
+            isConfidential: this.isConfidential,
+            canLicense: this.canLicense,
         };
     }
 

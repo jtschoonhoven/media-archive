@@ -49,6 +49,7 @@ async function sendResponse(successStatusCode, req, res, func, ...args) {
 /*
  * Validate request object against Joi schema.
  * Must be bound to a schema with `validateReq.bind(null, SCHEMA)`
+ * NOTE: modifies req.body with coerced values from validation
  */
 function validateReq(schema, req, res, next) {
     const validation = Joi.validate(req, schema);
@@ -57,6 +58,7 @@ function validateReq(schema, req, res, next) {
         logger.warn(`bad API request on ${req.url}: ${errorStr}`);
         return res.status(400).json({ error: errorStr });
     }
+    req.body = validation.value.body;
     return next();
 }
 
@@ -135,6 +137,10 @@ const FILE_UPDATE_SCHEMA = Joi.object({
         // FIXME: validate tags with regex
         tags: Joi.string().allow(null)
             .error(() => 'Tags must be a string.'),
+        isConfidential: Joi.boolean().empty('').allow(null).default(null)
+            .error(() => '"Is Confidential" must be true or false (or null)'),
+        canLicense: Joi.boolean().empty('').allow(null).default(null)
+            .error(() => '"Can License" must be true or false (or null)'),
     }),
 }).unknown();
 apiRouter.post('/detail/:fileId', validateReq.bind(null, FILE_UPDATE_SCHEMA), async (req, res) => {

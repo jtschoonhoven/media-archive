@@ -119,7 +119,7 @@ export default class ArchiveFiles extends React.Component<Props> {
                             {/* download CSV */}
                             <Dropdown.Item
                                 href={ urlJoin('/api/v1/csv/', filePath) }
-                                className={{ disabled: isRootDir }}
+                                className={ isRootDir ? 'disabled' : '' }
                                 target="_BLANK"
                             >
                                 ▼ Download CSV

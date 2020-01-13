@@ -72,9 +72,11 @@ module.exports = {
         },
         // frontend may use short nicknames for certain column names
         MEDIA_TABLE_COLUMN_ALIASES: {
-            title: 'media_name',
-            description: 'media_description',
-            tags: 'media_tags',
+            'title': 'media_name',
+            'description': 'media_description',
+            'tags': 'media_tags',
+            'isConfidential': 'legal_is_confidential',
+            'canLicense': 'legal_can_license',
         },
         // these columns may be directly edited via CSV uploads
         CSV_EDITABLE_COLUMN_WHITELIST: [
