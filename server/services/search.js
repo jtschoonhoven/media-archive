@@ -114,7 +114,7 @@ function getSearchSql(searchString, typeFilters, prevKey, nextKey, limit) {
 
     // if this is precise mode (i.e. a logical operator was used), search only on word roots
     if (isPrecise) {
-        query.append('\nAND media_tsvector @@ query_lex');
+        query.append('\nAND media_tsvector @@ query_lex\n');
     }
     // otherwise (no logical operator used), search on word roots and on prefixes
     else {
@@ -161,6 +161,7 @@ function getSearchSql(searchString, typeFilters, prevKey, nextKey, limit) {
 
     // fetch one extra row to detect extra pages (the extra is not returned to the client)
     query.append(sql`\nLIMIT ${limit + 1}`);
+    console.log(query.text);
     return query;
 }
 
