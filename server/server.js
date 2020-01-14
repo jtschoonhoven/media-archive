@@ -27,8 +27,10 @@ const SESSION_CONFIG = {
     sameSite: 'lax',
 };
 const NODE_ENV = config.get('NODE_ENV');
-const WORKERS = [transcriptionWorker, tableUpdateWorker];
 
+// WARNING! Workers are NOT safe to deploy to multiple hosts
+// FIXME: run workers on a dedicated singleton
+const WORKERS = [transcriptionWorker, tableUpdateWorker];
 
 // bootstrap database with test data for development
 // FIXME: remove when ready

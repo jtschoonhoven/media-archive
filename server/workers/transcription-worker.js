@@ -7,8 +7,7 @@ const isEmpty = require('lodash/isEmpty');
 const db = require('../services/database');
 const s3Service = require('../services/s3');
 
-
-const WORKER_DELAY_MS = 1000 * 5; // 5s
+const WORKER_DELAY_MS = 500; // 0.5s
 const WORKER_FINISHED_DELAY_MS = 1000 * 15 // 15s
 const WORKER_ERRORED_DELAY_MS = 1000 * 30 // 30s
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
@@ -21,17 +20,33 @@ const REGEX_MULTI_NEWLINE = new RegExp('[\n]{2,}', 'g');
  * Select a random PDF upload with no transcript and attempt to parse one.
  */
 async function run() {
-    let delay = WORKER_DELAY_MS;
     logger.info('transcription worker starting new run')
+    let delay = WORKER_DELAY_MS;
+
     try {
+        // fetch an arbitrary un-transcripted PDF from the DB
         const row = await _getNextPdfForTranscription();
+
+        // download and parse the PDF if exists
         if (!isEmpty(row)) {
             const stream = s3Service.streamObject(row.s3url);
             const parsed = await _parsePdfBuffer(stream);
-            const transcript = _sanitizeTranscript(parsed);
-            await _updateTranscript(row.id, transcript, true);
-            logger.info('transcription worker run successful');
+            const parsedTranscript = _sanitizeTranscript(parsed);
+
+            // if output contains text, save the result to the DB
+            if (parsedTranscript) {
+                await _updateTranscript(row.id, parsedTranscript, true);
+                logger.info(`successfully transcripted ${ row.path } (#${ row.id })`);
+            }
+
+            // else mark that transcription occurred, but keep original transcript
+            else {
+                await _updateTranscript(row.id, row.transcript, false);
+                logger.info(`transcription succeeded but returned no content for ${ row.path } (#${ row.id })`);
+            }
         }
+
+        // else we have transcripted all PDFs
         else {
             logger.info('transcription worker finished: no un-transcripted PDFs');
             delay = WORKER_FINISHED_DELAY_MS;
@@ -89,7 +104,11 @@ function _sanitizeTranscript(text) {
  */
 async function _getNextPdfForTranscription() {
     const query = sql`
-        SELECT id, media_url AS s3url, media_transcript AS transcript
+        SELECT
+            id,
+            media_url AS s3url,
+            media_transcript AS transcript,
+            media_file_path AS path
         FROM media
         WHERE upload_status = ${ UPLOAD_STATUSES.SUCCESS }
         AND media_file_extension = 'PDF'
