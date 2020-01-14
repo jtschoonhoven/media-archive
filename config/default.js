@@ -108,6 +108,11 @@ module.exports = {
             'legal_is_confidential',
             'legal_can_license',
         ],
+        MEDIA_TRANSCRIPTION_TYPES: {
+            MANUAL: 'manual',
+            PDF: 'pdf',
+            OCR: 'ocr',
+        }
     },
     CSV_UPLOAD_REQUIRED_FIELDS: ['id', 'uuid'],
 };
