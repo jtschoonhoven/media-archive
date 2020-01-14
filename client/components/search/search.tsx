@@ -203,7 +203,7 @@ class ArchiveSearch extends React.Component<SearchProps> {
                     </div>
 
                     {/* advanced search */}
-                    <div className="ml-auto">
+                    <div className="ml-auto d-none d-sm-block">
                         <Button variant="link" size="lg" onClick={ this.showAdvancedSearchModal }>
                             <small>advanced search</small>
                         </Button>
