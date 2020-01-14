@@ -70,7 +70,11 @@ exports.up = async (db) => {
             deleted_at TIMESTAMP,
 
             -- search
-            media_tsvector TSVECTOR
+            media_tsvector TSVECTOR,
+
+            -- text extraction
+            media_transcription_method TEXT, -- enum of 'manual' (or NULL, i.e. no transcription), 'pdf' (read from PDF content), and 'ocr'
+            media_transcription_method_success BOOLEAN -- whether the last automatic transcription method succeeded
         );
     `);
 };
