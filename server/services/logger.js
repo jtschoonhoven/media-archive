@@ -6,7 +6,9 @@ const TRANSPORTS = [new winston.transports.Console()];
 
 // configure app-level logging
 const logger = winston.createLogger({
-    format: winston.format.printf(info => `${info.level.toUpperCase()} ${info.message}`),
+    format: winston.format.printf(info => {
+        return `${ info.level.toUpperCase() } ${ info.stack || info.message }`
+    }),
     transports: TRANSPORTS,
 });
 
