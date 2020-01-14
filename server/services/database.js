@@ -39,8 +39,11 @@ class Database {
      */
     async getValue(sql) {
         const row = await this.get(sql);
-        if (row && row.length) {
-            return Object.values(row)[0];
+        if (row) {
+            const values = Object.values(row);
+            if (values.length) {
+                return Object.values(row)[0];
+            }
         }
         return undefined;
     }
@@ -49,9 +52,16 @@ class Database {
      * Fetch a all rows as an array of objects.
      */
     async all(sql) {
+        return this.exec(sql).then(res => res.rows);
+    }
+
+    /**
+     * Execute a query and return the raw response object.
+     */
+    async exec(sql) {
         const client = await this.pool.connect();
         try {
-            return await client.query(sql).then(res => res.rows);
+            return await client.query(sql);
         }
         finally {
             client.release();
