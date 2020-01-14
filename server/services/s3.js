@@ -183,7 +183,7 @@ module.exports.streamObject = (s3Url) => {
     //         resolve(fileContent);
     //     });
     //     stream.on('error', (err) => {
-    //         reject(err.message);
+    //         reject(err);
     //     });
     // });
 };
