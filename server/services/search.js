@@ -99,6 +99,7 @@ function getSearchSql(searchString, typeFilters, prevKey, nextKey, limit) {
             media_type AS "type",
             media_name AS "name",
             media_description AS "description",
+            media_transcript AS "transcript",
             media_url AS "url",
             media_url_thumbnail AS "thumbnailUrl",
             media_file_extension AS "extension",

@@ -272,7 +272,8 @@ function _getFileDetailSQL(fileId) {
         media_file_extension AS "extension",
         upload_status AS "uploadStatus",
         legal_is_confidential AS "isConfidential",
-        legal_can_license AS "canLicense"
+        legal_can_license AS "canLicense",
+        media_transcript AS "transcript"
     FROM media
     WHERE id = ${fileId};
     `;

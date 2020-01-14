@@ -77,6 +77,7 @@ module.exports = {
             'tags': 'media_tags',
             'isConfidential': 'legal_is_confidential',
             'canLicense': 'legal_can_license',
+            "transcript": "media_transcript",
         },
         // these columns may be directly edited via CSV uploads
         CSV_EDITABLE_COLUMN_WHITELIST: [

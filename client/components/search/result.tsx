@@ -1,6 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import urlJoin from 'url-join';
+import Truncate from 'react-truncate';
+import { Link } from 'react-router-dom';
 
 import SETTINGS from '../../settings';
 import { SearchResult as SearchResultModel } from '../../reducers/search';
@@ -38,11 +39,11 @@ export default function SearchResult(
                 {/* info */}
                 <div className="col-7 col-sm-8 col-md-9 col-lg-10">
                     <h3>
-                        <Link to={ `detail/${resultModel.id}` }>
-                            { resultModel.name }
+                        <Link to={ `detail/${resultModel.id}` } className="d-block">
+                            <Truncate lines={1}>{ resultModel.name }</Truncate>
                         </Link>
                     </h3>
-                    <p>{ resultModel.description }</p>
+                    <p><Truncate lines={5}>{ resultModel.description || resultModel.transcript }</Truncate></p>
                 </div>
             </div>
             <hr />

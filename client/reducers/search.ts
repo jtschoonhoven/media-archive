@@ -63,6 +63,7 @@ export interface SearchResult {
     readonly name: string;
     readonly type: string;
     readonly description: string;
+    readonly transcript: string;
     readonly url: string;
     readonly thumbnailUrl: string;
     readonly extension: string;

@@ -2,6 +2,7 @@ import './style.scss';
 
 import * as React from 'react';
 import * as History from 'history';
+import ShowMore from 'react-show-more';
 import { Dispatch } from 'redux';
 import { FormikValues } from 'formik';
 import { Link } from 'react-router-dom';
@@ -10,7 +11,7 @@ import Alert from '../common/alert';
 import Breadcrumbs from '../common/breadcrumbs';
 import DetailEditor from './editor';
 import Image from './image';
-import { DetailsModel, DetailsState } from '../../reducers/detail';
+import { DetailsState } from '../../reducers/detail';
 import { DetailActions } from '../../containers/detail';
 
 export interface Props {
@@ -43,7 +44,17 @@ class ArchiveDetail extends React.Component<Props> {
         const isExpanded = this.state.isExpanded;
         const isFetching = detailState.isFetching;
         const detailsModel = detailState.details;
-        const { tags, title, description, filename, url, path, isConfidential, canLicense } = detailsModel;
+        const {
+            tags,
+            title,
+            description,
+            transcript,
+            filename,
+            url,
+            path,
+            isConfidential,
+            canLicense,
+        } = detailsModel;
 
         const pathArray = path ? path.split('/') : [];
         const BreadCrumbs = pathArray.map((dirname, idx) => {
@@ -77,14 +88,24 @@ class ArchiveDetail extends React.Component<Props> {
 
                     {/* content */}
                     <div className={ `col-12 ${isExpanded || 'col-lg-6 order-lg-last'}` }>
+
+                        {/* loading */}
                         <h2>{ isFetching ? 'loading...' : title }</h2>
-                        { description
-                            ? <p>{ description }</p>
-                            : <p className="text-muted"><em>No description.</em></p>
-                        }
+
+                        {/* description */}
+                        { description ? <p><ShowMore>{ description }</ShowMore></p> : <p className="text-muted"><em>No description.</em></p> }
+
+                        {/* tags */}
                         { tags ? <p><strong>Tags: </strong>{ tags }</p> : '' }
+
+                        {/* confidential */}
                         { typeof isConfidential === 'boolean' ? <p><strong>Confidential: </strong> { isConfidential ? 'yes' : 'no' }</p> : '' }
+
+                        {/* licensable */}
                         { typeof canLicense === 'boolean' ? <p><strong>Licensable: </strong> { canLicense ? 'yes' : 'no' }</p> : '' }
+
+                        {/* transcript */}
+                        { transcript ? <p><strong>Transcript</strong><br /><ShowMore>{ transcript }</ShowMore></p> : <p className="text-muted"><em>No transcript.</em></p> }
                     </div>
 
                     {/* img */}

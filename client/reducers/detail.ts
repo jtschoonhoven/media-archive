@@ -9,6 +9,7 @@ import {
 export class DetailsModel {
     readonly title: string = '';
     readonly description: string = '';
+    readonly transcript: string = '';
     readonly filename: string = '';
     readonly path: string = '';
     readonly type: string = '';
@@ -30,6 +31,7 @@ export class DetailsModel {
         return {
             title: this.title,
             description: this.description,
+            transcript: this.transcript,
             filename: this.filename,
             path: this.path,
             type: this.type,
