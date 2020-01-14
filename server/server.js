@@ -13,6 +13,8 @@ const authRouter = require('./routes/auth-router');
 const authService = require('./services/auth');
 const db = require('./services/database');
 const logger = require('./services/logger');
+const transcriptionWorker = require('./workers/transcription-worker');
+const tableUpdateWorker = require('./workers/table-update-worker');
 
 // constants
 const PORT = 8081; // nginx default
@@ -25,6 +27,7 @@ const SESSION_CONFIG = {
     sameSite: 'lax',
 };
 const NODE_ENV = config.get('NODE_ENV');
+const WORKERS = [transcriptionWorker, tableUpdateWorker];
 
 
 // bootstrap database with test data for development
@@ -62,7 +65,7 @@ app.use(appRouter);
 
 // start server
 const server = app.listen(PORT, () => {
-    logger.info(`${NODE_ENV} node server listening on http://localhost:${PORT}`);
+    logger.info(`${NODE_ENV} node server listening on http://localhost:${ PORT }`);
 });
 
 // configure graceful shutdown and healthchecks
@@ -78,3 +81,8 @@ createTerminus(
         logger: err => logger.error(err.stack),
     },
 );
+
+// run worker scripts
+for (worker of WORKERS) {
+    setTimeout(worker.run, 0);
+}
