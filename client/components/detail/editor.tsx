@@ -10,27 +10,36 @@ export default () => {
     return (
         <div>
             {/* title */}
-            <div className="form-group">
-                <label htmlFor="detail-editor-title"><strong>Title:</strong></label>
-                <Field type="text" id="detail-editor-title" name="title" className="form-control" />
+            <Form.Group controlId="title">
+                <Form.Label><strong>Title:</strong></Form.Label>
+                <Field type="text" name="title" className="form-control" value={ undefined } defaultValue={ detailsModel.title } />
                 <ErrorMessage name="title">
                     { errorMessage => <div className="alert alert-danger" role="alert">{ errorMessage }</div> }
                 </ErrorMessage>
-            </div>
+            </Form.Group>
 
             {/* description */}
-            <div className="form-group">
-                <label htmlFor="detail-editor-description"><strong>Description:</strong></label>
-                <Field type="text" id="detail-editor-description" name="description" className="form-control" />
+            <Form.Group controlId="description">
+                <Form.Label><strong>Description:</strong></Form.Label>
+                <Field type="text" name="description" as="textarea" rows="3" className="form-control" value={ undefined } defaultValue={ detailsModel.description } />
                 <ErrorMessage name="description">
                     { errorMessage => <div className="alert alert-danger" role="alert">{ errorMessage }</div> }
                 </ErrorMessage>
-            </div>
+            </Form.Group>
+
+            {/* transcript */}
+            <Form.Group controlId="transcript">
+                <Form.Label><strong>Transcript:</strong></Form.Label>
+                <Field type="text" name="transcript" as="textarea" rows="3" className="form-control" value={ undefined } defaultValue={ detailsModel.transcript } />
+                <ErrorMessage name="transcript">
+                    { errorMessage => <div className="alert alert-danger" role="alert">{ errorMessage }</div> }
+                </ErrorMessage>
+            </Form.Group>
 
             {/* tags */}
             <div className="form-group">
                 <label htmlFor="detail-editor-tags"><strong>Tags:</strong></label>
-                <Field type="text" id="detail-editor-tags" name="tags" className="form-control" />
+                <Field type="text" name="tags" className="form-control" value={ undefined } defaultValue={ detailsModel.tags } />
                 <small className="form-text text-muted">Tags are short, comma-separated keywords.</small>
                 <ErrorMessage name="tags">
                     { errorMessage => <div className="alert alert-danger" role="alert">{ errorMessage }</div> }

@@ -76,6 +76,7 @@ export function updateFileDetail(
     const fileMetadata = {
         title: detailsModel.title,
         description: detailsModel.description,
+        transcript: detailsModel.transcript,
         tags: detailsModel.tags,
         isConfidential: detailsModel.isConfidential,
         canLicense: detailsModel.canLicense,

@@ -190,7 +190,7 @@ async function update(fileId, metadata) {
     query.append(sql` WHERE id = ${fileId};`);
 
     await db.run(query);
-    return { test: 'ok' };
+    return { status: 'ok' };
 }
 module.exports.update = update;
 

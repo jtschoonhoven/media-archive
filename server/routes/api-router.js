@@ -132,10 +132,12 @@ const FILE_UPDATE_SCHEMA = Joi.object({
     body: Joi.object({
         title: Joi.string().min(1)
             .error(() => 'Media title cannot be blank.'),
-        description: Joi.string().allow([null])
+        description: Joi.string().allow(['', null]).optional()
+            .error(() => 'Description must be a string.'),
+        transcript: Joi.string().allow(['', null]).optional()
             .error(() => 'Description must be a string.'),
         // FIXME: validate tags with regex
-        tags: Joi.string().allow(null)
+        tags: Joi.string().allow(['', null]).optional()
             .error(() => 'Tags must be a string.'),
         isConfidential: Joi.boolean().empty('').allow(null).default(null)
             .error(() => '"Is Confidential" must be true or false (or null)'),
