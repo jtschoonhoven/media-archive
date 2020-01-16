@@ -62,7 +62,8 @@
         "react/no-access-state-in-setstate": 0,
         "react/no-unescaped-entities": 0,
         "react/prefer-stateless-function": 0,
-        "react/sort-comp": 0
+        "react/sort-comp": 0,
+        "template-curly-spacing": 0
     },
     "settings": {
         "import/resolver": {

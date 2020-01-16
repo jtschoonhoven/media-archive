@@ -1,6 +1,5 @@
-const config = require('config');
-const logger = require('../services/logger');
 const sql = require('sql-template-strings');
+const logger = require('../services/logger');
 
 const db = require('../services/database');
 
@@ -12,7 +11,6 @@ const COL_TYPE_TRANS_SUCCESS = 'BOOLEAN';
 
 
 async function run() {
-    const errors = [];
     try {
         await _addColIfNotExists(TABLE_NAME_MEDIA, COL_NAME_TRANS_METHOD, COL_TYPE_TRANS_METHOD);
     }
@@ -51,11 +49,11 @@ async function _columnExists(tableName, colName) {
         WHERE table_name = ${ tableName }
         AND column_name = ${ colName };
     `;
-    return db.getValue(query).then(colName => !!colName);
+    return db.getValue(query).then(name => !!name);
 }
 
 
 async function _addColumn(tableName, colName, colType) {
     const query = `ALTER TABLE ${ tableName } ADD COLUMN ${ colName } ${ colType };`;
-    return db.raw(query);
+    return db.exec(query);
 }

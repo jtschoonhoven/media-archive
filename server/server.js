@@ -85,6 +85,6 @@ createTerminus(
 );
 
 // run worker scripts
-for (worker of WORKERS) {
+WORKERS.forEach((worker) => {
     setTimeout(worker.run, 0);
-}
+});

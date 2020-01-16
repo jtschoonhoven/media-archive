@@ -1,31 +1,32 @@
 const config = require('config');
-const logger = require('../services/logger');
-const sql = require('sql-template-strings');
-const pdf = require('pdf-parse');
 const isEmpty = require('lodash/isEmpty');
+const pdf = require('pdf-parse');
+const sql = require('sql-template-strings');
 
+const logger = require('../services/logger');
 const db = require('../services/database');
 const s3Service = require('../services/s3');
 
 const WORKER_DELAY_MS = 500; // 0.5s
-const WORKER_FINISHED_DELAY_MS = 1000 * 15 // 15s
-const WORKER_ERRORED_DELAY_MS = 1000 * 30 // 30s
+const WORKER_FINISHED_DELAY_MS = 1000 * 15; // 15s
+const WORKER_ERRORED_DELAY_MS = 1000 * 30; // 30s
 const UPLOAD_STATUSES = config.get('CONSTANTS.UPLOAD_STATUSES');
 const MEDIA_TRANSCRIPTION_TYPES = config.get('CONSTANTS.MEDIA_TRANSCRIPTION_TYPES');
-const REGEX_MULTI_WHITESPACE = new RegExp('[ \t]{2,}', 'g');
-const REGEX_MULTI_NEWLINE = new RegExp('[\n]{2,}', 'g');
+const REGEX_MULTI_WHITESPACE = new RegExp('[ \\t]{2,}', 'g');
+const REGEX_MULTI_NEWLINE = new RegExp('[\\n]{2,}', 'g');
 
 
 /**
  * Select a random PDF upload with no transcript and attempt to parse one.
  */
 async function run() {
-    logger.info('transcription worker starting new run')
+    logger.info('transcription worker starting new run');
     let delay = WORKER_DELAY_MS;
+    let row = {};
 
     try {
         // fetch an arbitrary un-transcripted PDF from the DB
-        const row = await _getNextPdfForTranscription();
+        row = await _getNextPdfForTranscription();
 
         // download and parse the PDF if exists
         if (!isEmpty(row)) {
@@ -60,8 +61,8 @@ async function run() {
             try {
                 await _updateTranscript(row.id, row.transcript, false);
             }
-            catch (err) {
-                logger.error(err);
+            catch (error) {
+                logger.error(error);
             }
         }
     }
@@ -74,7 +75,7 @@ module.exports = { run };
  * Parse the readableStream for a PDF file and extract text.
  */
 async function _parsePdfBuffer(stream) {
-    let chunks = [];
+    const chunks = [];
     return new Promise((resolve, reject) => {
         stream.on('data', (chunk) => {
             chunks.push(chunk);
