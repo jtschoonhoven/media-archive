@@ -4,7 +4,7 @@ const config = require('config');
 const filesService = require('./files');
 
 const S3_PROTOCOL_PREFIX = 's3://';
-const PUT_OBJECT_EXPIRATION_SECONDS = 60 * 60 * 6; // 6 hours
+const PUT_OBJECT_EXPIRATION_SECONDS = 60 * 60 * 48; // 48 hours
 const GET_OBJECT_EXPIRATION_SECONDS = 60 * 60 * 24 * 3; // 3 days
 
 const NODE_ENV = config.get('NODE_ENV');
