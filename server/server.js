@@ -14,6 +14,7 @@ const authService = require('./services/auth');
 const db = require('./services/database');
 const logger = require('./services/logger');
 const transcriptionWorker = require('./workers/transcription-worker');
+const tableUpdateWorker = require('./workers/table-update-worker');
 
 // constants
 const PORT = 8081; // nginx default
@@ -29,7 +30,7 @@ const NODE_ENV = config.get('NODE_ENV');
 
 // WARNING! Workers are NOT safe to deploy to multiple hosts
 // FIXME: run workers on a dedicated singleton
-const WORKERS = [transcriptionWorker];
+const WORKERS = [transcriptionWorker, tableUpdateWorker];
 
 // bootstrap database with test data for development
 // FIXME: remove when ready
