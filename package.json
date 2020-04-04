@@ -79,7 +79,7 @@
         "@types/url-join": "~4.0.0",
         "@typescript-eslint/eslint-plugin": "~1.4.2",
         "@typescript-eslint/parser": "~1.4.2",
-        "acorn": "^7.1.0",
+        "acorn": "^7.1.1",
         "autoprefixer": "~9.3.1",
         "babel-eslint": "~10.0.1",
         "babel-loader": "~8.0.4",
