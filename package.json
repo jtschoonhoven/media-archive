@@ -95,7 +95,7 @@
         "ignore-loader": "~0.1.2",
         "mini-css-extract-plugin": "~0.4.5",
         "node-inspect": "~1.11.5",
-        "node-sass": "^4.13.0",
+        "node-sass": "^4.13.1",
         "nodemon": "~1.18.7",
         "optimize-css-assets-webpack-plugin": "~5.0.1",
         "postcss-loader": "~3.0.0",
