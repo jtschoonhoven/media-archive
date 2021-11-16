@@ -27,7 +27,7 @@
     "dependencies": {
         "@babel/polyfill": "~7.2.5",
         "@godaddy/terminus": "~4.1.0",
-        "aws-sdk": "~2.382.0",
+        "aws-sdk": "~2.814.0",
         "body-parser": "~1.18.3",
         "bootstrap": "~4.3.1",
         "config": "^1.30.0",
